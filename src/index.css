@@ -1,0 +1,83 @@
+/* Root Variables and Global Styles */
+:root {
+  --font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --line-height: 1.5;
+  --font-weight: 400;
+
+  --color-text: #213547;
+  --color-background: #ffffff;
+  --color-primary: #646cff;
+
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+  font-weight: var(--font-weight);
+
+  color: var(--color-text);
+  background-color: var(--color-background);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Layout */
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Interactive Elements */
+button {
+  cursor: pointer;
+}
+
+/* Business Workflow Status Colors */
+.status-new {
+  background-color: #F1F3F4;
+}
+
+.status-offer-sent {
+  background-color: #FFF9C4;
+}
+
+.status-order-confirmed {
+  background-color: #FFD54F;
+}
+
+.status-purchase {
+  background-color: #FB8C00;
+}
+
+.status-ready-for-delivery {
+  background-color: #E1F5FE;
+}
+
+.status-delivery {
+  background-color: #90CAF9;
+}
+
+.status-delivered {
+  background-color: #3F51B5;
+}
+
+.status-invoiced {
+  background-color: #A5D6A7;
+}
+
+.status-closed {
+  background-color: #2E7D32;
+}
+
+.status-cancelled {
+  background-color: #C62828;
+}

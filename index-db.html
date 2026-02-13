@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Coolkonyha Database Viewer</title>
+  <style>
+    /* Root Variables with New Color Scheme */
+    :root {
+      --color-dark-primary: #181A2F;
+      --color-dark-secondary: #242E49;
+      --color-dark-tertiary: #37415C;
+      --color-accent-coral: #FDA481;
+      --color-accent-red: #B4182D;
+      --color-accent-dark-red: #54162B;
+      --color-text-light: #E5E7EB;
+      --color-text-muted: #9CA3AF;
+      --spacing-unit: 8px;
+      --border-radius: 8px;
+      --transition-speed: 0.3s;
+    }
+
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--color-dark-primary);
+      color: var(--color-text-light);
+      line-height: 1.6;
+      padding: calc(var(--spacing-unit) * 3);
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--color-dark-secondary) 0%, var(--color-dark-tertiary) 100%);
+      color: white;
+      padding: calc(var(--spacing-unit) * 4);
+      border-radius: var(--border-radius);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 1);
+      color: var(--color-accent-coral);
+    }
+
+    .subtitle {
+      opacity: 0.9;
+      font-size: 1rem;
+      color: var(--color-text-light);
+    }
+
+    /* Navigation */
+    nav {
+      background: var(--color-dark-secondary);
+      padding: calc(var(--spacing-unit) * 2);
+      border-radius: var(--border-radius);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      gap: calc(var(--spacing-unit) * 2);
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+      background: var(--color-dark-tertiary);
+      border: 2px solid transparent;
+      border-radius: calc(var(--border-radius) / 2);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-light);
+      transition: all var(--transition-speed);
+    }
+
+    .nav-btn:hover {
+      background: var(--color-accent-dark-red);
+      border-color: var(--color-accent-coral);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.active {
+      background: var(--color-accent-coral);
+      color: var(--color-dark-primary);
+      font-weight: 600;
+    }
+
+    /* Sections */
+    section {
+      display: none;
+      background: var(--color-dark-secondary);
+      padding: calc(var(--spacing-unit) * 3);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    section.active {
+      display: block;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: calc(var(--spacing-unit) * 2.5);
+      color: var(--color-accent-coral);
+      border-bottom: 2px solid var(--color-dark-tertiary);
+      padding-bottom: calc(var(--spacing-unit) * 1.5);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    th {
+      background: var(--color-dark-tertiary);
+      padding: calc(var(--spacing-unit) * 1.5);
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-accent-coral);
+      border-bottom: 2px solid var(--color-accent-dark-red);
+    }
+
+    td {
+      padding: calc(var(--spacing-unit) * 1.5);
+      border-bottom: 1px solid var(--color-dark-tertiary);
+      font-size: 0.875rem;
+      color: var(--color-text-light);
+    }
+
+    tr.clickable-row {
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+
+    tr.clickable-row:hover {
+      background: var(--color-dark-tertiary);
+    }
+
+    tr.clickable-row.expanded {
+      background: var(--color-accent-dark-red);
+    }
+
+    /* Expandable Row Indicator */
+    .expand-icon {
+      display: inline-block;
+      margin-right: calc(var(--spacing-unit) * 1);
+      transition: transform var(--transition-speed);
+      color: var(--color-accent-coral);
+      font-weight: bold;
+    }
+
+    tr.expanded .expand-icon {
+      transform: rotate(90deg);
+    }
+
+    /* Expanded Details */
+    .details-row {
+      display: none;
+    }
+
+    .details-row.visible {
+      display: table-row;
+    }
+
+    .details-cell {
+      padding: calc(var(--spacing-unit) * 3);
+      background: var(--color-dark-primary);
+      border-left: 4px solid var(--color-accent-coral);
+    }
+
+    .details-content {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 2);
+    }
+
+    /* Two-column layout */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: calc(var(--spacing-unit) * 3);
+      align-items: start;
+    }
+
+    .details-left {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .details-right {
+      min-width: 200px;
+      max-width: 250px;
+    }
+
+    .logo-display {
+      width: 100%;
+      padding: calc(var(--spacing-unit) * 2);
+      background: var(--color-dark-tertiary);
+      border-radius: calc(var(--border-radius) / 2);
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .detail-section {
+      background: var(--color-dark-secondary);
+      padding: calc(var(--spacing-unit) * 2);
+      border-radius: calc(var(--border-radius) / 2);
+    }
+
+    .detail-section.editing {
+      background: var(--color-dark-primary);
+      border: 2px solid var(--color-accent-coral);
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: var(--color-accent-coral);
+      margin-bottom: calc(var(--spacing-unit) * 1);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      color: var(--color-text-light);
+      line-height: 1.6;
+    }
+
+    /* Edit Form Styles */
+    .edit-form {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .form-group {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 0.5);
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      color: var(--color-accent-coral);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: calc(var(--spacing-unit) * 1);
+      background: var(--color-dark-tertiary);
+      border: 1px solid var(--color-accent-dark-red);
+      color: var(--color-text-light);
+      border-radius: calc(var(--border-radius) / 2);
+      font-family: inherit;
+      font-size: 0.875rem;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-accent-coral);
+    }
+
+    /* Buttons */
+    .edit-actions {
+      display: flex;
+      gap: calc(var(--spacing-unit) * 1);
+      margin-top: calc(var(--spacing-unit) * 2);
+    }
+
+    .btn {
+      padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+      border: none;
+      border-radius: calc(var(--border-radius) / 2);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all var(--transition-speed);
+    }
+
+    .btn-edit {
+      background: var(--color-accent-coral);
+      color: var(--color-dark-primary);
+    }
+
+    .btn-edit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(253, 164, 129, 0.4);
+    }
+
+    .btn-save {
+      background: #10B981;
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: #059669;
+    }
+
+    .btn-cancel {
+      background: var(--color-accent-red);
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      background: var(--color-accent-dark-red);
+    }
+
+    /* Status Badges with New Color Scheme */
+    .status-badge {
+      display: inline-block;
+      padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1.5);
+      border-radius: calc(var(--border-radius) / 2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-new {
+      background-color: var(--color-dark-tertiary);
+      color: var(--color-text-light);
+    }
+
+    .status-offer-sent {
+      background-color: #F59E0B;
+      color: #1F2937;
+    }
+
+    .status-order-confirmed {
+      background-color: var(--color-accent-coral);
+      color: var(--color-dark-primary);
+    }
+
+    .status-purchase {
+      background-color: #8B5CF6;
+      color: white;
+    }
+
+    .status-ready-for-delivery {
+      background-color: #3B82F6;
+      color: white;
+    }
+
+    .status-delivery {
+      background-color: #06B6D4;
+      color: white;
+    }
+
+    .status-delivered {
+      background-color: #10B981;
+      color: white;
+    }
+
+    .status-invoiced {
+      background-color: #84CC16;
+      color: var(--color-dark-primary);
+    }
+
+    .status-closed {
+      background-color: #059669;
+      color: white;
+    }
+
+    .status-cancelled {
+      background-color: var(--color-accent-red);
+      color: white;
+    }
+
+    /* Utility Classes */
+    .text-right {
+      text-align: right;
+    }
+
+    .text-muted {
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .currency {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: var(--color-accent-coral);
+    }
+
+    /* Timeline for Order History */
+    .timeline {
+      margin-top: calc(var(--spacing-unit) * 2);
+    }
+
+    .timeline-item {
+      padding-left: calc(var(--spacing-unit) * 3);
+      border-left: 2px solid var(--color-dark-tertiary);
+      padding-bottom: calc(var(--spacing-unit) * 2);
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-accent-coral);
+    }
+
+    .timeline-item:last-child {
+      border-left-color: transparent;
+    }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+    }
+
+    .timeline-event {
+      font-weight: 600;
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+      color: var(--color-text-light);
+    }
+
+    .timeline-user {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Orders Page Split Layout */
+    .orders-layout {
+      display: flex;
+      gap: calc(var(--spacing-unit) * 3);
+      align-items: flex-start;
+    }
+
+    .orders-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .workflow-sidebar {
+      width: 30%;
+      min-width: 300px;
+      max-width: 450px;
+      background: var(--color-dark-tertiary);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 2.5);
+      position: sticky;
+      top: calc(var(--spacing-unit) * 3);
+      max-height: calc(100vh - calc(var(--spacing-unit) * 6));
+      overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .workflow-sidebar h3 {
+      font-size: 1.125rem;
+      color: var(--color-accent-coral);
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      padding-bottom: calc(var(--spacing-unit) * 1);
+      border-bottom: 2px solid var(--color-accent-dark-red);
+    }
+
+    .workflow-sidebar table {
+      font-size: 0.8rem;
+    }
+
+    .workflow-sidebar th {
+      font-size: 0.75rem;
+      padding: calc(var(--spacing-unit) * 1);
+    }
+
+    .workflow-sidebar td {
+      padding: calc(var(--spacing-unit) * 1);
+      font-size: 0.75rem;
+    }
+
+    /* Search and Filter Controls */
+    .search-filter-container {
+      display: flex;
+      gap: calc(var(--spacing-unit) * 2);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      max-width: 400px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: calc(var(--spacing-unit) * 1.5);
+      background: var(--color-dark-tertiary);
+      border: 2px solid var(--color-accent-dark-red);
+      color: var(--color-text-light);
+      border-radius: calc(var(--border-radius) / 2);
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--color-accent-coral);
+    }
+
+    .search-box input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: calc(var(--spacing-unit) * 1);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+      background: var(--color-dark-tertiary);
+      border: 2px solid transparent;
+      color: var(--color-text-light);
+      border-radius: calc(var(--border-radius) / 2);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all var(--transition-speed);
+      text-transform: uppercase;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-accent-coral);
+    }
+
+    .filter-btn.active {
+      background: var(--color-accent-coral);
+      color: var(--color-dark-primary);
+      border-color: var(--color-accent-coral);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🍳 Coolkonyha Database Viewer</h1>
+    <p class="subtitle">Kitchen Supply Business Management System</p>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('customers')">Customers</button>
+    <button class="nav-btn" onclick="showSection('suppliers')">Suppliers</button>
+    <button class="nav-btn" onclick="showSection('products')">Products</button>
+    <button class="nav-btn" onclick="showSection('orders')">Orders</button>
+    <button class="nav-btn" onclick="showSection('workflow')">Workflow</button>
+  </nav>
+
+  <section id="customers" class="active">
+    <h2>👥 Customers</h2>
+    <div class="search-filter-container">
+      <div class="search-box">
+        <input type="text" id="searchCustomers" placeholder="🔍 Search customers..." onkeyup="filterCustomers()">
+      </div>
+    </div>
+    <div id="customersTable"></div>
+  </section>
+
+  <section id="suppliers">
+    <h2>📦 Product Suppliers</h2>
+    <div class="search-filter-container">
+      <div class="search-box">
+        <input type="text" id="searchSuppliers" placeholder="🔍 Search suppliers..." onkeyup="filterSuppliers()">
+      </div>
+    </div>
+    <div id="suppliersTable"></div>
+  </section>
+
+  <section id="products">
+    <h2>🍳 Products</h2>
+    <div class="search-filter-container">
+      <div class="search-box">
+        <input type="text" id="searchProducts" placeholder="🔍 Search products..." onkeyup="filterProducts()">
+      </div>
+    </div>
+    <div id="productsTable"></div>
+  </section>
+
+  <section id="orders">
+    <h2>📋 Orders</h2>
+    <div class="orders-layout">
+      <div class="orders-main">
+        <div class="search-filter-container">
+          <div class="search-box">
+            <input type="text" id="searchOrders" placeholder="🔍 Search orders..." onkeyup="filterOrders()">
+          </div>
+          <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterOrdersByStatus('ALL')">All</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('NEW')">New</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('OFFER_SENT')">Offer Sent</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('ORDER_CONFIRMED')">Confirmed</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('READY_FOR_DELIVERY')">Ready</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('DELIVERY')">Delivery</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('CLOSED')">Closed</button>
+            <button class="filter-btn" onclick="filterOrdersByStatus('CANCELLED')">Cancelled</button>
+          </div>
+        </div>
+        <div id="ordersTable"></div>
+      </div>
+      <aside class="workflow-sidebar">
+        <h3>🔄 Workflow Statuses</h3>
+        <div id="workflowSidebar"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="workflow">
+    <h2>🔄 Business Workflow Statuses</h2>
+    <div id="workflowTable"></div>
+  </section>
+
+  <script>
+    const API_BASE = 'http://localhost:3001/api';
+    let expandedRows = new Set();
+    let editMode = new Map();
+    let customersCache = null;
+    let currentOrderStatusFilter = 'ALL';
+
+    // Navigation
+    const showSection = (sectionId) => {
+      document.querySelectorAll('section').forEach((s) => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+      event.target.classList.add('active');
+      expandedRows.clear();
+      editMode.clear();
+    };
+
+    // Format currency
+    const formatCurrency = (amount, currency = 'HUF') => {
+      return `${amount.toLocaleString()} ${currency}`;
+    };
+
+    // Format date
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '-';
+      return new Date(dateStr).toLocaleString('hu-HU');
+    };
+
+    // Format date for order name (short format)
+    const formatOrderDate = (dateStr) => {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('hu-HU');
+    };
+
+    // Get status badge class
+    const getStatusClass = (status) => {
+      return `status-${status.toLowerCase().replace(/_/g, '-')}`;
+    };
+
+    // Get customer name by ID
+    const getCustomerName = (custId) => {
+      if (!customersCache) return `Customer #${custId}`;
+      const customer = customersCache.find((c) => c.cust_id === custId);
+      return customer ? customer.cust_name : `Customer #${custId}`;
+    };
+
+    // Filter Customers
+    const filterCustomers = () => {
+      const searchText = document.getElementById('searchCustomers').value.toLowerCase();
+      const table = document.querySelector('#customersTable table');
+      if (!table) return;
+
+      const rows = table.querySelectorAll('tbody > tr');
+
+      rows.forEach((row) => {
+        if (!row.classList.contains('details-row')) {
+          const text = row.textContent.toLowerCase();
+          const shouldShow = text.includes(searchText);
+          row.style.display = shouldShow ? '' : 'none';
+
+          const nextRow = row.nextElementSibling;
+          if (nextRow && nextRow.classList.contains('details-row')) {
+            nextRow.style.display = shouldShow ? '' : 'none';
+          }
+        }
+      });
+    };
+
+    // Filter Suppliers
+    const filterSuppliers = () => {
+      const searchText = document.getElementById('searchSuppliers').value.toLowerCase();
+      const table = document.querySelector('#suppliersTable table');
+      if (!table) return;
+
+      const rows = table.querySelectorAll('tbody > tr');
+
+      rows.forEach((row) => {
+        if (!row.classList.contains('details-row')) {
+          const text = row.textContent.toLowerCase();
+          const shouldShow = text.includes(searchText);
+          row.style.display = shouldShow ? '' : 'none';
+
+          const nextRow = row.nextElementSibling;
+          if (nextRow && nextRow.classList.contains('details-row')) {
+            nextRow.style.display = shouldShow ? '' : 'none';
+          }
+        }
+      });
+    };
+
+    // Filter Products
+    const filterProducts = () => {
+      const searchText = document.getElementById('searchProducts').value.toLowerCase();
+      const table = document.querySelector('#productsTable table');
+      if (!table) return;
+
+      const rows = table.querySelectorAll('tbody > tr');
+
+      rows.forEach((row) => {
+        if (!row.classList.contains('details-row')) {
+          const text = row.textContent.toLowerCase();
+          const shouldShow = text.includes(searchText);
+          row.style.display = shouldShow ? '' : 'none';
+
+          const nextRow = row.nextElementSibling;
+          if (nextRow && nextRow.classList.contains('details-row')) {
+            nextRow.style.display = shouldShow ? '' : 'none';
+          }
+        }
+      });
+    };
+
+    // Filter Orders by search text
+    const filterOrders = () => {
+      const searchText = document.getElementById('searchOrders').value.toLowerCase();
+      const table = document.querySelector('#ordersTable table');
+      if (!table) return;
+
+      const rows = table.querySelectorAll('tbody > tr');
+
+      rows.forEach((row) => {
+        if (!row.classList.contains('details-row')) {
+          const text = row.textContent.toLowerCase();
+          const statusBadge = row.querySelector('.status-badge');
+          const rowStatus = statusBadge ? statusBadge.textContent.trim().replace(/\s+/g, '_').toUpperCase() : '';
+
+          const matchesSearch = text.includes(searchText);
+          const matchesStatus = currentOrderStatusFilter === 'ALL' || rowStatus === currentOrderStatusFilter;
+          const shouldShow = matchesSearch && matchesStatus;
+
+          row.style.display = shouldShow ? '' : 'none';
+
+          const nextRow = row.nextElementSibling;
+          if (nextRow && nextRow.classList.contains('details-row')) {
+            nextRow.style.display = shouldShow ? '' : 'none';
+          }
+        }
+      });
+    };
+
+    // Filter Orders by status
+    const filterOrdersByStatus = (status) => {
+      currentOrderStatusFilter = status;
+
+      document.querySelectorAll('.filter-buttons .filter-btn').forEach((btn) => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      filterOrders();
+    };
+
+    // Toggle row expansion
+    const toggleRow = (rowId) => {
+      const row = document.getElementById(`row-${rowId}`);
+      const detailsRow = document.getElementById(`details-${rowId}`);
+
+      if (expandedRows.has(rowId)) {
+        row.classList.remove('expanded');
+        detailsRow.classList.remove('visible');
+        expandedRows.delete(rowId);
+        editMode.delete(rowId);
+      } else {
+        row.classList.add('expanded');
+        detailsRow.classList.add('visible');
+        expandedRows.add(rowId);
+        detailsRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    };
+
+    // Edit Customer
+    const editCustomer = (custId) => {
+      editMode.set(`c${custId}`, true);
+      loadCustomers();
+    };
+
+    const saveCustomer = async (custId) => {
+      const formData = {
+        cust_name: document.getElementById(`cust_name_${custId}`).value,
+        cust_contact: document.getElementById(`cust_contact_${custId}`).value,
+        cust_email: document.getElementById(`cust_email_${custId}`).value,
+        cust_email2: document.getElementById(`cust_email2_${custId}`).value,
+        cust_phone: document.getElementById(`cust_phone_${custId}`).value,
+        cust_web: document.getElementById(`cust_web_${custId}`).value,
+        notes: document.getElementById(`cust_notes_${custId}`).value,
+        logo_path: document.getElementById(`cust_logo_${custId}`).value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/customers/${custId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          editMode.delete(`c${custId}`);
+          await loadCustomers();
+        } else {
+          alert('Failed to save changes');
+        }
+      } catch (err) {
+        console.error('Failed to save:', err);
+        alert('Failed to save changes');
+      }
+    };
+
+    const cancelEditCustomer = (custId) => {
+      editMode.delete(`c${custId}`);
+      loadCustomers();
+    };
+
+    // Edit Supplier
+    const editSupplier = (suppId) => {
+      editMode.set(`s${suppId}`, true);
+      loadSuppliers();
+    };
+
+    const saveSupplier = async (suppId) => {
+      const formData = {
+        prod_supp_co: document.getElementById(`supp_co_${suppId}`).value,
+        prod_supp_name: document.getElementById(`supp_name_${suppId}`).value,
+        prod_supp_email: document.getElementById(`supp_email_${suppId}`).value,
+        prod_supp_phone: document.getElementById(`supp_phone_${suppId}`).value,
+        prod_supp_web: document.getElementById(`supp_web_${suppId}`).value,
+        notes: document.getElementById(`supp_notes_${suppId}`).value,
+        logo_path: document.getElementById(`supp_logo_${suppId}`).value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/suppliers/${suppId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          editMode.delete(`s${suppId}`);
+          await loadSuppliers();
+        } else {
+          alert('Failed to save changes');
+        }
+      } catch (err) {
+        console.error('Failed to save:', err);
+        alert('Failed to save changes');
+      }
+    };
+
+    const cancelEditSupplier = (suppId) => {
+      editMode.delete(`s${suppId}`);
+      loadSuppliers();
+    };
+
+    // Edit Product
+    const editProduct = (prodId) => {
+      editMode.set(`p${prodId}`, true);
+      loadProducts();
+    };
+
+    const saveProduct = async (prodId) => {
+      const formData = {
+        prod_name: document.getElementById(`prod_name_${prodId}`).value,
+        prod_type: document.getElementById(`prod_type_${prodId}`).value,
+        prod_size: document.getElementById(`prod_size_${prodId}`).value,
+        unit_price: parseFloat(document.getElementById(`prod_price_${prodId}`).value),
+        prod_supp_id: parseInt(document.getElementById(`prod_supp_${prodId}`).value),
+        notes: document.getElementById(`prod_notes_${prodId}`).value,
+        image_path: document.getElementById(`prod_image_${prodId}`).value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/products/${prodId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          editMode.delete(`p${prodId}`);
+          await loadProducts();
+        } else {
+          alert('Failed to save changes');
+        }
+      } catch (err) {
+        console.error('Failed to save:', err);
+        alert('Failed to save changes');
+      }
+    };
+
+    const cancelEditProduct = (prodId) => {
+      editMode.delete(`p${prodId}`);
+      loadProducts();
+    };
+
+    // Load Customers
+    const loadCustomers = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/customers`);
+        const customers = await response.json();
+        customersCache = customers;
+
+        const html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Email</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${customers.map((c) => {
+          const isEditing = editMode.has(`c${c.cust_id}`);
+          const isExpanded = expandedRows.has(`c${c.cust_id}`);
+
+          return `
+                <tr id="row-c${c.cust_id}" class="clickable-row ${isExpanded ? 'expanded' : ''}" onclick="toggleRow('c${c.cust_id}')">
+                  <td><span class="expand-icon">▶</span><strong>${c.cust_name}</strong></td>
+                  <td>${c.cust_contact || '-'}</td>
+                  <td>${c.cust_email}</td>
+                  <td>${c.cust_phone || '-'}</td>
+                </tr>
+                <tr id="details-c${c.cust_id}" class="details-row ${isExpanded ? 'visible' : ''}">
+                  <td colspan="4" class="details-cell">
+                    <div class="details-content">
+                      <div class="details-grid">
+                        <div class="details-left">
+                          ${isEditing ? `
+                            <div class="detail-section editing">
+                              <div class="detail-label">Edit Customer Information</div>
+                              <div class="edit-form">
+                                <div class="form-group">
+                                  <label>Company Name</label>
+                                  <input type="text" id="cust_name_${c.cust_id}" value="${c.cust_name}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Contact Person</label>
+                                  <input type="text" id="cust_contact_${c.cust_id}" value="${c.cust_contact || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Email</label>
+                                  <input type="email" id="cust_email_${c.cust_id}" value="${c.cust_email}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Email 2</label>
+                                  <input type="email" id="cust_email2_${c.cust_id}" value="${c.cust_email2 || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Phone</label>
+                                  <input type="tel" id="cust_phone_${c.cust_id}" value="${c.cust_phone || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Website</label>
+                                  <input type="url" id="cust_web_${c.cust_id}" value="${c.cust_web || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Notes</label>
+                                  <textarea id="cust_notes_${c.cust_id}">${c.notes || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                  <label>Logo Path</label>
+                                  <input type="text" id="cust_logo_${c.cust_id}" value="${c.logo_path || ''}">
+                                </div>
+                              </div>
+                            </div>
+                          ` : `
+                            <div class="detail-section">
+                              <div class="detail-label">Additional Information</div>
+                              <div class="detail-value">
+                                <strong>Email 2:</strong> ${c.cust_email2 || 'N/A'}<br>
+                                <strong>Website:</strong> ${c.cust_web || 'N/A'}<br>
+                                <strong>Registered:</strong> ${formatDate(c.cust_reg_date)}
+                              </div>
+                            </div>
+                            ${c.notes ? `
+                              <div class="detail-section">
+                                <div class="detail-label">Notes</div>
+                                <div class="detail-value">${c.notes}</div>
+                              </div>
+                            ` : ''}
+                          `}
+                        </div>
+                        <div class="details-right">
+                          <div class="logo-display">
+                            ${c.logo_path ? `Logo: ${c.logo_path}` : 'No logo'}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="edit-actions">
+                        ${isEditing ? `
+                          <button class="btn btn-save" onclick="event.stopPropagation(); saveCustomer(${c.cust_id})">Save</button>
+                          <button class="btn btn-cancel" onclick="event.stopPropagation(); cancelEditCustomer(${c.cust_id})">Cancel</button>
+                        ` : `
+                          <button class="btn btn-edit" onclick="event.stopPropagation(); editCustomer(${c.cust_id})">Edit</button>
+                        `}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+        }).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.getElementById('customersTable').innerHTML = html;
+      } catch (err) {
+        console.error('Failed to load customers:', err);
+      }
+    };
+
+    // Load Suppliers
+    const loadSuppliers = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/suppliers`);
+        const suppliers = await response.json();
+
+        const html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact Person</th>
+                <th>Email</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${suppliers.map((s) => {
+          const isEditing = editMode.has(`s${s.prod_supp_id}`);
+          const isExpanded = expandedRows.has(`s${s.prod_supp_id}`);
+
+          return `
+                <tr id="row-s${s.prod_supp_id}" class="clickable-row ${isExpanded ? 'expanded' : ''}" onclick="toggleRow('s${s.prod_supp_id}')">
+                  <td><span class="expand-icon">▶</span><strong>${s.prod_supp_co}</strong></td>
+                  <td>${s.prod_supp_name || '-'}</td>
+                  <td>${s.prod_supp_email || '-'}</td>
+                  <td>${s.prod_supp_phone || '-'}</td>
+                </tr>
+                <tr id="details-s${s.prod_supp_id}" class="details-row ${isExpanded ? 'visible' : ''}">
+                  <td colspan="4" class="details-cell">
+                    <div class="details-content">
+                      <div class="details-grid">
+                        <div class="details-left">
+                          ${isEditing ? `
+                            <div class="detail-section editing">
+                              <div class="detail-label">Edit Supplier Information</div>
+                              <div class="edit-form">
+                                <div class="form-group">
+                                  <label>Company Name</label>
+                                  <input type="text" id="supp_co_${s.prod_supp_id}" value="${s.prod_supp_co}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Contact Person</label>
+                                  <input type="text" id="supp_name_${s.prod_supp_id}" value="${s.prod_supp_name || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Email</label>
+                                  <input type="email" id="supp_email_${s.prod_supp_id}" value="${s.prod_supp_email || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Phone</label>
+                                  <input type="tel" id="supp_phone_${s.prod_supp_id}" value="${s.prod_supp_phone || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Website</label>
+                                  <input type="url" id="supp_web_${s.prod_supp_id}" value="${s.prod_supp_web || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Notes</label>
+                                  <textarea id="supp_notes_${s.prod_supp_id}">${s.notes || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                  <label>Logo Path</label>
+                                  <input type="text" id="supp_logo_${s.prod_supp_id}" value="${s.logo_path || ''}">
+                                </div>
+                              </div>
+                            </div>
+                          ` : `
+                            <div class="detail-section">
+                              <div class="detail-label">Additional Information</div>
+                              <div class="detail-value">
+                                <strong>Website:</strong> ${s.prod_supp_web || 'N/A'}<br>
+                                <strong>Registered:</strong> ${formatDate(s.prod_supp_reg_date)}
+                              </div>
+                            </div>
+                            ${s.notes ? `
+                              <div class="detail-section">
+                                <div class="detail-label">Notes</div>
+                                <div class="detail-value">${s.notes}</div>
+                              </div>
+                            ` : ''}
+                          `}
+                        </div>
+                        <div class="details-right">
+                          <div class="logo-display">
+                            ${s.logo_path ? `Logo: ${s.logo_path}` : 'No logo'}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="edit-actions">
+                        ${isEditing ? `
+                          <button class="btn btn-save" onclick="event.stopPropagation(); saveSupplier(${s.prod_supp_id})">Save</button>
+                          <button class="btn btn-cancel" onclick="event.stopPropagation(); cancelEditSupplier(${s.prod_supp_id})">Cancel</button>
+                        ` : `
+                          <button class="btn btn-edit" onclick="event.stopPropagation(); editSupplier(${s.prod_supp_id})">Edit</button>
+                        `}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+        }).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.getElementById('suppliersTable').innerHTML = html;
+      } catch (err) {
+        console.error('Failed to load suppliers:', err);
+      }
+    };
+
+    // Load Products
+    const loadProducts = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/products`);
+        const products = await response.json();
+
+        const html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th class="text-right">Unit Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${products.map((p) => {
+          const isEditing = editMode.has(`p${p.prod_id}`);
+          const isExpanded = expandedRows.has(`p${p.prod_id}`);
+
+          return `
+                <tr id="row-p${p.prod_id}" class="clickable-row ${isExpanded ? 'expanded' : ''}" onclick="toggleRow('p${p.prod_id}')">
+                  <td><span class="expand-icon">▶</span><strong>${p.prod_name}</strong></td>
+                  <td>${p.prod_type || '-'}</td>
+                  <td>${p.prod_size || '-'}</td>
+                  <td class="text-right currency">${formatCurrency(p.unit_price)}</td>
+                </tr>
+                <tr id="details-p${p.prod_id}" class="details-row ${isExpanded ? 'visible' : ''}">
+                  <td colspan="4" class="details-cell">
+                    <div class="details-content">
+                      <div class="details-grid">
+                        <div class="details-left">
+                          ${isEditing ? `
+                            <div class="detail-section editing">
+                              <div class="detail-label">Edit Product Information</div>
+                              <div class="edit-form">
+                                <div class="form-group">
+                                  <label>Product Name</label>
+                                  <input type="text" id="prod_name_${p.prod_id}" value="${p.prod_name}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Type</label>
+                                  <input type="text" id="prod_type_${p.prod_id}" value="${p.prod_type || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Size</label>
+                                  <input type="text" id="prod_size_${p.prod_id}" value="${p.prod_size || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Unit Price (HUF)</label>
+                                  <input type="number" id="prod_price_${p.prod_id}" value="${p.unit_price}" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                  <label>Supplier ID</label>
+                                  <input type="number" id="prod_supp_${p.prod_id}" value="${p.prod_supp_id || ''}">
+                                </div>
+                                <div class="form-group">
+                                  <label>Specifications</label>
+                                  <textarea id="prod_notes_${p.prod_id}">${p.notes || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                  <label>Image Path</label>
+                                  <input type="text" id="prod_image_${p.prod_id}" value="${p.image_path || ''}">
+                                </div>
+                              </div>
+                            </div>
+                          ` : `
+                            <div class="detail-section">
+                              <div class="detail-label">Product Details</div>
+                              <div class="detail-value">
+                                <strong>Supplier ID:</strong> ${p.prod_supp_id || 'N/A'}<br>
+                                <strong>Registered:</strong> ${formatDate(p.prod_reg_date)}
+                              </div>
+                            </div>
+                            ${p.notes ? `
+                              <div class="detail-section">
+                                <div class="detail-label">Specifications</div>
+                                <div class="detail-value">${p.notes}</div>
+                              </div>
+                            ` : ''}
+                          `}
+                        </div>
+                        <div class="details-right">
+                          <div class="logo-display">
+                            ${p.image_path ? `Image: ${p.image_path}` : 'No image'}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="edit-actions">
+                        ${isEditing ? `
+                          <button class="btn btn-save" onclick="event.stopPropagation(); saveProduct(${p.prod_id})">Save</button>
+                          <button class="btn btn-cancel" onclick="event.stopPropagation(); cancelEditProduct(${p.prod_id})">Cancel</button>
+                        ` : `
+                          <button class="btn btn-edit" onclick="event.stopPropagation(); editProduct(${p.prod_id})">Edit</button>
+                        `}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+        }).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.getElementById('productsTable').innerHTML = html;
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    };
+
+    // Load Orders
+    const loadOrders = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/orders`);
+        const orders = await response.json();
+
+        let html = '<table><thead><tr>';
+        html += '<th>Order Name</th>';
+        html += '<th>Status</th>';
+        html += '<th class="text-right">Total</th>';
+        html += '</tr></thead><tbody>';
+
+        for (const order of orders) {
+          const detailsResponse = await fetch(`${API_BASE}/orders/${order.order_id}`);
+          const details = await detailsResponse.json();
+
+          const customerName = getCustomerName(order.cust_id);
+          const orderDate = formatOrderDate(order.order_date);
+          const orderName = `${customerName} - ${orderDate}`;
+
+          html += `
+            <tr id="row-o${order.order_id}" class="clickable-row" onclick="toggleRow('o${order.order_id}')">
+              <td><span class="expand-icon">▶</span><strong>${orderName}</strong></td>
+              <td><span class="status-badge ${getStatusClass(order.current_status)}">
+                ${order.current_status.replace(/_/g, ' ')}
+              </span></td>
+              <td class="text-right currency">${formatCurrency(order.total_amount || 0, order.currency)}</td>
+            </tr>
+            <tr id="details-o${order.order_id}" class="details-row">
+              <td colspan="3" class="details-cell">
+                <div class="details-content">
+                  <div class="detail-section">
+                    <div class="detail-label">Order Information</div>
+                    <div class="detail-value">
+                      <strong>Order ID:</strong> #${order.order_id}<br>
+                      <strong>Customer:</strong> ${customerName}<br>
+                      <strong>Order Date:</strong> ${formatDate(order.order_date)}<br>
+                      <strong>Last Update:</strong> ${order.update_event}<br>
+                      <strong>Status Updated:</strong> ${formatDate(order.current_status_update)}
+                    </div>
+                  </div>
+                  ${order.notes ? `
+                    <div class="detail-section">
+                      <div class="detail-label">Order Notes</div>
+                      <div class="detail-value">${order.notes}</div>
+                    </div>
+                  ` : ''}
+                  <div class="detail-section">
+                    <div class="detail-label">Order Items</div>
+                    <table style="margin-top: 10px;">
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Qty</th>
+                          <th class="text-right">Unit Price</th>
+                          <th class="text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${details.items.map((item) => `
+                          <tr>
+                            <td>${item.prod_name}</td>
+                            <td>${item.quantity}</td>
+                            <td class="text-right currency">${formatCurrency(item.unit_price)}</td>
+                            <td class="text-right currency">${formatCurrency(item.quantity * item.unit_price)}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="detail-section">
+                    <div class="detail-label">Status History</div>
+                    <div class="timeline">
+                      ${details.history.map((h) => `
+                        <div class="timeline-item">
+                          <div class="timeline-date">${formatDate(h.update_date)}</div>
+                          <div class="timeline-event">
+                            <span class="status-badge ${getStatusClass(h.status)}">${h.status.replace(/_/g, ' ')}</span>
+                            ${h.update_event}
+                          </div>
+                          <div class="timeline-user">by ${h.performed_by}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+
+        html += '</tbody></table>';
+        document.getElementById('ordersTable').innerHTML = html;
+      } catch (err) {
+        console.error('Failed to load orders:', err);
+      }
+    };
+
+    // Load Workflow
+    const loadWorkflow = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/workflow`);
+        const statuses = await response.json();
+
+        const html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Status Key</th>
+                <th>Display Name</th>
+                <th>Description</th>
+                <th>Skippable</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${statuses.map((s) => `
+                <tr>
+                  <td><span class="status-badge ${getStatusClass(s.status_key)}">${s.status_key}</span></td>
+                  <td><strong>${s.display_name}</strong></td>
+                  <td>${s.description}</td>
+                  <td>${s.is_skippable ? 'Yes' : 'No'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        // Populate the standalone workflow section
+        document.getElementById('workflowTable').innerHTML = html;
+
+        // Also populate the workflow sidebar on the orders page
+        const sidebarHtml = `
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${statuses.map((s) => `
+                <tr>
+                  <td><span class="status-badge ${getStatusClass(s.status_key)}">${s.status_key.replace(/_/g, ' ')}</span></td>
+                  <td style="font-size: 0.7rem;">${s.description}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        document.getElementById('workflowSidebar').innerHTML = sidebarHtml;
+      } catch (err) {
+        console.error('Failed to load workflow:', err);
+      }
+    };
+
+    // Load all data on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCustomers();
+      loadSuppliers();
+      loadProducts();
+      loadOrders();
+      loadWorkflow();
+    });
+  </script>
+</body>
+
+</html>
