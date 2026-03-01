@@ -13,17 +13,17 @@ Coolkonyha Solo Vibe is a specialized order and product management system design
 ## Architecture Overview
 
 ```mermaid
-graph TD
-    User[Browser / Client] <-->|HTTP JSON| API[Express API Routes]
-    API <-->|Method Calls| Agent[DBAgent Layer]
-    Agent <-->|SQL / Transactions| DB[(SQLite Database)]
+flowchart TD
+    User["Browser / Client"] <-->|HTTP JSON| API["Express API Routes"]
+    API <-->|Method Calls| Agent["DBAgent Layer"]
+    Agent <-->|SQL / Transactions| DB[("SQLite Database")]
     
-    subgraph "Server Logic"
+    subgraph ServerLogic ["Server Logic"]
         API
         Agent
     end
     
-    subgraph "Data Persistence"
+    subgraph DataPersistence ["Data Persistence"]
         DB
     end
 ```
@@ -36,30 +36,34 @@ graph TD
 ## Documentation Index
 
 ### Architecture Documentation
-- [Database Agent](file:///d:/dev/coolkonyha-solo-vibe/docs/architecture/database-agent.md) - Data access layer & business rules
-- [API Routes](file:///d:/dev/coolkonyha-solo-vibe/docs/architecture/api-routes.md) - REST endpoints overview
-- [Database Schema](file:///d:/dev/coolkonyha-solo-vibe/docs/architecture/database-schema.md) - Schema definitions & ER diagram
-- [Database Connection](file:///d:/dev/coolkonyha-solo-vibe/docs/architecture/database-connection.md) - Singleton connection management
+
+- [Database Agent](./docs/architecture/database-agent.md) - Data access layer & business rules
+- [API Routes](./docs/architecture/api-routes.md) - REST endpoints overview
+- [Database Schema](./docs/architecture/database-schema.md) - Schema definitions & ER diagram
+- [Database Connection](./docs/architecture/database-connection.md) - Singleton connection management
 
 ### Business Logic Documentation
-- [DB Agent Logic Tools](file:///d:/dev/coolkonyha-solo-vibe/docs/agent_logics/db_agent_logic_tools.md) - Detailed business rules
-- [DB Agent Code Structure](file:///d:/dev/coolkonyha-solo-vibe/docs/agent_logics/db_agent_code_structure.md) - Code organization details
+
+- [DB Agent Logic Tools](./docs/agent_logics/db_agent_logic_tools.md) - Detailed business rules
+- [DB Agent Code Structure](./docs/agent_logics/db_agent_code_structure.md) - Code organization details
 
 ### Building History
-- [Building Documentation Index](file:///d:/dev/coolkonyha-solo-vibe/docs/building-docs/README.md) - Feature implementation history
+
+- [Building Documentation Index](./docs/building-docs/README.md) - Feature implementation history
 
 ## Component Responsibility Matrix
 
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
-| DBAgent | `server/agent.js` | Data access, business rules | [database-agent.md] |
-| Routes | `server/routes.js` | REST API endpoints | [api-routes.md] |
-| DB Connection | `server/db.js` | SQLite connection | [database-connection.md] |
+| DBAgent | `server/agent.js` | Data access, business rules | [database-agent.md](./docs/architecture/database-agent.md) |
+| Routes | `server/routes.js` | REST API endpoints | [api-routes.md](./docs/architecture/api-routes.md) |
+| DB Connection | `server/db.js` | SQLite connection | [database-connection.md](./docs/architecture/database-connection.md) |
 | Server | `server/index.js` | Express app entry | - |
 
 ## Quick Reference
 
 ### Code → Documentation Map
+
 - `server/agent.js` → `docs/architecture/database-agent.md`
 - `server/routes.js` → `docs/architecture/api-routes.md`
 - `server/db.js` → `docs/architecture/database-connection.md`
@@ -67,6 +71,7 @@ graph TD
 - Business rules → `docs/agent_logics/db_agent_logic_tools.md`
 
 ### Documentation → Code Map
+
 - Dual-write pattern → `server/agent.js:updateOrderStatus()`
 - Pricing continuity → `server/agent.js:addOrderItem()`
 - Foreign keys → `server/db.js:constructor()`
@@ -74,16 +79,19 @@ graph TD
 ## How to Maintain This Documentation
 
 ### When Code Changes
+
 1. Update corresponding documentation file in `docs/architecture/`
 2. Update code cross-references if method names change
 3. Update this index if new components are added
 
 ### When Architecture Changes
+
 1. Create new architecture documentation file following the 4-part structure
 2. Add to this index under the appropriate category
 3. Add cross-references in related code files
 
 ### Documentation Review Checklist
+
 - [ ] All components listed in Component Responsibility Matrix
 - [ ] All architecture docs follow 4-part structure
 - [ ] Bidirectional links working (code ↔ docs)

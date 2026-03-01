@@ -1,7 +1,7 @@
 # Database Schema Architecture
 
 **Component:** `Database Schema`
-**Location:** [`coolkonyha.db`](file:///d:/dev/coolkonyha-solo-vibe/coolkonyha.db)
+**Location:** [`coolkonyha.db`](../../coolkonyha.db)
 
 ## 1. Purpose
 The Coolkonyha database uses a **hybrid relational model** designed for an AI-driven order management system. It balances two competing needs:
@@ -133,4 +133,4 @@ Configuration for the workflow state machine.
 
 ## Cross References
 - **Business Rules:** See [`docs/agent_logics/db_agent_logic_tools.md`](../agent_logics/db_agent_logic_tools.md)
-- **Data Access:** See [`server/agent.js`](file:///d:/dev/coolkonyha-solo-vibe/server/agent.js)
+- **Data Access:** See [`server/agent.js`](../../server/agent.js)

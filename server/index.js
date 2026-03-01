@@ -1,1 +1,33 @@
-/**\r\n * @fileoverview Express Server Entry Point - Main HTTP server for Coolkonyha.\r\n * \r\n * Configures Express application with:\r\n * - CORS for cross-origin requests\r\n * - Body parser for JSON payloads\r\n * - API routes under /api prefix\r\n * \r\n * Server runs on port 3001 by default.\r\n * \r\n * @see server/routes.js - API endpoints\r\n * @author Coolkonyha Development Team\r\n * @version 1.0.0\r\n */\r\nimport express from 'express'; \r\nimport cors from 'cors'; \r\nimport bodyParser from 'body-parser'; \r\nimport routes from './routes.js'; \r\n\r\nconst app = express(); \r\nconst PORT = 3001; \r\n\r\napp.use(cors()); \r\napp.use(bodyParser.json()); \r\n\r\napp.use('/api', routes); \r\n\r\napp.listen(PORT, () => { \r\n    console.log(`DB Agent Server running on http://localhost:${PORT}`); \r\n }).on('error', (err) => { \r\n    console.error('Failed to start server:', err.message); \r\n    process.exit(1); \r\n }); \r\n
+/**
+ * @fileoverview Express Server Entry Point - Main HTTP server for Coolkonyha.
+ * 
+ * Configures Express application with:
+ * - CORS for cross-origin requests
+ * - Body parser for JSON payloads
+ * - API routes under /api prefix
+ * 
+ * Server runs on port 3001 by default.
+ * 
+ * @see server/routes.js - API endpoints
+ * @author Coolkonyha Development Team
+ * @version 1.0.0
+ */
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import routes from './routes.js';
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.use('/api', routes);
+
+app.listen(PORT, () => {
+    console.log(`DB Agent Server running on http://localhost:${PORT}`);
+}).on('error', (err) => {
+    console.error('Failed to start server:', err.message);
+    process.exit(1);
+});

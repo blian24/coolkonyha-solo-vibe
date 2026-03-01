@@ -1,7 +1,7 @@
 # Database Agent Architecture
 
 **Component:** `DBAgent`
-**Location:** [`server/agent.js`](file:///d:/dev/coolkonyha-solo-vibe/server/agent.js)
+**Location:** [`server/agent.js`](../../server/agent.js)
 
 ## 1. Purpose
 The **Database Agent** acts as the centralized data access layer (DAL) for the Coolkonyha application. It abstracts all raw SQL operations and enforces critical business rules before data reaches the persistence layer.

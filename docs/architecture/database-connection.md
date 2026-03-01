@@ -1,7 +1,7 @@
 # Database Connection Architecture
 
 **Component:** `Database Connection`
-**Location:** [`server/db.js`](file:///d:/dev/coolkonyha-solo-vibe/server/db.js)
+**Location:** [`server/db.js`](../../server/db.js)
 
 ## 1. Purpose
 This module manages the low-level connection to the SQLite database. It ensures a single, shared connection instance is used throughout the application's lifecycle and enforces critical database configurations like foreign key constraints.

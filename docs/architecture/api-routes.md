@@ -1,7 +1,7 @@
 # API Routes Architecture
 
 **Component:** `API Routes`
-**Location:** [`server/routes.js`](file:///d:/dev/coolkonyha-solo-vibe/server/routes.js)
+**Location:** [`server/routes.js`](../../server/routes.js)
 
 ## 1. Purpose
 The API Routes module defines the **RESTful interface** for the Coolkonyha application. It handles HTTP requests, parses parameters, delegates business logic to the `DBAgent`, and formats responses.

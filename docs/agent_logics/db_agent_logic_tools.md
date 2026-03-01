@@ -1,7 +1,7 @@
 # DB Agent Operations & Logic Rules
 
 **Component:** `Business Logic`
-**Location:** [`server/agent.js`](file:///d:/dev/coolkonyha-solo-vibe/server/agent.js)
+**Location:** [`server/agent.js`](../../server/agent.js)
 
 ## 1. Purpose
 This document defines the mandatory **business logic and operational rules** that the Database Agent must enforce. These rules ensure data integrity, auditability, and consistent workflow execution across the Coolkonyha application.
@@ -68,5 +68,5 @@ Whenever an order status changes, the Agent MUST perform a dual-write operation:
 -   **Price Freezing**: The Pricing Continuity rule is a financial security measure to prevent accidental modification of historical revenue data.
 
 ## Cross References
-- **Implementation:** See [`server/agent.js`](file:///d:/dev/coolkonyha-solo-vibe/server/agent.js)
+- **Implementation:** See [`server/agent.js`](../../server/agent.js)
 - **Schema:** See [`docs/architecture/database-schema.md`](../architecture/database-schema.md)
