@@ -8,7 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node tests/run-tests.js",
+    "test:unit": "node tests/run-tests.js unit",
+    "test:integration": "node tests/run-tests.js integration",
+    "test:e2e": "node tests/run-tests.js e2e"
   },
   "dependencies": {
     "body-parser": "^2.2.2",
