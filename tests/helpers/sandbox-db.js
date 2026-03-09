@@ -113,11 +113,28 @@ INSERT INTO business_status_workflow (status_key, display_name, description, is_
 ('INVOICED', 'Invoiced', 'Invoice sent, awaiting payment.', 0),
 ('CLOSED', 'Closed', 'Transaction successful.', 0),
 ('CANCELLED', 'Cancelled', 'Deal failed.', 0);
+
+CREATE TABLE IF NOT EXISTS processed_emails (
+  email_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  gmail_message_id  TEXT UNIQUE NOT NULL,
+  thread_id         TEXT,
+  email_date        DATETIME,
+  direction         TEXT NOT NULL CHECK(direction IN ('received', 'sent')),
+  from_address      TEXT,
+  to_address        TEXT,
+  subject           TEXT,
+  ai_summary        TEXT,
+  linked_order_id   INTEGER,
+  status            TEXT NOT NULL DEFAULT 'pending'
+                        CHECK(status IN ('pending', 'processed', 'failed', 'skipped')),
+  processed_at      DATETIME,
+  FOREIGN KEY (linked_order_id) REFERENCES orders(order_id)
+);
 `;
 
 /**
  * Wraps a raw sqlite3.Database with promise-based helpers matching the
- * DBAgent interface so tests can use the same patterns.
+ * DBRobot interface so tests can use the same patterns.
  */
 export class SandboxDb {
     /** @param {sqlite3.Database} rawDb */

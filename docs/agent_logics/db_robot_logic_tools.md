@@ -1,10 +1,10 @@
-# DB Agent Operations & Logic Rules
+# DB Robot Operations & Logic Rules
 
-**Component:** `Business Logic`
+**Component:** `DBRobot`
 **Location:** [`server/agent.js`](../../server/agent.js)
 
 ## 1. Purpose
-This document defines the mandatory **business logic and operational rules** that the Database Agent must enforce. These rules ensure data integrity, auditability, and consistent workflow execution across the Coolkonyha application.
+This document defines the mandatory **business logic and operational rules** that the Database Robot must enforce. These rules ensure data integrity, auditability, and consistent workflow execution across the Coolkonyha application.
 
 ## 2. Architecture/Flow (Logic Patterns)
 
@@ -63,7 +63,7 @@ Whenever an order status changes, the Agent MUST perform a dual-write operation:
 
 ## 4. Security Considerations
 
--   **Transaction Safety**: All multi-step logic (like Dual-Write) must be wrapped in database transactions to prevent partial updates.
+-   **Transaction Safety (All Write Methods)**: Every method that performs more than one DB write (`createOrder`, `addOrderItem`, `updateOrderStatus`) is wrapped in an explicit `BEGIN TRANSACTION` / `COMMIT` / `ROLLBACK` block. If the process is interrupted at any point mid-write, SQLite rolls back the entire operation automatically — no partial data is ever committed.
 -   **Status Validation**: The Agent must validate that any target status exists in the `business_status_workflow` table before attempting an update to prevent invalid states.
 -   **Price Freezing**: The Pricing Continuity rule is a financial security measure to prevent accidental modification of historical revenue data.
 

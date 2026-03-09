@@ -3,7 +3,7 @@
  *
  * Tests the complete order lifecycle from customer creation through to final
  * CLOSED status, exercising both the HTTP API layer and the underlying
- * DBAgent business rules together.
+ * DBRobot business rules together.
  *
  * RE-LEARN: Before tests run, the learner reads all source and documentation
  * files (full scope) to understand the complete system: routes, agent logic,
@@ -17,7 +17,7 @@
  *   5. Verify each transition is recorded in order_status_history
  *   6. Attempt invalid transitions → verify rejection
  *
- * @see docs/agent_logics/db_agent_logic_tools.md — Business rules
+ * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
  * @see docs/tests/e2e-tests.md — Test documentation
  */
 

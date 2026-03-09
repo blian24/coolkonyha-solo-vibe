@@ -1,21 +1,21 @@
 /**
- * @fileoverview Database Agent - Centralized data access layer for Coolkonyha.
- * 
- * This class implements critical business rules:
+ * @fileoverview Database Robot - Centralized data access layer for Coolkonyha.
+ *
+ * This is a deterministic Robot (no AI). It enforces business rules mechanically:
  * - **Pricing Continuity:** Order items freeze product prices at order time
  * - **Dual-Write Status:** Order status updates write to both orders table and history
  * - **Transaction Safety:** Critical operations use SQLite transactions
- * 
+ *
  * All database operations are promisified for async/await usage.
- * 
- * @see docs/agent_logics/db_agent_logic_tools.md - Business rules documentation
- * @see docs/antigravity_db_schema.md - Database schema
+ *
+ * @see docs/agent_logics/db_robot_logic_tools.md - Business rules documentation
+ * @see docs/architecture/database-schema.md - Database schema
  * @author Coolkonyha Development Team
- * @version 1.0.0
+ * @version 1.1.0
  */
 import db from './db.js';
 
-class DBAgent {
+class DBRobot {
     /**
      * Promisified wrapper for db.all() to fetch multiple rows.
      * 
@@ -66,7 +66,7 @@ class DBAgent {
 
     // ---------------------------------------------------------
     // RULE: Dual-Write for Order Status
-    // See docs/agent_logics/db_agent_logic_tools.md Section 2
+    // See docs/agent_logics/db_robot_logic_tools.md Section 2
     // ---------------------------------------------------------
     /**
      * Updates an order's status with dual-write pattern for data consistency.
@@ -81,7 +81,7 @@ class DBAgent {
      * @returns {Promise<{success: boolean, newStatus: string}>}
      * @throws {Error} When status is invalid or transaction fails
      * 
-     * @see docs/agent_logics/db_agent_logic_tools.md Section 2
+     * @see docs/agent_logics/db_robot_logic_tools.md Section 2
      * 
      * @example
      * await dbAgent.updateOrderStatus(123, 'PROCESSING', 'admin', 'Payment confirmed');
@@ -130,7 +130,7 @@ class DBAgent {
 
     // ---------------------------------------------------------
     // RULE: Pricing Continuity
-    // See docs/agent_logics/db_agent_logic_tools.md Section 1
+    // See docs/agent_logics/db_robot_logic_tools.md Section 1
     // ---------------------------------------------------------
     /**
      * Adds an item to an order with frozen pricing.
@@ -145,25 +145,28 @@ class DBAgent {
      * @returns {Promise<{id: number}>} Created order item ID
      * @throws {Error} When product not found
      * 
-     * @see docs/agent_logics/db_agent_logic_tools.md Section 1
+     * @see docs/agent_logics/db_robot_logic_tools.md Section 1
      */
     async addOrderItem(orderId, prodId, quantity) {
-        // 1. Fetch current product price
+        // 1. Fetch current product price (outside transaction — read-only)
         const product = await this.get(
             'SELECT unit_price FROM products WHERE prod_id = ?',
             [prodId]
         );
         if (!product) throw new Error('Product not found');
 
-        // 2. Insert with FROZEN price
-        const result = await this.run(`
+        try {
+            await this.run('BEGIN TRANSACTION');
+
+            // 2. Insert with FROZEN price
+            const result = await this.run(`
       INSERT INTO order_items (order_id, prod_id, quantity, unit_price)
       VALUES (?, ?, ?, ?)
     `, [orderId, prodId, quantity, product.unit_price]);
 
-        // 3. Update Order Total (Section 1 rule)
-        // Recalculate full total to ensure consistency
-        await this.run(`
+            // 3. Update Order Total (Section 1 rule)
+            // Recalculate full total to ensure consistency
+            await this.run(`
       UPDATE orders
       SET total_amount = (
         SELECT SUM(quantity * unit_price)
@@ -173,7 +176,12 @@ class DBAgent {
       WHERE order_id = ?
     `, [orderId, orderId]);
 
-        return { id: result.lastID };
+            await this.run('COMMIT');
+            return { id: result.lastID };
+        } catch (error) {
+            await this.run('ROLLBACK');
+            throw error;
+        }
     }
 
     /**
@@ -184,19 +192,26 @@ class DBAgent {
      * @returns {Promise<{orderId: number}>} Created order ID
      */
     async createOrder(custId, currency = 'HUF') {
-        const result = await this.run(`
+        try {
+            await this.run('BEGIN TRANSACTION');
+
+            const result = await this.run(`
       INSERT INTO orders (cust_id, current_status, update_event, currency)
       VALUES (?, 'NEW', 'Order created via API', ?)
     `, [custId, currency]);
 
-        // Initial history log
-        // Manually trigger history log since 'NEW' status is implicit on creation
-        await this.run(`
+            // Initial history log — must succeed together with the order row
+            await this.run(`
       INSERT INTO order_status_history (order_id, status, update_event, performed_by)
       VALUES (?, 'NEW', 'Order Initialized', 'SYSTEM')
     `, [result.lastID]);
 
-        return { orderId: result.lastID };
+            await this.run('COMMIT');
+            return { orderId: result.lastID };
+        } catch (error) {
+            await this.run('ROLLBACK');
+            throw error;
+        }
     }
 
     async getOrders() {
@@ -430,4 +445,4 @@ class DBAgent {
     }
 }
 
-export default new DBAgent();
+export default new DBRobot();

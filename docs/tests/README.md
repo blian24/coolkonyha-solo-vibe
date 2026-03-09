@@ -51,10 +51,10 @@ tests/
 │   ├── learner.js          # Re-Learn Phase — reads scoped source + docs
 │   ├── sandbox-db.js       # In-memory SQLite with full schema
 │   ├── fixtures.js         # Deterministic seed data factories
-│   ├── agent-factory.js    # Injectable DBAgent for unit tests
+│   ├── agent-factory.js    # Injectable DBRobot for unit tests
 │   └── test-app-factory.js # Injectable Express app for HTTP tests
 ├── unit/
-│   └── agent.unit.test.js  # DBAgent business logic tests
+│   └── agent.unit.test.js  # DBRobot business logic tests
 ├── integration/
 │   └── routes.integration.test.js  # REST API HTTP contract tests
 ├── e2e/
@@ -66,8 +66,8 @@ tests/
 
 | Scope | Files Read Before Test |
 |---|---|
-| `unit` | `server/agent.js`, `docs/agent_logics/db_agent_logic_tools.md`, `docs/agent_logics/db_agent_code_structure.md` |
-| `integration` | `server/routes.js`, `server/agent.js`, `docs/architecture/api-routes.md`, `docs/agent_logics/db_agent_logic_tools.md` |
+| `unit` | `server/agent.js`, `docs/agent_logics/db_robot_logic_tools.md`, `docs/agent_logics/db_robot_code_structure.md` |
+| `integration` | `server/routes.js`, `server/agent.js`, `docs/architecture/api-routes.md`, `docs/agent_logics/db_robot_logic_tools.md` |
 | `e2e` | All of the above + `server/index.js`, `docs/architecture/database-schema.md` |
 | `all` | Union of all scopes |
 

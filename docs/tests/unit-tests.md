@@ -1,11 +1,11 @@
-# Unit Tests — DBAgent Business Logic
+# Unit Tests — DBRobot Business Logic
 
 **File:** [`tests/unit/agent.unit.test.js`](../../tests/unit/agent.unit.test.js)  
 **Re-Learn Scope:** `unit`
 
 ## 1. Purpose
 
-Verifies the core business rules of the `DBAgent` class in isolation, using an in-memory sandbox DB with no server running.
+Verifies the core business rules of the `DBRobot` class in isolation, using an in-memory sandbox DB with no server running.
 
 ## 2. Architecture / Flow
 
@@ -60,4 +60,4 @@ All tests receive seeded data from `seedBaseData()`:
 - No production DB access; all writes go to `:memory:` only
 - Each `describe` block creates its own isolated `SandboxDb` instance
 
-*See also:* [docs/agent_logics/db_agent_logic_tools.md](../agent_logics/db_agent_logic_tools.md)
+*See also:* [docs/agent_logics/db_robot_logic_tools.md](../agent_logics/db_robot_logic_tools.md)

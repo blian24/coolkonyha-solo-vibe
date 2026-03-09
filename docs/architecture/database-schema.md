@@ -19,6 +19,7 @@ erDiagram
     products ||--o{ order_items : "definitions copied to"
     orders ||--|{ order_items : contains
     orders ||--|{ order_status_history : "logs changes to"
+    orders ||--o{ processed_emails : "linked to"
     business_status_workflow ||--o{ orders : "defines status of"
     business_status_workflow ||--o{ order_status_history : "defines status of"
 
@@ -67,6 +68,21 @@ erDiagram
         int status_id PK
         string status_key
         string display_name
+    }
+
+    processed_emails {
+        int email_id PK
+        string gmail_message_id "UNIQUE dedup key"
+        string thread_id
+        datetime email_date
+        string direction "received | sent"
+        string from_address
+        string to_address
+        string subject
+        string ai_summary "AI interpretation of newest block only"
+        int linked_order_id FK
+        string status "pending|processed|failed|skipped"
+        datetime processed_at
     }
 ```
 
@@ -125,6 +141,20 @@ Configuration for the workflow state machine.
 -   `status_key`: Programmatic key (e.g., `OFFER_SENT`).
 -   `is_skippable`: Logic flag for AI automation.
 
+### Email Processing Table
+
+#### `processed_emails`
+Ledger of every email processed by the Email Robot. The single source of truth for deduplication.
+-   `email_id` (PK): Unique identifier.
+-   `gmail_message_id` (UNIQUE): Gmail's immutable message ID — the dedup key.
+-   `thread_id`: Groups emails in the same conversation thread.
+-   `email_date`: When the email was sent/received.
+-   `direction`: `received` or `sent` — determines which Gmail folder was monitored.
+-   `ai_summary`: The Manager Agent's interpretation of the **newest message block only** (quoted history is stripped before AI processing).
+-   `linked_order_id` (FK, nullable): The order this email relates to. Null if unmatched or spam.
+-   `status`: Processing state — `pending`, `processed`, `failed`, or `skipped`.
+-   `processed_at`: Timestamp when the agent finished processing.
+
 ## 4. Security Considerations
 
 -   **Foreign Key Integrity:** `PRAGMA foreign_keys = ON` is enforced by the [`Database Connection`](./database-connection.md) to prevent orphaned records.
@@ -132,5 +162,5 @@ Configuration for the workflow state machine.
 -   **Price Freezing:** `order_items.unit_price` MUST be populated at insertion time to protect financial records from future price changes in the `products` table.
 
 ## Cross References
-- **Business Rules:** See [`docs/agent_logics/db_agent_logic_tools.md`](../agent_logics/db_agent_logic_tools.md)
+- **Business Rules:** See [`docs/agent_logics/db_robot_logic_tools.md`](../agent_logics/db_robot_logic_tools.md)
 - **Data Access:** See [`server/agent.js`](../../server/agent.js)

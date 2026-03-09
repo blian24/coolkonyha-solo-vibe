@@ -23,7 +23,7 @@ graph TD
     Config --> Store[Store Instance]
     Check -->|Yes| Return[Return Existing Instance]
     Store --> Return
-    Return --> Usage(DBAgent usage)
+    Return --> Usage(DBRobot usage)
 ```
 
 The database file is located at `../coolkonyha.db` relative to the `server/` directory.

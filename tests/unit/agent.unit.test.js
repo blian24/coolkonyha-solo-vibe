@@ -1,7 +1,7 @@
 /**
- * @fileoverview Unit Tests — DBAgent Business Logic
+ * @fileoverview Unit Tests — DBRobot Business Logic
  *
- * Tests each DBAgent method in isolation using an in-memory sandbox SQLite DB.
+ * Tests each DBRobot method in isolation using an in-memory sandbox SQLite DB.
  * The production coolkonyha.db is never opened.
  *
  * RE-LEARN: Before tests run, the learner reads server/agent.js and the
@@ -14,7 +14,7 @@
  *   - Status Validation: invalid status keys are rejected before DB write
  *   - Order Total: recalculated as SUM(quantity * unit_price) after item add
  *
- * @see docs/agent_logics/db_agent_logic_tools.md — Business rules
+ * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
  * @see docs/tests/unit-tests.md — Test documentation
  */
 
@@ -42,7 +42,7 @@ before(async () => {
 // ---------------------------------------------------------------
 // SUITE: createOrder
 // ---------------------------------------------------------------
-describe('DBAgent.createOrder()', () => {
+describe('DBRobot.createOrder()', () => {
     let db;
     let agent;
     let seeded;
@@ -91,7 +91,7 @@ describe('DBAgent.createOrder()', () => {
 // ---------------------------------------------------------------
 // SUITE: updateOrderStatus — Dual-Write Rule
 // ---------------------------------------------------------------
-describe('DBAgent.updateOrderStatus() — Dual-Write Rule', () => {
+describe('DBRobot.updateOrderStatus() — Dual-Write Rule', () => {
     let db;
     let agent;
     let orderId;
@@ -148,7 +148,7 @@ describe('DBAgent.updateOrderStatus() — Dual-Write Rule', () => {
 // ---------------------------------------------------------------
 // SUITE: addOrderItem — Pricing Continuity Rule
 // ---------------------------------------------------------------
-describe('DBAgent.addOrderItem() — Pricing Continuity Rule', () => {
+describe('DBRobot.addOrderItem() — Pricing Continuity Rule', () => {
     let db;
     let agent;
     let seeded;
@@ -219,7 +219,7 @@ describe('DBAgent.addOrderItem() — Pricing Continuity Rule', () => {
 // ---------------------------------------------------------------
 // SUITE: updateCustomer / updateSupplier / updateProduct
 // ---------------------------------------------------------------
-describe('DBAgent.updateCustomer()', () => {
+describe('DBRobot.updateCustomer()', () => {
     let db;
     let agent;
     let seeded;
@@ -246,7 +246,7 @@ describe('DBAgent.updateCustomer()', () => {
     });
 });
 
-describe('DBAgent.updateProduct()', () => {
+describe('DBRobot.updateProduct()', () => {
     let db;
     let agent;
     let seeded;

@@ -1,10 +1,10 @@
-# Database Agent Architecture
+# Database Robot Architecture
 
-**Component:** `DBAgent`
+**Component:** `DBRobot`
 **Location:** [`server/agent.js`](../../server/agent.js)
 
 ## 1. Purpose
-The **Database Agent** acts as the centralized data access layer (DAL) for the Coolkonyha application. It abstracts all raw SQL operations and enforces critical business rules before data reaches the persistence layer.
+The **Database Robot** is a deterministic (non-AI) data access layer for the Coolkonyha application. It abstracts all raw SQL operations and enforces critical business rules mechanically before data reaches the persistence layer.
 
 Key responsibilities:
 - **Centralized Data Access:** All database interactions flow through this class.
@@ -16,7 +16,7 @@ Key responsibilities:
 ### Class Structure
 ```mermaid
 classDiagram
-    class DBAgent {
+    class DBRobot {
         +all(sql, params)
         +get(sql, params)
         +run(sql, params)
@@ -31,7 +31,7 @@ classDiagram
     class Database {
         +sqlite3.Database db
     }
-    DBAgent --> Database : uses
+    DBRobot --> Database : uses
 ```
 
 ### Dual-Write Pattern (Order Status)
@@ -40,7 +40,7 @@ This pattern ensures auditability by determining that every status change is rec
 ```mermaid
 sequenceDiagram
     participant Route as API Route
-    participant Agent as DBAgent
+    participant Agent as DBRobot
     participant DB as SQLite DB
 
     Route->>Agent: updateOrderStatus(123, 'PROCESSING', ...)
@@ -69,7 +69,7 @@ Ensures that the price of an item is frozen at the moment of ordering, so future
 ```mermaid
 sequenceDiagram
     participant Route as API Route
-    participant Agent as DBAgent
+    participant Agent as DBRobot
     participant DB as SQLite DB
 
     Route->>Agent: addOrderItem(orderId, prodId, qty)

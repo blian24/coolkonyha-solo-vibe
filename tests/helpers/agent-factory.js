@@ -1,8 +1,8 @@
 /**
- * @fileoverview DBAgent Factory — Test-injectable version of the database agent.
+ * @fileoverview DBRobot Factory — Test-injectable version of the database robot.
  *
  * The production `server/agent.js` imports a hardcoded singleton DB connection.
- * This factory re-implements the same DBAgent class but accepts any db-compatible
+ * This factory re-implements the same DBRobot class but accepts any db-compatible
  * object (e.g., SandboxDb) via constructor injection, enabling full sandbox isolation
  * in tests without modifying production code.
  *
@@ -10,16 +10,16 @@
  * update this file to match.
  *
  * @see server/agent.js — Production implementation (source of truth)
- * @see docs/agent_logics/db_agent_logic_tools.md — Business rules
+ * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
  * @see docs/tests/unit-tests.md — Unit test documentation
  */
 
 /**
- * Creates a new DBAgent instance backed by the provided database connection.
- * Mirrors the full public API of the production DBAgent singleton.
+ * Creates a new DBRobot instance backed by the provided database connection.
+ * Mirrors the full public API of the production DBRobot singleton.
  *
  * @param {import('./sandbox-db.js').SandboxDb} db - A sandbox or real DB connection
- * @returns {object} A DBAgent-compatible instance
+ * @returns {object} A DBRobot-compatible instance
  */
 export const createTestAgent = (db) => ({
 
@@ -37,7 +37,7 @@ export const createTestAgent = (db) => ({
 
     // ---------------------------------------------------------
     // RULE: Dual-Write for Order Status
-    // See docs/agent_logics/db_agent_logic_tools.md Section 2
+    // See docs/agent_logics/db_robot_logic_tools.md Section 2
     // ---------------------------------------------------------
     async updateOrderStatus(orderId, newStatus, performedBy, eventDescription) {
         const statusDef = await db.get(
@@ -71,7 +71,7 @@ export const createTestAgent = (db) => ({
 
     // ---------------------------------------------------------
     // RULE: Pricing Continuity
-    // See docs/agent_logics/db_agent_logic_tools.md Section 1
+    // See docs/agent_logics/db_robot_logic_tools.md Section 1
     // ---------------------------------------------------------
     async addOrderItem(orderId, prodId, quantity) {
         const product = await db.get(
@@ -80,38 +80,55 @@ export const createTestAgent = (db) => ({
         );
         if (!product) throw new Error('Product not found');
 
-        const result = await db.run(
-            `INSERT INTO order_items (order_id, prod_id, quantity, unit_price)
-       VALUES (?, ?, ?, ?)`,
-            [orderId, prodId, quantity, product.unit_price]
-        );
+        try {
+            await db.run('BEGIN TRANSACTION');
 
-        await db.run(
-            `UPDATE orders
+            const result = await db.run(
+                `INSERT INTO order_items (order_id, prod_id, quantity, unit_price)
+       VALUES (?, ?, ?, ?)`,
+                [orderId, prodId, quantity, product.unit_price]
+            );
+
+            await db.run(
+                `UPDATE orders
        SET total_amount = (
          SELECT SUM(quantity * unit_price)
          FROM order_items
          WHERE order_id = ?
        )
        WHERE order_id = ?`,
-            [orderId, orderId]
-        );
+                [orderId, orderId]
+            );
 
-        return { id: result.lastID };
+            await db.run('COMMIT');
+            return { id: result.lastID };
+        } catch (error) {
+            await db.run('ROLLBACK');
+            throw error;
+        }
     },
 
     async createOrder(custId, currency = 'HUF') {
-        const result = await db.run(
-            `INSERT INTO orders (cust_id, current_status, update_event, currency)
+        try {
+            await db.run('BEGIN TRANSACTION');
+
+            const result = await db.run(
+                `INSERT INTO orders (cust_id, current_status, update_event, currency)
        VALUES (?, 'NEW', 'Order created via API', ?)`,
-            [custId, currency]
-        );
-        await db.run(
-            `INSERT INTO order_status_history (order_id, status, update_event, performed_by)
+                [custId, currency]
+            );
+            await db.run(
+                `INSERT INTO order_status_history (order_id, status, update_event, performed_by)
        VALUES (?, 'NEW', 'Order Initialized', 'SYSTEM')`,
-            [result.lastID]
-        );
-        return { orderId: result.lastID };
+                [result.lastID]
+            );
+
+            await db.run('COMMIT');
+            return { orderId: result.lastID };
+        } catch (error) {
+            await db.run('ROLLBACK');
+            throw error;
+        }
     },
 
     async getOrders() {

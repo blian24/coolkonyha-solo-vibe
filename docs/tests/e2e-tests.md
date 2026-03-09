@@ -5,7 +5,7 @@
 
 ## 1. Purpose
 
-Validates the complete order lifecycle from creation to closure, exercising the HTTP API, DBAgent business rules, and the SQLite persistence layer together.
+Validates the complete order lifecycle from creation to closure, exercising the HTTP API, DBRobot business rules, and the SQLite persistence layer together.
 
 ## 2. Architecture / Flow
 
@@ -47,4 +47,4 @@ flowchart TD
 - Sandbox DB: in-memory only; closed after suite teardown
 - Production DB safety explicitly verified in Step 6
 
-*See also:* [docs/agent_logics/db_agent_logic_tools.md](../agent_logics/db_agent_logic_tools.md)
+*See also:* [docs/agent_logics/db_robot_logic_tools.md](../agent_logics/db_robot_logic_tools.md)

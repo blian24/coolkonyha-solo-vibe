@@ -1,9 +1,9 @@
 /**
  * @fileoverview Test App Factory — Creates an isolated Express app for integration/E2E testing.
  *
- * The production server/index.js launches Express with the singleton DBAgent
+ * The production server/index.js launches Express with the singleton DBRobot
  * (which connects to the production DB). This factory creates a fresh Express app
- * using a provided test agent instance, enabling full HTTP-level tests against
+ * using a provided test robot instance, enabling full HTTP-level tests against
  * a sandbox database without ever touching coolkonyha.db.
  *
  * @see server/routes.js — Route definitions (production)
@@ -18,7 +18,7 @@ import bodyParser from 'body-parser';
  * Builds the route handlers using a provided agent (instead of the singleton).
  * Mirrors all routes from server/routes.js exactly.
  *
- * @param {object} agent - A DBAgent-compatible object (e.g., from createTestAgent)
+ * @param {object} agent - A DBRobot-compatible object (e.g., from createTestAgent)
  * @returns {import('express').Router}
  */
 const buildRouter = (agent) => {
@@ -81,7 +81,7 @@ const buildRouter = (agent) => {
         }
     });
 
-    // Dual-write business rule — see docs/agent_logics/db_agent_logic_tools.md Section 2
+    // Dual-write business rule — see docs/agent_logics/db_robot_logic_tools.md Section 2
     router.put('/orders/:id/status', async (req, res) => {
         try {
             const { status, performedBy, eventDescription } = req.body;
@@ -93,7 +93,7 @@ const buildRouter = (agent) => {
         }
     });
 
-    // Pricing continuity rule — see docs/agent_logics/db_agent_logic_tools.md Section 1
+    // Pricing continuity rule — see docs/agent_logics/db_robot_logic_tools.md Section 1
     router.post('/orders/:id/items', async (req, res) => {
         try {
             const { prodId, quantity } = req.body;
@@ -134,7 +134,7 @@ const buildRouter = (agent) => {
  * Creates and starts an isolated Express server bound to a random port.
  * Returns the base URL and a teardown function.
  *
- * @param {object} agent - A DBAgent-compatible object
+ * @param {object} agent - A DBRobot-compatible object
  * @returns {Promise<{baseUrl: string, teardown: () => Promise<void>}>}
  */
 export const createTestServer = (agent) => new Promise((resolve) => {

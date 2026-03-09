@@ -4,12 +4,12 @@
 **Location:** [`server/routes.js`](../../server/routes.js)
 
 ## 1. Purpose
-The API Routes module defines the **RESTful interface** for the Coolkonyha application. It handles HTTP requests, parses parameters, delegates business logic to the `DBAgent`, and formats responses.
+The API Routes module defines the **RESTful interface** for the Coolkonyha application. It handles HTTP requests, parses parameters, delegates business logic to the `DBRobot`, and formats responses.
 
 Key responsibilities:
 - **Routing:** Mapping HTTP methods and paths to handler functions.
 - **Middleware:** applying CORS and Body Parser to requests.
-- **Delegation:** Passing extracted data to `DBAgent` for processing.
+- **Delegation:** Passing extracted data to `DBRobot` for processing.
 - **Error Handling:** Catching errors from the agent and returning appropriate HTTP status codes (500, 400, etc.).
 
 ## 2. Architecture/Flow
@@ -20,7 +20,7 @@ sequenceDiagram
     participant Client
     participant Express as Express App
     participant Route as API Route
-    participant Agent as DBAgent
+    participant Agent as DBRobot
     
     Client->>Express: HTTP Request (GET/POST/PUT)
     Express->>Route: Route Match
@@ -89,5 +89,5 @@ sequenceDiagram
 ## 4. Security Considerations
 
 - **CORS:** Currently configured to allow all origins (`cors()`). For production, this should be restricted to the specific frontend domain.
-- **Input Validation:** Routes perform minimal validation, relying on `DBAgent` to enforce business rules and data integrity.
+- **Input Validation:** Routes perform minimal validation, relying on `DBRobot` to enforce business rules and data integrity.
 - **Error Exposure:** Stack traces are logged to the server console, but only error messages are returned to the client. Care is taken not to leak sensitive system paths in production (though currently, `err.message` is returned directly).
