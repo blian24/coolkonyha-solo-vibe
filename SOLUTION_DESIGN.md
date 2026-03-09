@@ -3,6 +3,8 @@
 ## Project Overview
 Coolkonyha Solo Vibe is a specialized order and product management system designed for efficient kitchen operations. It handles customers, suppliers, products, and orders with a focus on business rule enforcement and verifiable audit trails.
 
+**Last updated:** 2026-03-09
+
 ## Technology Stack
 - **Frontend:** React + Vite
 - **Backend:** Express.js + Node.js
