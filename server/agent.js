@@ -200,6 +200,15 @@ class DBRobot {
       VALUES (?, 'NEW', 'Order created via API', ?)
     `, [custId, currency]);
 
+            // Generate order_code (4 letters + 5 digits)
+            const customer = await this.get('SELECT cust_name FROM customers WHERE cust_id = ?', [custId]);
+            const cleanName = customer ? customer.cust_name.replace(/[^a-zA-Z]/g, '').toUpperCase() : 'UNKN';
+            const prefix = (cleanName + 'XXXX').substring(0, 4);
+            const idStr = String(result.lastID).padStart(5, '0');
+            const orderCode = `${prefix}-${idStr}`;
+
+            await this.run('UPDATE orders SET order_code = ? WHERE order_id = ?', [orderCode, result.lastID]);
+
             // Initial history log — must succeed together with the order row
             await this.run(`
       INSERT INTO order_status_history (order_id, status, update_event, performed_by)
@@ -442,6 +451,59 @@ class DBRobot {
         values.push(prodId);
         await this.run(`UPDATE products SET ${fields.join(', ')} WHERE prod_id = ?`, values);
         return { success: true };
+    }
+    // ---------------------------------------------------------
+    // P.I.S.T.A. CHAT HISTORY
+    // All chat log reads and writes go through DBRobot to enforce
+    // the single data-access layer rule.
+    // @see docs/assistant_team/pista-agent.md — Chat history architecture
+    // ---------------------------------------------------------
+
+    /**
+     * Saves a single chat message to the persistent conversation log.
+     *
+     * @param {object} entry - Chat log entry
+     * @param {number|null} entry.orderId - Linked order ID, or null for dashboard context
+     * @param {'ck'|'pista'} entry.role - Who sent the message
+     * @param {string} entry.message - Plain text message content
+     * @param {string|null} [entry.proposal] - JSON-stringified P.I.S.T.A. proposal object (pista role only)
+     * @returns {Promise<{logId: number}>} ID of the created log entry
+     *
+     * @see docs/assistant_team/pista-agent.md — Chat history architecture
+     */
+    async saveChatMessage({ orderId = null, role, message, proposal = null }) {
+        const result = await this.run(
+            `INSERT INTO pista_chat_logs (order_id, role, message, proposal)
+             VALUES (?, ?, ?, ?)`,
+            [orderId, role, message, proposal ? JSON.stringify(proposal) : null]
+        );
+        return { logId: result.lastID };
+    }
+
+    /**
+     * Retrieves the conversation history for a given context.
+     *
+     * Pass orderId to get the thread for a specific order.
+     * Pass null to get the global Dashboard thread.
+     *
+     * @param {number|null} orderId - Order context, or null for dashboard
+     * @param {number} [limit=50] - Maximum number of messages to return (newest first)
+     * @returns {Promise<Array>} Array of chat log entries ordered oldest-first for display
+     *
+     * @see docs/assistant_team/pista-agent.md — Chat history architecture
+     */
+    async getChatHistory(orderId = null, limit = 50) {
+        // Subquery reverses the newest-first fetch to return oldest-first for rendering
+        return await this.all(
+            `SELECT * FROM (
+                SELECT log_id, order_id, role, message, proposal, created_at
+                FROM pista_chat_logs
+                WHERE order_id IS ?
+                ORDER BY created_at DESC
+                LIMIT ?
+             ) ORDER BY created_at ASC`,
+            [orderId, limit]
+        );
     }
 }
 

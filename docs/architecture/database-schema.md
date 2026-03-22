@@ -43,6 +43,7 @@ erDiagram
 
     orders {
         int order_id PK
+        string order_code UNIQUE
         int cust_id FK
         string current_status "Current Workflow Step"
         decimal total_amount
@@ -125,6 +126,7 @@ Stores supplier details.
 #### `orders`
 The "Head" of a transaction.
 -   `order_id` (PK): Unique identifier.
+-   `order_code` (UNIQUE): Human-readable unique code (e.g., HILT-00001).
 -   `cust_id` (FK): Customer reference.
 -   `current_status`: The active state from `business_status_workflow`.
 -   `update_event`: AI-generated summary of the last action.

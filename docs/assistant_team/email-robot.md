@@ -2,7 +2,7 @@
 
 **Component:** `Email Robot`
 **Type:** 🤖 Robot (deterministic, no AI)
-**Status:** Planned — not yet implemented
+**Status:** Implemented — `server/email-robot.js`
 
 ## 1. Purpose
 
@@ -29,6 +29,8 @@ graph TD
     RuleCheck -->|action = notify / auto_customer| Strip
     RuleCheck -->|no rule| Strip
     Strip -->|payload + metadata flags| PISTA["P.I.S.T.A."]
+    PISTA -->|proposal stored| Done[Mark 'processed' in DB]
+    Done -->|applyPistaLabel| Label[Apply Gmail label \"pista\"]
 ```
 
 ### Trigger Methods
@@ -52,6 +54,11 @@ graph TD
    - Rule with `action = notify` or `auto_customer` → include the `rule` in the payload
    - No rule found → set `known_sender: false`
 6. Strip quoted email history, deliver payload to P.I.S.T.A.
+7. Mark the `processed_emails` row as `'processed'`.
+8. **Apply Gmail label "pista"** to the original Gmail message via the Gmail API label modify endpoint.
+   - On the first run the robot checks if the label exists using `gmail.users.labels.list`; if not, it creates it with a light-blue color (`#4a86e8`) using `gmail.users.labels.create`.
+   - The resolved label ID is cached in memory for the session to avoid repeated API calls.
+   - A labeling failure is **non-fatal** and only logs a warning — it never aborts the main pipeline.
 
 ## 3. Input/Output Specifications
 
@@ -79,9 +86,10 @@ graph TD
 ## 4. Security Considerations
 
 - **OAuth2 only:** Gmail API access must use OAuth2 tokens stored as environment variables — never hardcoded credentials.
-- **Read-only Gmail scope:** The robot only needs `gmail.readonly` — it must not request write permissions.
+- **`gmail.modify` scope required:** The robot needs `gmail.modify` (not just `gmail.readonly`) in order to add the "pista" label to processed emails. All other operations remain read-access only.
 - **Minimal data:** Only the newest message block is forwarded — full email bodies are never stored in the DB.
 - **Dedup is the safety net:** The `gmail_message_id UNIQUE` constraint in `processed_emails` provides a second layer of protection against duplicate processing even if the robot's in-memory state is lost.
+- **Label failure is non-fatal:** If the Gmail labels API is unreachable, the email is still processed and handed to P.I.S.T.A. — the label step is best-effort.
 
 ## Cross References
 - **P.I.S.T.A.:** [`docs/assistant_team/pista-agent.md`](./pista-agent.md)

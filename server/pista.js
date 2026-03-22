@@ -16,7 +16,7 @@
  * @see SOLUTION_DESIGN.md                   — Full system overview
  *
  * @author Coolkonyha Development Team
- * @version 0.1.0 (Initial — mock email support)
+ * @version 0.2.0 (Chat history persistence via DBRobot)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -112,14 +112,24 @@ class PistaAgent {
    * @param {string|null} emailPayload.rule          - sender_rules action if known_sender is true
    * @returns {Promise<object>} Structured proposal for CK
    */
-  async receiveEmail(emailPayload) {
+  async receiveEmail(emailPayload, orderId = null) {
     console.log(`\n[P.I.S.T.A.] 📧 Processing email from: ${emailPayload.from}`);
 
     const context = await this._gatherEmailContext(emailPayload.from);
     const prompt = this._buildEmailPrompt(emailPayload, context);
     const analysis = await this._callGemini(prompt);
 
-    console.log('[P.I.S.T.A.] 💡 Proposal generated. Awaiting CK approval...');
+    // Auto-save the P.I.S.T.A. proposal to the persistent chat log.
+    // Links to the order if one is identifiable, otherwise goes to the Dashboard thread.
+    const resolvedOrderId = orderId ?? context.orders?.[0]?.order_id ?? null;
+    await this.dbRobot.saveChatMessage({
+      orderId: resolvedOrderId,
+      role: 'pista',
+      message: analysis.summary,
+      proposal: analysis,
+    });
+
+    console.log('[P.I.S.T.A.] 💡 Proposal generated and saved. Awaiting CK approval...');
     return analysis;
   }
 
@@ -155,14 +165,28 @@ class PistaAgent {
 
   /**
    * Process a natural language message from CK via the chat interface.
+   * Loads conversation history from DB for context, then saves both the
+   * CK message and P.I.S.T.A.'s response back to the persistent log.
    *
    * @param {string} message - CK's message
+   * @param {number|null} [orderId=null] - Linked order context (null = Dashboard)
    * @returns {Promise<object>} Structured proposal or informational response
    */
-  async receiveChat(message) {
+  async receiveChat(message, orderId = null) {
     console.log(`\n[P.I.S.T.A.] 💬 Chat message received from CK.`);
 
-    // For chat, we load all active orders as broad context
+    // 1. Persist CK's message immediately (so history is complete even on failure)
+    await this.dbRobot.saveChatMessage({ orderId, role: 'ck', message });
+
+    // 2. Load prior conversation history for context continuity
+    const history = await this.dbRobot.getChatHistory(orderId, 20);
+    const historyText = history.length > 0
+      ? history
+          .map(h => `[${h.role.toUpperCase()} @ ${h.created_at}]: ${h.message}`)
+          .join('\n')
+      : 'No prior conversation in this context.';
+
+    // 3. Load active orders as broad business context
     const activeOrders = await this.dbRobot.all(
       `SELECT o.*, c.cust_name FROM orders o
        JOIN customers c ON o.cust_id = c.cust_id
@@ -171,7 +195,10 @@ class PistaAgent {
     );
 
     const prompt = `
-CK's message: "${message}"
+Conversation history in this context (oldest first):
+${historyText}
+
+CK's latest message: "${message}"
 
 Current active orders for context:
 ${JSON.stringify(activeOrders, null, 2)}
@@ -181,7 +208,17 @@ If the request requires a DB change, include it in proposed_actions.
 If it is purely informational, set proposed_actions to [] and requires_approval to false.
     `.trim();
 
-    return await this._callGemini(prompt);
+    const analysis = await this._callGemini(prompt);
+
+    // 4. Persist P.I.S.T.A.'s response
+    await this.dbRobot.saveChatMessage({
+      orderId,
+      role: 'pista',
+      message: analysis.summary,
+      proposal: analysis,
+    });
+
+    return analysis;
   }
 
   // -------------------------------------------------------------------------

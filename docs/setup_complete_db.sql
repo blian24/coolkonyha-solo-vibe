@@ -37,6 +37,7 @@ CREATE TABLE products (
 -- 2. Transactions
 CREATE TABLE orders (
     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_code TEXT UNIQUE,
     cust_id INTEGER NOT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     total_amount NUMERIC(12,2),
