@@ -60,4 +60,4 @@ All tests receive seeded data from `seedBaseData()`:
 - No production DB access; all writes go to `:memory:` only
 - Each `describe` block creates its own isolated `SandboxDb` instance
 
-*See also:* [docs/agent_logics/db_robot_logic_tools.md](../agent_logics/db_robot_logic_tools.md)
+*See also:* [docs/assistant_team/db_robot_logic_tools.md](../assistant_team/db_robot_logic_tools.md)

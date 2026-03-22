@@ -84,6 +84,16 @@ erDiagram
         string status "pending|processed|failed|skipped"
         datetime processed_at
     }
+
+    sender_rules {
+        int rule_id PK
+        string email_address "UNIQUE"
+        string action "skip|notify|auto_customer"
+        string reason
+        string created_by "CK or PISTA"
+        string approved_by "Always CK"
+        datetime created_at
+    }
 ```
 
 ## 3. Input/Output Specifications (Schema Definitions)
@@ -155,6 +165,16 @@ Ledger of every email processed by the Email Robot. The single source of truth f
 -   `status`: Processing state — `pending`, `processed`, `failed`, or `skipped`.
 -   `processed_at`: Timestamp when the agent finished processing.
 
+#### `sender_rules`
+Stores CK's learned preferences for non-customer email senders. Rules are proposed by P.I.S.T.A. and approved by CK.
+-   `rule_id` (PK): Unique identifier.
+-   `email_address` (UNIQUE): The sender email address the rule applies to.
+-   `action`: Disposition — `skip` (ignore silently), `notify` (always show to CK), or `auto_customer` (treat as customer lead).
+-   `reason`: Human-readable explanation of why the rule was created.
+-   `created_by`: Who proposed the rule (`CK` or `PISTA`).
+-   `approved_by`: Who approved the rule — always `CK`.
+-   `created_at`: When the rule was created.
+
 ## 4. Security Considerations
 
 -   **Foreign Key Integrity:** `PRAGMA foreign_keys = ON` is enforced by the [`Database Connection`](./database-connection.md) to prevent orphaned records.
@@ -162,5 +182,7 @@ Ledger of every email processed by the Email Robot. The single source of truth f
 -   **Price Freezing:** `order_items.unit_price` MUST be populated at insertion time to protect financial records from future price changes in the `products` table.
 
 ## Cross References
-- **Business Rules:** See [`docs/agent_logics/db_robot_logic_tools.md`](../agent_logics/db_robot_logic_tools.md)
+- **Business Rules:** See [`docs/assistant_team/db_robot_logic_tools.md`](../assistant_team/db_robot_logic_tools.md)
 - **Data Access:** See [`server/agent.js`](../../server/agent.js)
+- **P.I.S.T.A. (sender_rules consumer):** See [`docs/assistant_team/pista-agent.md`](./pista-agent.md)
+- **Email Robot (sender_rules consumer):** See [`docs/assistant_team/email-robot.md`](./email-robot.md)

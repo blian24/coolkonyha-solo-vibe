@@ -15,7 +15,7 @@ Before each test run, the agent performs a **Re-Learn Phase**: it reads the curr
 flowchart TD
     CLI([npm test / npm run test:unit]) --> Runner[tests/run-tests.js]
     Runner --> Learn[Re-Learn Phase\nlearner.js]
-    Learn --> SrcFiles[Reads: server/*.js\ndocs/agent_logics/*.md\ndocs/architecture/*.md]
+    Learn --> SrcFiles[Reads: server/*.js\ndocs/assistant_team/*.md\ndocs/architecture/*.md]
     Runner --> Suites{Test Scope}
     Suites --> Unit[Unit Tests\ntests/unit/]
     Suites --> Integration[Integration Tests\ntests/integration/]
@@ -66,8 +66,8 @@ tests/
 
 | Scope | Files Read Before Test |
 |---|---|
-| `unit` | `server/agent.js`, `docs/agent_logics/db_robot_logic_tools.md`, `docs/agent_logics/db_robot_code_structure.md` |
-| `integration` | `server/routes.js`, `server/agent.js`, `docs/architecture/api-routes.md`, `docs/agent_logics/db_robot_logic_tools.md` |
+| `unit` | `server/agent.js`, `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
+| `integration` | `server/routes.js`, `server/agent.js`, `docs/architecture/api-routes.md`, `docs/assistant_team/db_robot_logic_tools.md` |
 | `e2e` | All of the above + `server/index.js`, `docs/architecture/database-schema.md` |
 | `all` | Union of all scopes |
 

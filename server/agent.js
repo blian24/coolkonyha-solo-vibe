@@ -8,7 +8,7 @@
  *
  * All database operations are promisified for async/await usage.
  *
- * @see docs/agent_logics/db_robot_logic_tools.md - Business rules documentation
+ * @see docs/assistant_team/db_robot_logic_tools.md - Business rules documentation
  * @see docs/architecture/database-schema.md - Database schema
  * @author Coolkonyha Development Team
  * @version 1.1.0
@@ -66,7 +66,7 @@ class DBRobot {
 
     // ---------------------------------------------------------
     // RULE: Dual-Write for Order Status
-    // See docs/agent_logics/db_robot_logic_tools.md Section 2
+    // See docs/assistant_team/db_robot_logic_tools.md Section 2
     // ---------------------------------------------------------
     /**
      * Updates an order's status with dual-write pattern for data consistency.
@@ -81,7 +81,7 @@ class DBRobot {
      * @returns {Promise<{success: boolean, newStatus: string}>}
      * @throws {Error} When status is invalid or transaction fails
      * 
-     * @see docs/agent_logics/db_robot_logic_tools.md Section 2
+     * @see docs/assistant_team/db_robot_logic_tools.md Section 2
      * 
      * @example
      * await dbAgent.updateOrderStatus(123, 'PROCESSING', 'admin', 'Payment confirmed');
@@ -130,7 +130,7 @@ class DBRobot {
 
     // ---------------------------------------------------------
     // RULE: Pricing Continuity
-    // See docs/agent_logics/db_robot_logic_tools.md Section 1
+    // See docs/assistant_team/db_robot_logic_tools.md Section 1
     // ---------------------------------------------------------
     /**
      * Adds an item to an order with frozen pricing.
@@ -145,7 +145,7 @@ class DBRobot {
      * @returns {Promise<{id: number}>} Created order item ID
      * @throws {Error} When product not found
      * 
-     * @see docs/agent_logics/db_robot_logic_tools.md Section 1
+     * @see docs/assistant_team/db_robot_logic_tools.md Section 1
      */
     async addOrderItem(orderId, prodId, quantity) {
         // 1. Fetch current product price (outside transaction — read-only)

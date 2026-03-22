@@ -156,7 +156,7 @@ After creating a new document:
 
 ## Related Documentation
 
-- **Agent Logics:** [`docs/agent_logics/`](../agent_logics/) - Business logic documentation
+- **Agent Logics:** [`docs/assistant_team/`](../assistant_team/) - Business logic documentation
 - **Database Schema:** [`docs/antigravity_db_schema.md`](../antigravity_db_schema.md) - Current schema
 - **Setup Scripts:** [`docs/setup_complete_db.sql`](../setup_complete_db.sql) - Database initialization
 

@@ -47,4 +47,4 @@ flowchart TD
 - Sandbox DB: in-memory only; closed after suite teardown
 - Production DB safety explicitly verified in Step 6
 
-*See also:* [docs/agent_logics/db_robot_logic_tools.md](../agent_logics/db_robot_logic_tools.md)
+*See also:* [docs/assistant_team/db_robot_logic_tools.md](../assistant_team/db_robot_logic_tools.md)

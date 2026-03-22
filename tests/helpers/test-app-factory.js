@@ -81,7 +81,7 @@ const buildRouter = (agent) => {
         }
     });
 
-    // Dual-write business rule — see docs/agent_logics/db_robot_logic_tools.md Section 2
+    // Dual-write business rule — see docs/assistant_team/db_robot_logic_tools.md Section 2
     router.put('/orders/:id/status', async (req, res) => {
         try {
             const { status, performedBy, eventDescription } = req.body;
@@ -93,7 +93,7 @@ const buildRouter = (agent) => {
         }
     });
 
-    // Pricing continuity rule — see docs/agent_logics/db_robot_logic_tools.md Section 1
+    // Pricing continuity rule — see docs/assistant_team/db_robot_logic_tools.md Section 1
     router.post('/orders/:id/items', async (req, res) => {
         try {
             const { prodId, quantity } = req.body;

@@ -45,7 +45,7 @@ sequenceDiagram
 
     Route->>Agent: updateOrderStatus(123, 'PROCESSING', ...)
     
-    rect rgb(240, 248, 255)
+    rect rgba(13, 132, 236, 0.27)
         note right of Agent: Transaction Scope
         Agent->>DB: BEGIN TRANSACTION
         
@@ -83,7 +83,71 @@ sequenceDiagram
     Agent-->>Route: { id: newItemId }
 ```
 
-## 3. Input/Output Specifications
+## 3. Inter-Agent Workflows (API Contract)
+
+The DBRobot acts as the sole gatekeeper to the database. It provides specific services (endpoints) to the other operational robots and agents to ensure they never touch raw data.
+
+### 3.1 Services for Email Robot
+
+**Goal:** Deduplicate emails and enforce basic sender rules before the AI agent even wakes up.
+
+```mermaid
+sequenceDiagram
+    participant Email as Email Robot
+    participant DB as DBRobot
+
+    Email->>DB: checkEmailExists(gmail_message_id)
+    alt Email is known
+        DB-->>Email: true (Robot drops email)
+    else Email is new
+        DB-->>Email: false (Robot proceeds)
+        Email->>DB: checkSenderRules(from_address)
+        alt Blocked by rule
+            DB-->>Email: Block Action (Robot drops email)
+        else Allowed
+            DB-->>Email: Allow (Robot strips body & passes to P.I.S.T.A.)
+        end
+    end
+```
+
+### 3.2 Services for P.I.S.T.A. (Manager Agent)
+
+**Goal:** Provide context for reasoning and execute AI-driven updates *only after human approval*.
+
+```mermaid
+sequenceDiagram
+    participant CK as CK (Human)
+    participant Pista as P.I.S.T.A.
+    participant DB as DBRobot
+
+    note over Pista, DB: 1. Context Gathering
+    Pista->>DB: findCustomerByEmail(email)
+    DB-->>Pista: customer data / null
+    Pista->>DB: getOrderContext(customerId)
+    DB-->>Pista: Active orders, items, history, past emails
+
+    note over CK, Pista: 2. Human-in-the-loop Approval
+    Pista->>CK: Propose action via chat (e.g., "Add new product?")
+    CK-->>Pista: Approves action
+
+    note over Pista, DB: 3. Execution (Strictly Post-Approval)
+    alt Requires Order Update
+        Pista->>DB: updateOrderStatus(..., eventDescription)
+        DB-->>Pista: Success
+    end
+    
+    alt Needs New Product / Item
+        Pista->>DB: checkProductExists(prodId)
+        DB-->>Pista: Result (true/false)
+        Pista->>DB: addOrderItem(orderId, prodId, qty)
+    end
+    
+    note over Pista, DB: 4. Finalization
+    Pista->>DB: markEmailProcessed(gmail_id, ai_summary)
+    DB-->>Pista: Success
+```
+
+## 4. Input/Output Specifications
 
 | Method | Parameters | Returns | Throws |
 |--------|------------|---------|--------|
@@ -95,7 +159,7 @@ sequenceDiagram
 | `updateSupplier` | `suppId` (int), `data` (Obj) | `{ success: boolean }` | No fields to update |
 | `updateProduct` | `prodId` (int), `data` (Obj) | `{ success: boolean }` | No fields to update |
 
-## 4. Security Considerations
+## 5. Security Considerations
 
 - **SQL Injection Prevention:** All methods use parameterized queries (`?` placeholders) inherited from the base `sqlite3` driver.
 - **Transaction Integrity:** Critical updates (like status changes) use explicit `BEGIN TRANSACTION` / `COMMIT` / `ROLLBACK` to ensure data consistency (ACID).

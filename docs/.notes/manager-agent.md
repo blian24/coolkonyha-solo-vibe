@@ -82,6 +82,6 @@ graph TD
 
 ## Cross References
 - **DBRobot:** [`server/agent.js`](../../server/agent.js)
-- **Email Robot:** [`docs/architecture/email-robot.md`](./email-robot.md)
+- **Email Robot:** [`docs/assistant_team/email-robot.md`](./email-robot.md)
 - **DB Schema:** [`docs/architecture/database-schema.md`](./database-schema.md)
 - **Solution Design:** [`SOLUTION_DESIGN.md`](../../SOLUTION_DESIGN.md)

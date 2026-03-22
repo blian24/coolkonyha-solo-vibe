@@ -84,7 +84,7 @@ router.get('/orders/:id', async (req, res) => {
 });
 
 // Implements dual-write business rule pattern
-// See docs/agent_logics/db_robot_logic_tools.md Section 2
+// See docs/assistant_team/db_robot_logic_tools.md Section 2
 router.put('/orders/:id/status', async (req, res) => {
     try {
         const { status, performedBy, eventDescription } = req.body;
@@ -101,7 +101,7 @@ router.put('/orders/:id/status', async (req, res) => {
 });
 
 // Implements pricing continuity business rule
-// See docs/agent_logics/db_robot_logic_tools.md Section 1
+// See docs/assistant_team/db_robot_logic_tools.md Section 1
 router.post('/orders/:id/items', async (req, res) => {
     try {
         const { prodId, quantity } = req.body;

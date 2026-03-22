@@ -10,7 +10,7 @@
  * update this file to match.
  *
  * @see server/agent.js — Production implementation (source of truth)
- * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
+ * @see docs/assistant_team/db_robot_logic_tools.md — Business rules
  * @see docs/tests/unit-tests.md — Unit test documentation
  */
 
@@ -37,7 +37,7 @@ export const createTestAgent = (db) => ({
 
     // ---------------------------------------------------------
     // RULE: Dual-Write for Order Status
-    // See docs/agent_logics/db_robot_logic_tools.md Section 2
+    // See docs/assistant_team/db_robot_logic_tools.md Section 2
     // ---------------------------------------------------------
     async updateOrderStatus(orderId, newStatus, performedBy, eventDescription) {
         const statusDef = await db.get(
@@ -71,7 +71,7 @@ export const createTestAgent = (db) => ({
 
     // ---------------------------------------------------------
     // RULE: Pricing Continuity
-    // See docs/agent_logics/db_robot_logic_tools.md Section 1
+    // See docs/assistant_team/db_robot_logic_tools.md Section 1
     // ---------------------------------------------------------
     async addOrderItem(orderId, prodId, quantity) {
         const product = await db.get(

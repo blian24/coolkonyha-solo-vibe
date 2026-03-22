@@ -24,21 +24,21 @@ import { resolve } from 'node:path';
 export const LEARN_SCOPES = {
     unit: [
         'server/agent.js',
-        'docs/agent_logics/db_robot_logic_tools.md',
-        'docs/agent_logics/db_robot_code_structure.md',
+        'docs/assistant_team/db_robot_logic_tools.md',
+        'docs/assistant_team/db_robot_code_structure.md',
     ],
     integration: [
         'server/routes.js',
         'server/agent.js',
         'docs/architecture/api-routes.md',
-        'docs/agent_logics/db_robot_logic_tools.md',
+        'docs/assistant_team/db_robot_logic_tools.md',
     ],
     e2e: [
         'server/routes.js',
         'server/agent.js',
         'server/index.js',
         'docs/architecture/api-routes.md',
-        'docs/agent_logics/db_robot_logic_tools.md',
+        'docs/assistant_team/db_robot_logic_tools.md',
         'docs/architecture/database-schema.md',
     ],
 };

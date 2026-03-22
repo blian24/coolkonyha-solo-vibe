@@ -14,7 +14,7 @@
  *   - Status Validation: invalid status keys are rejected before DB write
  *   - Order Total: recalculated as SUM(quantity * unit_price) after item add
  *
- * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
+ * @see docs/assistant_team/db_robot_logic_tools.md — Business rules
  * @see docs/tests/unit-tests.md — Test documentation
  */
 

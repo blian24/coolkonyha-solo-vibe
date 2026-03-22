@@ -17,7 +17,7 @@
  *   5. Verify each transition is recorded in order_status_history
  *   6. Attempt invalid transitions → verify rejection
  *
- * @see docs/agent_logics/db_robot_logic_tools.md — Business rules
+ * @see docs/assistant_team/db_robot_logic_tools.md — Business rules
  * @see docs/tests/e2e-tests.md — Test documentation
  */
 

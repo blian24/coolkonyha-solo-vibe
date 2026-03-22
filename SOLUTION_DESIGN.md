@@ -3,7 +3,7 @@
 ## Project Overview
 Coolkonyha Solo Vibe is a specialized order and product management system designed for efficient kitchen operations. It handles customers, suppliers, products, and orders with a focus on business rule enforcement and verifiable audit trails.
 
-**Last updated:** 2026-03-09 20:43
+**Last updated:** 2026-03-15 16:46
 
 ## Technology Stack
 - **Frontend:** React + Vite
@@ -32,6 +32,7 @@ graph TD
 
 - **Browser:** React frontend consuming the API.
 - **Express:** Handles HTTP routing, CORS, and request parsing.
+- **P.I.S.T.A. (Proactive Intelligent System for Task Automation):** AI Agent that interprets emails & chat, learns sender preferences, and communicates with CK. No direct DB writes.
 - **DBRobot:** Deterministic data access Robot that encapsulates all business rules (Dual-Write, Pricing Continuity). No AI.
 - **SQLite:** Relational storage with foreign key enforcement.
 
@@ -44,8 +45,9 @@ Gmail Robot              CK's Chat Input
      │                         │
      └──────────┬──────────────┘
                 ▼
-        🧠 Manager Agent        ← ONE agent, does both:
+        🧠 P.I.S.T.A.            ← ONE agent, does both:
          ├─ interprets new info (email / chat note)
+         ├─ learns sender preferences from CK
          ├─ reads DB context when needed
          ├─ updates DB via DBRobot
          └─ communicates back to CK
@@ -54,30 +56,31 @@ Gmail Robot              CK's Chat Input
            DBRobot (existing)
          ├── processed_emails
          ├── order_status_history
-         └── orders
+         ├── orders
+         └── sender_rules
 ```
 
 | Actor | Type | Role | Detail Doc |
 |---|---|---|---|
-| Manager Agent | 🧠 Agent (AI) | Interprets emails & chat, reads context, updates orders, communicates with CK | [manager-agent.md](./docs/architecture/manager-agent.md) |
-| Email Robot | 🤖 Robot | Fetches emails from Gmail (INBOX + SENT), deduplicates via `processed_emails` | [email-robot.md](./docs/architecture/email-robot.md) |
-| DBRobot | 🤖 Robot | Executes all DB writes, enforces business rules (Dual-Write, Pricing Continuity) | [database-robot.md](./docs/architecture/database-robot.md) |
+| P.I.S.T.A. | 🧠 Agent (AI) | Interprets emails & chat, learns sender preferences, proposes actions to CK | [pista-agent.md](./docs/assistant_team/pista-agent.md) |
+| Email Robot | 🤖 Robot | Fetches emails from Gmail (INBOX + SENT), deduplicates and filters via `sender_rules` | [email-robot.md](./docs/assistant_team/email-robot.md) |
+| DBRobot | 🤖 Robot | Executes all DB writes, enforces business rules (Dual-Write, Pricing Continuity) | [database-robot.md](./docs/assistant_team/database-robot.md) |
 
 ## Documentation Index
 
 ### Architecture Documentation
 
-- [Database Robot](./docs/architecture/database-robot.md) - Data access robot & business rules
+- [Database Robot](./docs/assistant_team/database-robot.md) - Data access robot & business rules
 - [API Routes](./docs/architecture/api-routes.md) - REST endpoints overview
 - [Database Schema](./docs/architecture/database-schema.md) - Schema definitions & ER diagram
 - [Database Connection](./docs/architecture/database-connection.md) - Singleton connection management
-- [Manager Agent](./docs/architecture/manager-agent.md) - AI Agent definition & logic
-- [Email Robot](./docs/architecture/email-robot.md) - Email fetching robot definition
+- [P.I.S.T.A. Agent](./docs/assistant_team/pista-agent.md) - AI Agent definition & logic
+- [Email Robot](./docs/assistant_team/email-robot.md) - Email fetching robot definition
 
 ### Business Logic Documentation
 
-- [DB Robot Logic Tools](./docs/agent_logics/db_robot_logic_tools.md) - Detailed business rules
-- [DB Robot Code Structure](./docs/agent_logics/db_robot_code_structure.md) - Code organization details
+- [DB Robot Logic Tools](./docs/assistant_team/db_robot_logic_tools.md) - Detailed business rules
+- [DB Robot Code Structure](./docs/assistant_team/db_robot_code_structure.md) - Code organization details
 
 ### Testing Documentation
 
@@ -93,9 +96,9 @@ Gmail Robot              CK's Chat Input
 
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
-| Manager Agent | *(to be built)* | AI reasoning, CK communication | [manager-agent.md](./docs/architecture/manager-agent.md) |
-| Email Robot | *(to be built)* | Gmail fetcher, deduplication | [email-robot.md](./docs/architecture/email-robot.md) |
-| DBRobot | `server/agent.js` | Data access, business rules | [database-robot.md](./docs/architecture/database-robot.md) |
+| P.I.S.T.A. | *(to be built)* | AI reasoning, sender learning, CK communication | [pista-agent.md](./docs/assistant_team/pista-agent.md) |
+| Email Robot | *(to be built)* | Gmail fetcher, deduplication | [email-robot.md](./docs/assistant_team/email-robot.md) |
+| DBRobot | `server/agent.js` | Data access, business rules | [database-robot.md](./docs/assistant_team/database-robot.md) |
 | Routes | `server/routes.js` | REST API endpoints | [api-routes.md](./docs/architecture/api-routes.md) |
 | DB Connection | `server/db.js` | SQLite connection | [database-connection.md](./docs/architecture/database-connection.md) |
 | Server | `server/index.js` | Express app entry | - |
@@ -104,11 +107,11 @@ Gmail Robot              CK's Chat Input
 
 ### Code → Documentation Map
 
-- `server/agent.js` → `docs/architecture/database-robot.md`
+- `server/agent.js` → `docs/assistant_team/database-robot.md`
 - `server/routes.js` → `docs/architecture/api-routes.md`
 - `server/db.js` → `docs/architecture/database-connection.md`
 - Database tables → `docs/architecture/database-schema.md`
-- Business rules → `docs/agent_logics/db_robot_logic_tools.md`
+- Business rules → `docs/assistant_team/db_robot_logic_tools.md`
 
 ### Documentation → Code Map
 
