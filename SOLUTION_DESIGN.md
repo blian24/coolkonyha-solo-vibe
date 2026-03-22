@@ -9,6 +9,7 @@ Coolkonyha Solo Vibe is a specialized order and product management system design
 - **Frontend:** React + Vite
 - **Backend:** Express.js + Node.js
 - **Database:** SQLite with business rule logic layer
+- **AI:** Google Gemini API (`@google/generative-ai`)
 - **Languages:** JavaScript (ES modules)
 - **Styling:** CSS / Tailwind
 
@@ -96,7 +97,7 @@ Gmail Robot              CK's Chat Input
 
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
-| P.I.S.T.A. | *(to be built)* | AI reasoning, sender learning, CK communication | [pista-agent.md](./docs/assistant_team/pista-agent.md) |
+| P.I.S.T.A. | `server/pista.js` | AI reasoning, Senior PM workflow monitoring, CK communication | [pista-agent.md](./docs/assistant_team/pista-agent.md) |
 | Email Robot | *(to be built)* | Gmail fetcher, deduplication | [email-robot.md](./docs/assistant_team/email-robot.md) |
 | DBRobot | `server/agent.js` | Data access, business rules | [database-robot.md](./docs/assistant_team/database-robot.md) |
 | Routes | `server/routes.js` | REST API endpoints | [api-routes.md](./docs/architecture/api-routes.md) |
@@ -112,6 +113,7 @@ Gmail Robot              CK's Chat Input
 - `server/db.js` → `docs/architecture/database-connection.md`
 - Database tables → `docs/architecture/database-schema.md`
 - Business rules → `docs/assistant_team/db_robot_logic_tools.md`
+- `server/pista.js` → `docs/assistant_team/pista-agent.md`
 
 ### Documentation → Code Map
 

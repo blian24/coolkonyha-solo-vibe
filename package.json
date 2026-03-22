@@ -15,8 +15,10 @@
     "test:e2e": "node tests/run-tests.js e2e"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

@@ -7,13 +7,16 @@
 
 ## 1. Purpose
 
-**P.I.S.T.A.** is the single AI-powered actor in the Coolkonyha system. It is responsible for:
+**P.I.S.T.A.** is the single AI-powered actor in the Coolkonyha system, acting as a highly professional **Senior Business Project Manager**. It is responsible for:
 
-- **Interpreting** incoming information (emails via the Email Robot, or manual input from CK via the chat box)
-- **Reading context** from the database (orders, email history, status history) to build a complete picture before responding
-- **Updating** the database via the DBRobot when a status change or log entry is needed
-- **Learning** CK's sender preferences and applying them to future email filtering
-- **Communicating** back to CK with summaries, next step suggestions, and answers to questions
+- **Business Management & Workflow Monitoring:** Continuously monitoring the state of orders, identifying stuck processes or delayed replies, and proactively suggesting interventions to CK to ensure business rules and workflows are strictly followed.
+- **Interpreting** incoming information (emails via the Email Robot, or manual input from CK via the chat box).
+- **Reading context** from the database (orders, email history, status history) to build a complete picture before responding.
+- **Updating** the database via the DBRobot when a status change or log entry is needed (only after human approval).
+- **Learning** CK's sender preferences and applying them to future email filtering.
+- **Communicating** back to CK with summaries, next step suggestions, and answers to questions.
+
+**Constraint - Local First:** The Coolkonyha application (including P.I.S.T.A.'s execution runtime and the database) is designed to run locally on CK's machine as an easily installable standalone application. P.I.S.T.A. only reaches out to the external internet for the **Gemini LLM API** and incoming/outgoing Gmail sync.
 
 P.I.S.T.A. is the *only* component in the system that uses an LLM. Everything else is deterministic.
 
@@ -37,6 +40,7 @@ graph TD
 |---|---|
 | New email (received or sent) | Email Robot fetches → passes to P.I.S.T.A. with `known_sender` and `rule` flags |
 | CK chat message | Direct input via app chat box |
+| Scheduled Health Check | A local cron or scheduled interval invokes P.I.S.T.A. to query DBRobot for stuck/aging orders |
 
 ### Processing Flow
 
@@ -48,6 +52,15 @@ graph TD
 6. **Propose** action to CK for approval — never execute outbound actions autonomously
 7. On CK approval → write to DB via DBRobot
 8. Respond to CK with a clear, concise message
+
+### Attachment Handling Workflow (Security-First)
+
+Due to the "Local First" architecture, automatically downloading email attachments introduces significant security risks (malware, ransomware). P.I.S.T.A. handles attachments via a strict human-in-the-loop quarantine process:
+
+1. **Detection:** The Email Robot passes attachment metadata (filename, size) and a Gmail URL to P.I.S.T.A.
+2. **Warning & Proposal:** P.I.S.T.A. halts automatic processing and proposes an action to CK:
+   *"CK, csatolmány érkezett (tervrajz.pdf). Kérlek, nyisd meg a megadott Gmail linken és ellenőrizd, hogy biztonságos-e. Ha igen, másold be nekem a tartalmát, foglald össze, vagy töltsd fel ide a chatbe, hogy lementhessem a rendeléshez!"*
+3. **Manual Upload & Storage:** If CK uploads the file via the chat interface, the system encrypts the file at rest (AES-256), saves it to `/data/attachments/` with a UUID filename, and P.I.S.T.A. logs a reference to this file in the `order_status_history` table.
 
 ### Unknown Sender Handling
 
