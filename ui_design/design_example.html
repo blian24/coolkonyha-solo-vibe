@@ -1,970 +1,213 @@
 <!DOCTYPE html>
-<html lang="hu" class="dark">
-
+<html lang="hu">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoolKonyha – AI Asszisztens</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>CoolKonyha – Design Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'ck-bg':         '#081426',
-            'ck-card':       '#012340',
-            'ck-text':       '#DCEAF7',
-            'ck-muted':      '#6B8CAE',
-            'ck-ocean':      '#0077B6',
-            'ck-hover':      '#5482B4',
-            'ck-cyan':       '#07B2D9',
-            'ck-bronze':     '#D98032',
-            'ck-border':     'rgba(220,234,247,0.1)',
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-        }
-      }
-    }
-  </script>
-
   <style>
-    /* =========================================================
-       BASE & RESET
-    ========================================================= */
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', sans-serif;
-      margin: 0;
-      overflow: hidden;
-      transition: background-color 0.3s;
-    }
-
-    /* =========================================================
-       CUSTOM SCROLLBAR
-    ========================================================= */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(0, 119, 182, 0.5);
-      border-radius: 10px;
-    }
-    .custom-scroll:hover::-webkit-scrollbar-thumb { background: #0077B6; }
-
-    /* =========================================================
-       PRECISION SHADOW CARD
-    ========================================================= */
-    .card-shadow {
-      filter: drop-shadow(6px 6px 8px rgba(0, 119, 182, 0.30));
-      border-radius: 2.5rem;
+      background: #050d18;
       display: flex;
       flex-direction: column;
-      height: 100%;
-    }
-
-    .dark .card-shadow {
-      filter: drop-shadow(6px 6px 8px rgba(0, 119, 182, 0.45));
-    }
-
-    .card-inner {
-      border-radius: 2.5rem;
+      height: 100vh;
       overflow: hidden;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #e2e8f0;
-      transform: translateZ(0);
-      background: #ffffff;
     }
 
-    .dark .card-inner {
-      background: #012340;
-      border-color: rgba(220, 234, 247, 0.08);
-    }
-
-    .divider-line { border-color: #e2e8f0; }
-    .dark .divider-line { border-color: rgba(220, 234, 247, 0.08); }
-
-    /* =========================================================
-       SIDEBAR
-    ========================================================= */
-    .sidebar { background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%); }
-    .dark .sidebar { background: linear-gradient(180deg, #012340 0%, #081426 100%); }
-
-    .sidebar-logo-wrap {
-      width: 3.5rem;
-      height: 3.5rem;
-      border-radius: 1rem;
+    /* ── Switcher Bar ─────────────────────────────── */
+    #switcher-bar {
+      flex-shrink: 0;
+      height: 3rem;
+      background: #0b1a2e;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.4);
-      border: 1px solid rgba(0,0,0,0.05);
+      gap: 1.5rem;
+      padding: 0 1.5rem;
+      z-index: 100;
     }
 
-    .dark .sidebar-logo-wrap {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.15);
-    }
-
-    .nav-item {
+    .switcher-brand {
       display: flex;
       align-items: center;
-      gap: 1.2rem;
-      padding: 1rem;
-      border-radius: 1rem;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #64748b;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .dark .nav-item { color: rgba(255,255,255,0.65); }
-    .nav-item:hover { background: rgba(0,0,0,0.04); color: #1e293b; }
-    .dark .nav-item:hover { background: rgba(255,255,255,0.06); color: #ffffff; }
-    .nav-item.active { background: rgba(0,0,0,0.06); color: #1e293b; font-weight: 600; }
-    .dark .nav-item.active { background: rgba(255,255,255,0.10); color: #ffffff; }
-
-    /* =========================================================
-       CHAT MESSAGES
-    ========================================================= */
-    .chat-scroll-area {
-      mask-image: linear-gradient(to top, black 50%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to top, black 50%, transparent 100%);
+      gap: 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      white-space: nowrap;
     }
 
-    .chat-bubble-user, .chat-message-ai {
-      font-size: 0.85rem;
-      line-height: 1.6;
+    .switcher-brand i { color: #0077B6; font-size: 0.85rem; }
+
+    .switcher-sep {
+      width: 1px;
+      height: 1.25rem;
+      background: rgba(255,255,255,0.10);
+      flex-shrink: 0;
     }
 
-    .chat-bubble-user {
-      align-self: flex-end;
-      max-width: 90%;
-      padding: 0.75rem 1rem;
-      border-radius: 1.25rem 1.25rem 0 1.25rem;
-      background: rgba(0, 123, 182, 0.08);
-      border: 1px solid rgba(0, 123, 182, 0.06);
-      color: #1e293b;
-    }
-    .dark .chat-bubble-user {
-      background: rgba(220, 234, 247, 0.14);
-      border-color: transparent;
-      color: #DCEAF7;
+    /* Custom dropdown */
+    .design-select-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
     }
 
-    .chat-message-ai { align-self: flex-start; max-width: 95%; color: #1e293b; }
-    .dark .chat-message-ai { color: #DCEAF7; }
-
-    .chat-label {
+    .design-select-wrap i {
+      position: absolute;
+      left: 0.75rem;
       font-size: 0.7rem;
+      color: #0077B6;
+      pointer-events: none;
+    }
+
+    #design-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 0.5rem;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 2.25rem 0.35rem 2rem;
+      cursor: pointer;
+      outline: none;
+      min-width: 18rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    #design-select:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: #0077B6;
+    }
+
+    #design-select option {
+      background: #0b1a2e;
+      color: #ffffff;
+    }
+
+    .design-select-caret {
+      position: absolute;
+      right: 0.75rem;
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.4);
+      pointer-events: none;
+    }
+
+    /* Status chip */
+    .design-chip {
+      font-size: 0.65rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      display: block;
-      margin-bottom: 0.25rem;
-      color: #0077B6;
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+      border: 1px solid;
+      white-space: nowrap;
     }
-    .dark .chat-label { color: #07B2D9; }
 
-    /* =========================================================
-       CARVED INPUT
-    ========================================================= */
-    .carved-input-wrap {
-      background: #e2e8f0;
-      box-shadow: inset 2px 2px 4px rgba(0,0,0,0.10);
-      border: 1px solid rgba(0,0,0,0.04);
-      border-radius: 1rem;
+    .chip-saved {
+      color: #10b981;
+      border-color: rgba(16,185,129,0.35);
+      background: rgba(16,185,129,0.08);
+    }
+
+    .chip-wip {
+      color: #f59e0b;
+      border-color: rgba(245,158,11,0.35);
+      background: rgba(245,158,11,0.08);
+    }
+
+    .switcher-right {
+      margin-left: auto;
       display: flex;
       align-items: center;
-      padding: 0 0.5rem 0 1rem;
-      height: 3rem;
-    }
-    .dark .carved-input-wrap {
-      background: #081426;
-      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.55);
-      border-color: rgba(255,255,255,0.04);
+      gap: 0.75rem;
     }
 
-    .carved-input {
-      flex: 1; background: transparent; border: none; outline: none;
-      font-size: 0.9rem; font-family: 'Inter', sans-serif; color: #1e293b;
-    }
-    .dark .carved-input { color: #DCEAF7; }
-    .carved-input::placeholder { color: #94a3b8; }
-    .dark .carved-input::placeholder { color: rgba(255,255,255,0.25); }
-
-    .carved-icon-btn {
-      background: transparent; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      width: 2.2rem; height: 2.2rem; border-radius: 0.625rem;
-      color: #94a3b8; transition: color 0.2s, transform 0.15s;
-    }
-    .carved-icon-btn i { font-size: 1rem; }
-    .carved-icon-btn:hover { color: #0077B6; transform: scale(1.1); }
-    .dark .carved-icon-btn:hover { color: #07B2D9; }
-
-    /* =========================================================
-       SECTION HEADERS
-    ========================================================= */
-    .section-header {
-      padding: 1.4rem 2rem;
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0; background: #0077B6;
-    }
-    .section-header-title {
-      font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.18em; color: #ffffff;
-    }
-    .section-badge {
-      padding: 0.3rem 0.75rem; font-size: 0.7rem; font-weight: 700;
-      border-radius: 99px; background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.20); color: #ffffff;
+    .switcher-hint {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.20);
+      font-style: italic;
     }
 
-    .section-header-light {
-      padding: 1.4rem 2rem; border-bottom: 1px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0; background: transparent;
+    /* ── Design iframe ────────────────────────────── */
+    #design-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
     }
-    .dark .section-header-light { border-color: rgba(220,234,247,0.08); }
-
-    .section-header-light-title {
-      font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.18em; color: #1e293b;
-    }
-    .dark .section-header-light-title { color: #DCEAF7; }
-
-    /* =========================================================
-       SEARCH
-    ========================================================= */
-    .header-search { position: relative; display: flex; align-items: center; }
-    .header-search-icon { position: absolute; left: 1rem; font-size: 0.8rem; color: #94a3b8; }
-    .header-search input {
-      background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 1rem;
-      padding: 0.6rem 1rem 0.6rem 2.5rem; font-size: 0.9rem;
-      color: #1e293b; outline: none; width: 18rem; transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .dark .header-search input {
-      background: rgba(0,0,0,0.20); border-color: rgba(220,234,247,0.10); color: #DCEAF7;
-    }
-    .header-search input:focus { border-color: #0077B6; box-shadow: 0 0 0 3px rgba(0,119,182,0.12); }
-    .header-search input::placeholder { color: #94a3b8; }
-    .dark .header-search input::placeholder { color: rgba(255,255,255,0.30); }
-
-    /* =========================================================
-       TABLES
-    ========================================================= */
-    .whats-new-table { width: 100%; border-collapse: collapse; }
-    .whats-new-table tbody tr { cursor: pointer; transition: background 0.15s; }
-    .whats-new-table tbody tr:hover { background: rgba(0,119,182,0.05); }
-    .dark .whats-new-table tbody tr:hover { background: rgba(220,234,247,0.04); }
-    .whats-new-table td { padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .dark .whats-new-table td { border-color: rgba(220,234,247,0.06); }
-
-    .orders-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .orders-table thead th {
-      position: sticky; top: 0; z-index: 10;
-      padding: 1rem 1.25rem; font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.18em; text-align: left;
-      color: #94a3b8; background: rgba(255,255,255,0.95);
-      border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(6px); cursor: pointer; user-select: none;
-    }
-    .dark .orders-table thead th { background: rgba(1,35,64,0.95); border-color: rgba(220,234,247,0.06); color: #6B8CAE; }
-    .orders-table thead th:hover { color: #0077B6; }
-    .orders-table thead th.col-logo { cursor: default; width: 4rem; }
-    .orders-table tbody tr { cursor: pointer; transition: background 0.15s; }
-    .orders-table tbody tr:hover { background: rgba(0,119,182,0.05); }
-    .dark .orders-table tbody tr:hover { background: rgba(220,234,247,0.04); }
-    .orders-table tbody tr.selected { background: rgba(0,119,182,0.08); }
-    .dark .orders-table tbody tr.selected { background: rgba(0,119,182,0.14); }
-    .orders-table tbody td { padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .dark .orders-table tbody td { border-color: rgba(220,234,247,0.06); }
-
-    /* =========================================================
-       TYPOGRAPHY / ELEMENTS
-    ========================================================= */
-    .wn-logo-wrap { width: 3rem; height: 3rem; margin: 0 auto; border-radius: 0.875rem; display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 1rem; color: #0077B6; }
-    .dark .wn-logo-wrap { background: rgba(255,255,255,0.05); border-color: rgba(220,234,247,0.10); }
-
-    .wn-summary-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; text-decoration: underline; text-decoration-color: #D98032; text-underline-offset: 3px; margin-bottom: 0.3rem; font-style: italic; text-transform: uppercase; letter-spacing: 0.02em; }
-    .dark .wn-summary-title { color: #DCEAF7; }
-    .wn-summary-detail { font-size: 0.85rem; color: #64748b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55; }
-    .dark .wn-summary-detail { color: #6B8CAE; }
-    .wn-suggestion { font-size: 0.85rem; font-weight: 500; font-style: italic; color: #0077B6; }
-    .dark .wn-suggestion { color: #07B2D9; }
-
-    .order-logo-wrap { width: 2.75rem; height: 2.75rem; border-radius: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #0077B6; }
-    .dark .order-logo-wrap { background: rgba(255,255,255,0.04); border-color: rgba(220,234,247,0.10); }
-    .orders-table tbody tr:hover .order-logo-wrap, .orders-table tbody tr.selected .order-logo-wrap { border-color: #0077B6; }
-
-    .order-client-name { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
-    .dark .order-client-name { color: #DCEAF7; }
-    .order-code-text { font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #0077B6; background: rgba(0,119,182,0.1); padding: 0.15rem 0.4rem; border-radius: 0.3rem; margin-top: 0.2rem; display: inline-block; }
-    .dark .order-code-text { color: #07B2D9; background: rgba(7,178,217,0.15); }
-    .order-status-text { font-size: 0.85rem; color: #64748b; }
-    .dark .order-status-text { color: #6B8CAE; }
-    .order-updated { font-size: 0.85rem; font-weight: 600; font-family: monospace; color: #64748b; }
-    .dark .order-updated { color: #6B8CAE; }
-
-    /* =========================================================
-       STATUS PILLS
-    ========================================================= */
-    .status-pill { font-size: 0.65em; font-weight: 800; padding: 0.3rem 0.75rem; border-radius: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; color: #ffffff; }
-    .status-NEW              { background: #94a3b8; }
-    .status-OFFER_SENT       { background: #D98032; }
-    .status-ORDER_CONFIRMED  { background: #0477BF; }
-    .status-PURCHASE         { background: #8b5cf6; }
-    .status-READY_FOR_DELIVERY { background: #3b82f6; }
-    .status-DELIVERY         { background: #07B2D9; }
-    .status-DELIVERED        { background: #10b981; }
-    .status-INVOICED         { background: #84cc16; color: #1e293b; }
-    .status-CLOSED           { background: #059669; }
-    .status-CANCELLED        { background: #ef4444; }
-
-    /* =========================================================
-       DETAILS PANEL
-    ========================================================= */
-    .details-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #94a3b8; height: 100%; }
-    .dark .details-empty { color: #6B8CAE; }
-    .details-empty-icon { font-size: 3.5rem; opacity: 0.3; }
-    .details-empty-text { font-size: 0.9rem; font-weight: 500; }
-
-    .details-client-logo { width: 4.5rem; height: 4.5rem; border-radius: 1.25rem; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0077B6; flex-shrink: 0; }
-    .dark .details-client-logo { background: rgba(255,255,255,0.05); border-color: rgba(220,234,247,0.10); }
-
-    .details-name { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-    .dark .details-name { color: #DCEAF7; }
-    .details-updated { font-size: 0.85rem; color: #64748b; margin-top: 0.35rem; }
-    .dark .details-updated { color: #6B8CAE; }
-
-    .details-section-title { font-size: 0.75rem; font-weight: 800; margin: 2rem 0 1rem 0; color: #1e293b; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
-    .dark .details-section-title { color: #DCEAF7; border-color: rgba(220,234,247,0.10); }
-
-    .details-item-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.85rem; color: #64748b; }
-    .dark .details-item-row { border-color: rgba(220,234,247,0.10); color: #6B8CAE; }
-    .details-item-name { font-weight: 600; color: #1e293b; flex: 1; }
-    .dark .details-item-name { color: #DCEAF7; }
-    .details-item-qty { margin-right: 1.5rem; font-weight: 600; }
-    .details-item-price { font-family: monospace; font-weight: 600; color: #D98032; }
-    .details-item-row.total { border-top: 2px solid #e2e8f0; border-bottom: none; padding-top: 1rem; font-size: 1rem; font-weight: 700; color: #1e293b; }
-    .dark .details-item-row.total { border-color: rgba(220,234,247,0.20); color: #DCEAF7; }
-
-    .timeline { margin-top: 0.5rem; }
-    .timeline-item { padding-left: 1.5rem; border-left: 2px solid #e2e8f0; padding-bottom: 1.5rem; position: relative; }
-    .dark .timeline-item { border-color: rgba(220,234,247,0.10); }
-    .timeline-item::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #0077B6; }
-    .timeline-item:last-child { border-color: transparent; }
-    .timeline-date { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.3rem; font-family: monospace; }
-    .timeline-event { font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 0.3rem; }
-    .dark .timeline-event { color: #DCEAF7; }
-    .timeline-note { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
-    .dark .timeline-note { color: #6B8CAE; }
-
-    /* Attached Files styling */
-    .file-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(0,119,182,0.06);
-      border: 1px solid rgba(0,119,182,0.15);
-      padding: 0.4rem 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #0077B6;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .dark .file-chip {
-      background: rgba(220,234,247,0.06);
-      border-color: rgba(220,234,247,0.15);
-      color: #7dd3fc;
-    }
-    .file-chip:hover { background: rgba(0,119,182,0.15); }
-    .dark .file-chip:hover { background: rgba(220,234,247,0.12); }
-
-
-    /* =========================================================
-       MISC
-    ========================================================= */
-    .theme-toggle { width: 3rem; height: 1.5rem; background: #cbd5e1; border-radius: 99px; position: relative; cursor: pointer; border: 1px solid #0077B6; transition: background 0.3s; }
-    .dark .theme-toggle { background: #0077B6; }
-    .theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 1.125rem; height: 1.125rem; background: #ffffff; border-radius: 50%; transition: transform 0.3s ease; }
-    .dark .theme-toggle::after { transform: translateX(1.5rem); }
-
-    .date-nav { display: flex; align-items: center; gap: 0; background: rgba(0,0,0,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 0.875rem; padding: 0.3rem; }
-    .date-nav-btn { width: 2rem; height: 2rem; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.55); transition: color 0.15s; font-size: 0.8rem; }
-    .date-nav-btn:hover { color: #ffffff; }
-    .date-nav-label { font-size: 0.75rem; font-weight: 700; font-family: monospace; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; padding: 0 0.5rem; min-width: 8rem; text-align: center; }
-
-    @keyframes subtle-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .status-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #10b981; animation: subtle-pulse 2.5s infinite; }
-    .btn-action { width: 2.5rem; height: 2.5rem; border: none; border-radius: 0.625rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: white; transition: transform 0.15s, box-shadow 0.15s; }
-    .btn-action:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-    .btn-approve { background: #10b981; }
-    .btn-edit    { background: #0077B6; }
-    .table-footer { padding: 1rem 2rem; border-top: 1px solid #f1f5f9; background: #f8fafc; display: flex; justify-content: center; flex-shrink: 0; }
-    .dark .table-footer { border-color: rgba(220,234,247,0.06); background: rgba(0,0,0,0.15); }
-    .btn-show-all { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #0077B6; background: none; border: none; cursor: pointer; transition: color 0.2s; }
-    .btn-show-all:hover { color: #1e293b; }
-    .dark .btn-show-all:hover { color: #DCEAF7; }
-
-    /* =========================================================
-       MODALS
-    ========================================================= */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-      z-index: 50; display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: auto; }
-    
-    .modal-container {
-      background: #ffffff; border-radius: 1.5rem; width: 90%; max-width: 1200px;
-      max-height: 90vh; display: flex; flex-direction: column;
-      transform: translateY(20px); transition: transform 0.3s ease;
-      overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-    .dark .modal-container { background: #081426; border: 1px solid rgba(220, 234, 247, 0.1); }
-    .modal-overlay.open .modal-container { transform: translateY(0); }
-
-    .modal-header {
-      padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .dark .modal-header { border-color: rgba(220, 234, 247, 0.1); }
-    
-    .modal-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-    .dark .modal-title { color: #DCEAF7; }
-
-    .btn-close {
-      background: none; border: none; font-size: 1.5rem; color: #94a3b8;
-      cursor: pointer; transition: color 0.2s;
-    }
-    .btn-close:hover { color: #ef4444; }
-
-    .modal-body { flex: 1; overflow-y: auto; padding: 2rem; }
-
-    /* Entry Details Modal specifics */
-    .entry-modal-h2 { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #1e293b; border-left: 4px solid #0077B6; padding-left: 0.75rem; margin: 2rem 0 1rem 0; }
-    .dark .entry-modal-h2 { color: #DCEAF7; border-color: #07B2D9; }
-    
-    .entry-summary-box { background: #f8fafc; border-radius: 1rem; padding: 1.5rem; color: #64748b; font-size: 0.95rem; line-height: 1.6; }
-    .dark .entry-summary-box { background: rgba(255,255,255,0.03); color: #6B8CAE; }
-
-    .entry-text { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 1rem; }
-    .dark .entry-text { color: #94a3b8; }
-
-    .ai-suggestion-box { background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 1rem; padding: 1.5rem; display: flex; gap: 1rem; margin-top: 2rem; }
-    .dark .ai-suggestion-box { background: rgba(5, 150, 105, 0.1); border-color: rgba(5, 150, 105, 0.2); }
-    
-    .ai-suggest-icon { width: 2.5rem; height: 2.5rem; background: #ccfbf1; color: #0f766e; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
-    .dark .ai-suggest-icon { background: rgba(5, 150, 105, 0.2); color: #10b981; }
-
-    .ai-suggest-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #0f766e; margin-bottom: 0.25rem; }
-    .dark .ai-suggest-title { color: #34d399; }
-    .ai-suggest-text { font-size: 0.9rem; color: #0f766e; }
-    .dark .ai-suggest-text { color: #a7f3d0; }
-
-    .date-divider { font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.15em; margin: 1.5rem 0 0.5rem 0; padding-bottom: 0.5rem; border-bottom: 1px dashed #e2e8f0; }
-    .dark .date-divider { color: #6B8CAE; border-color: rgba(220, 234, 247, 0.1); }
-    
-    /* Processed Badge & Sidebar Resizer */
-    .processed-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: #f1f5f9; border-radius: 99px; padding: 0.35rem 1rem;
-      color: #94a3b8; font-size: 0.8rem; font-style: italic; font-weight: 600;
-      border: 1px solid #e2e8f0;
-    }
-    .dark .processed-badge { background: rgba(255,255,255,0.03); color: #64748b; border-color: rgba(255,255,255,0.06); }
-
-    .sidebar-resizer {
-      position: absolute; right: -1rem; top: 0; width: 2rem; height: 100%;
-      cursor: col-resize; z-index: 40; display: flex; align-items: center; justify-content: center;
-    }
-    .sidebar-resizer::after {
-      content: ''; width: 4px; height: 3rem; background: rgba(148, 163, 184, 0.4);
-      border-radius: 4px; transition: background 0.2s;
-    }
-    .sidebar-resizer:hover::after, .sidebar-resizer.active::after { background: #0077B6; }
   </style>
 </head>
+<body>
 
-<body class="bg-slate-50 dark:bg-ck-bg text-slate-900 dark:text-ck-text h-screen flex p-8 gap-8" id="app-body">
-
-  <aside id="main-sidebar" class="shrink-0 flex flex-col h-full card-shadow relative" style="width: 25vw; min-width: 200px;">
-    <div class="sidebar-resizer" id="sidebar-resizer"></div>
-    <div class="card-inner sidebar">
-      <div class="p-8 shrink-0">
-        <div class="flex items-center gap-4 mb-10">
-          <div class="sidebar-logo-wrap"><i class="fas fa-snowflake text-3xl text-ck-ocean"></i></div>
-          <div>
-            <h1 class="font-bold text-2xl tracking-tight leading-none text-ck-ocean dark:text-ck-text">CoolKonyha</h1>
-            <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] mt-1 text-ck-ocean dark:text-ck-cyan">Enterprise AI</p>
-          </div>
-        </div>
-        <nav class="space-y-2">
-          <a href="#" class="nav-item active" id="nav-dashboard"><i class="fas fa-columns w-6 text-center text-lg"></i><span>Irányítópult</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-file-alt w-6 text-center text-lg"></i><span>Riportok</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-database w-6 text-center text-lg"></i><span>Adatbázis</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-cog w-6 text-center text-lg"></i><span>Beállítások</span></a>
-        </nav>
-      </div>
-
-      <div class="flex-1 flex flex-col min-h-0 relative px-6">
-        <div class="flex-1 overflow-y-auto flex flex-col custom-scroll chat-scroll-area pb-6 gap-6">
-          <div class="flex-1"></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Üdv CK! Minden rendszerelem stabil. Készen állok a műveletekre.</p>
-          </div>
-          <div class="chat-bubble-user"><p>Mikor érkeznek a Brema egységek a Hiltonhoz?</p></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">A Hilton szállítmánya (HILT-00001) holnap reggel 10:00-ra van ütemezve. Vámkezelés kész.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-6 shrink-0">
-        <div class="carved-input-wrap">
-          <button class="carved-icon-btn" title="Fájl csatolása"><i class="fas fa-paperclip"></i></button>
-          <input class="carved-input" type="text" placeholder="Kérdezz P.I.S.T.A.-tól...">
-          <button class="carved-icon-btn" title="Küldés"><i class="fas fa-paper-plane text-ck-ocean dark:text-ck-cyan"></i></button>
-        </div>
-      </div>
+  <div id="switcher-bar">
+    <div class="switcher-brand">
+      <i class="fas fa-palette"></i>
+      CoolKonyha Design Gallery
     </div>
-  </aside>
 
-  <main class="flex-1 flex flex-col overflow-hidden gap-8">
-    
-    <!-- TOP SECTION: WHAT'S NEW -->
-    <section class="shrink-0 card-shadow" style="max-height:35%">
-      <div class="card-inner">
-        <div class="section-header">
-          <div class="flex items-center gap-4">
-            <h2 class="section-header-title">Mi Újság?</h2>
-            <span class="section-badge" id="whats-new-count">3 ÚJ FRISSÍTÉS</span>
-          </div>
-          <div class="flex items-center gap-6">
-            <div class="date-nav">
-              <button class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
-              <span class="date-nav-label">2026. Március 22.</span>
-              <button class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white" id="theme-label">Sötét Mód</span>
-              <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Téma váltása"></div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-1 overflow-y-auto custom-scroll">
-          <table class="whats-new-table"><tbody id="whats-new-body"></tbody></table>
-        </div>
-        <div class="table-footer">
-          <button class="btn-show-all" onclick="openModal('all-updates-modal')">Összes Frissítés Megtekintése (34)</button>
-        </div>
-      </div>
-    </section>
+    <div class="switcher-sep"></div>
 
-    <!-- BOTTOM SECTION: MERGED ORDERS + DETAILS -->
-    <section class="flex-1 card-shadow min-h-0">
-      <div class="card-inner flex flex-row">
-        
-        <!-- LEFT: ACTIVE ORDERS -->
-        <div class="flex flex-col border-r divider-line" style="width:65%">
-          <div class="section-header-light border-b-0 pb-4 pt-6">
-            <div class="flex flex-col gap-1">
-              <h3 class="section-header-light-title">Aktív Rendelések</h3>
-            </div>
-            <div class="header-search">
-              <i class="fas fa-search header-search-icon"></i>
-              <input type="text" placeholder="Szűrés (Ügyfél, Státusz...)" id="orders-search" oninput="filterOrders()">
-            </div>
-          </div>
-          <div class="flex-1 overflow-y-auto custom-scroll border-t divider-line">
-            <table class="orders-table">
-              <thead>
-                <tr>
-                  <th class="col-logo"></th>
-                  <th onclick="sortOrders('name')">Ügyfél neve <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('orderCode')">Azonosító <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('status')">Státusz <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('workflow')">Folyamat <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                </tr>
-              </thead>
-              <tbody id="orders-body"></tbody>
-            </table>
-          </div>
-        </div>
+    <div class="design-select-wrap">
+      <i class="fas fa-layer-group"></i>
+      <select id="design-select" onchange="switchDesign()">
+        <option value="designs/design-01-oceanic.html" data-status="saved">01 · Oceanic Dark (v1)</option>
+        <option value="designs/design-02-oceanic-v1.1.html" data-status="saved">02 · Oceanic S-Curve Layered (v1.1)</option>
+        <option value="designs/design-03-oceanic-plus-v1.html" data-status="wip">03 · Oceanic Plus (v1)</option>
+      </select>
+      <i class="fas fa-chevron-down design-select-caret"></i>
+    </div>
 
-        <!-- RIGHT: DETAILS PANEL -->
-        <div class="flex flex-col relative" style="width:35%">
-           <!-- Status Indicator top right corner -->
-           <div class="absolute top-6 right-6 z-10">
-             <div class="status-dot"></div>
-           </div>
-          <div class="flex-1 overflow-y-auto custom-scroll p-8" id="details-panel">
-            <div class="details-empty">
-              <i class="fas fa-mouse-pointer details-empty-icon"></i>
-              <p class="details-empty-text">Kattints egy rendelésre a részletekhez!</p>
-            </div>
-          </div>
-        </div>
+    <span class="design-chip chip-saved" id="design-status-chip">Mentve</span>
 
-      </div>
-    </section>
-  </main>
-
-  <!-- MODALS -->
-  <div class="modal-overlay" id="all-updates-modal" onclick="closeModalOnBg(event, 'all-updates-modal')">
-    <div class="modal-container" style="max-width: 800px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Összes Frissítés Története</h2>
-        <button class="btn-close" onclick="closeModal('all-updates-modal')"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body custom-scroll">
-        <div class="date-divider">Ma (2026. Március 22.)</div>
-        <table class="whats-new-table"><tbody id="all-updates-body-today"></tbody></table>
-        
-        <div class="date-divider">Tegnap (2026. Március 21.)</div>
-        <table class="whats-new-table"><tbody id="all-updates-body-yesterday"></tbody></table>
-      </div>
+    <div class="switcher-right">
+      <span class="switcher-hint">Válassz egy designt a legördülő menüből</span>
     </div>
   </div>
 
-  <div class="modal-overlay" id="entry-details-modal" onclick="closeModalOnBg(event, 'entry-details-modal')">
-    <div class="modal-container" style="flex-direction: row; height: 80vh;">
-      
-      <!-- LEFT COL: Core Content -->
-      <div class="flex flex-col border-r divider-line" style="width:65%">
-        <div class="modal-header border-b-0 pb-0">
-          <div class="flex items-center gap-4">
-            <div class="details-client-logo" id="entry-modal-logo"><i class="fas fa-hotel"></i></div>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-code-text" style="margin:0" id="entry-modal-code">HILT-00001</span>
-              <p class="details-name leading-tight" id="entry-modal-name">CRYSTAL PALACE RESORTS</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-body custom-scroll">
-          <h2 class="entry-modal-h2">Összegzés</h2>
-          <div class="entry-summary-box" id="entry-modal-summary">
-            A hűtőrendszer szenzorai kritikus eltérést észleltek a C-szektor 4-es moduljában...
-          </div>
-
-          <h2 class="entry-modal-h2">Részletes Leírás</h2>
-          <div id="entry-modal-desc">
-            <p class="entry-text">Az automatizált diagnosztika alapján a hűtőközeg nyomása stabil...</p>
-          </div>
-
-          <div class="ai-suggestion-box">
-            <div class="ai-suggest-icon"><i class="fas fa-bolt"></i></div>
-            <div>
-              <p class="ai-suggest-title">AI Javaslat</p>
-              <p class="ai-suggest-text" id="entry-modal-suggestion">Az Arctic Core modul újraindítása javasolt.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT COL: AI Chat Interface -->
-      <div class="flex flex-col bg-slate-50 dark:bg-ck-bg" style="width:35%">
-        <div class="modal-header bg-white dark:bg-ck-card border-b divider-line">
-          <div class="flex items-center gap-3 text-ck-ocean dark:text-ck-text font-bold text-sm tracking-wider uppercase">
-            <i class="fas fa-robot text-lg"></i> Rendszer AI
-          </div>
-          <button class="btn-close" onclick="closeModal('entry-details-modal')"><i class="fas fa-times"></i></button>
-        </div>
-        
-        <div class="flex-1 overflow-y-auto custom-scroll p-6 flex flex-col gap-6">
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Üdvözlöm! Észleltem a problémát. Segíthetek az adatok elemzésében?</p>
-          </div>
-          <div class="chat-bubble-user"><p>Mikor volt az utolsó manuális kalibráció?</p></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Az utolsó manuális beavatkozás 72 órája történt. A jelenlegi hiba szoftveres úton is orvosolhatónak tűnik.</p>
-          </div>
-        </div>
-
-        <div class="p-6 bg-white dark:bg-ck-card border-t divider-line shrink-0">
-          <div class="carved-input-wrap">
-            <button class="carved-icon-btn"><i class="fas fa-plus-circle"></i></button>
-            <input class="carved-input" type="text" placeholder="Kérdezzen...">
-            <button class="carved-icon-btn"><i class="fas fa-paper-plane text-ck-ocean dark:text-ck-cyan"></i></button>
-          </div>
-          <p class="text-[0.6rem] text-center text-slate-400 dark:text-slate-500 mt-2 uppercase font-bold tracking-widest">Rendszer AI Asszisztens</p>
-        </div>
-
-      </div>
-    </div>
-  </div>
+  <iframe id="design-frame" src="designs/design-01-oceanic.html"></iframe>
 
   <script>
-    // ---- MOCK DATA -------------------------------------------------------
-    const WHATS_NEW = [
-      { id: 1, icon: 'fa-hotel', title: 'Rendelés Frissítés: Hilton Budapest', detail: 'Vámkezelés igazolva 2x Brema CB 249 egységre a HILT-00001 rendelésben.', suggestion: 'Egyeztesd a logisztikát a technikai személyzettel.', orderCode: 'HILT-00001', name: 'Hilton Budapest Ltd.' },
-      { id: 2, icon: 'fa-envelope', title: 'Új Email: Kovács Kft.', detail: 'Aláírt szerződés csatolva a KOVA-00002 ajánlathoz.', suggestion: 'Indítsd el a gyártási folyamatot.', orderCode: 'KOVA-00002', name: 'Kovács Kft.' },
-      { id: 3, icon: 'fa-box', title: 'Korábbi Rendelés: Tóth Kft.', detail: 'A TÓTH-00004 rendelés teljesen feldolgozva, a szerelő ütemezve.', suggestion: '-', orderCode: 'TOTH-00004', name: 'Tóth Kft.', processed: true },
-      { id: 4, icon: 'fa-building', title: 'Beragadt Rendelés: Mező & Társa', detail: '8 napja nem volt státuszváltozás (MEZO-00003). Sürgős beavatkozás javasolt.', suggestion: 'Hívd fel az ügyfelet és tisztázd a státuszt.', orderCode: 'MEZO-00003', name: 'Mező & Társa' },
-    ];
-    
-    // Extracted logic for reusable row rendering
-    function getWhatsNewRowHTML(item, index) {
-      const actionHtml = item.processed 
-        ? `<div class="processed-badge">Feldolgozva</div>`
-        : `<div class="wn-action-row">
-             <button class="btn-action btn-approve"><i class="fas fa-check"></i></button>
-             <button class="btn-action btn-edit" onclick="openEntryModal(${index})"><i class="fas fa-pencil"></i></button>
-           </div>`;
+    const STORAGE_KEY = 'ck_selected_design';
 
-      return `
-        <tr>
-          <td class="wn-logo-cell"><div class="wn-logo-wrap"><i class="fas ${item.icon}"></i></div></td>
-          <td class="wn-summary-cell"><p class="wn-summary-title">${item.title}</p><p class="wn-summary-detail">${item.detail}</p></td>
-          <td class="wn-suggestion-cell"><span class="wn-suggestion">${item.suggestion}</span></td>
-          <td class="wn-actions-cell">${actionHtml}</td>
-        </tr>
-      `;
-    }
+    function switchDesign() {
+      const sel = document.getElementById('design-select');
+      const src = sel.value;
+      const status = sel.options[sel.selectedIndex].getAttribute('data-status');
 
-    const ORDERS = [
-      { id: 1, orderCode: 'HILT-00001', icon: 'fa-hotel',    name: 'Hilton Budapest Ltd.', status: 'Szállítás folyamatban', workflow: 'DELIVERY',         updated: '2026-03-22' },
-      { id: 2, orderCode: 'KOVA-00002', icon: 'fa-industry', name: 'Kovács Kft.',          status: 'Rendelés visszaigazolva', workflow: 'ORDER_CONFIRMED',  updated: '2026-03-21' },
-      { id: 3, orderCode: 'MEZO-00003', icon: 'fa-building', name: 'Mező & Társa',         status: 'Ajánlat kiküldve',      workflow: 'OFFER_SENT',        updated: '2026-03-14' },
-      { id: 4, orderCode: 'PAPP-00004', icon: 'fa-store',    name: 'Papp Bútor Kft.',      status: 'Számlázva',             workflow: 'INVOICED',          updated: '2026-03-20' },
-      { id: 5, orderCode: 'BUDA-00005', icon: 'fa-landmark', name: 'Budapest Szálló Zrt.', status: 'Új megkeresés',         workflow: 'NEW',              updated: '2026-03-22' },
-    ];
+      document.getElementById('design-frame').src = src;
+      localStorage.setItem(STORAGE_KEY, src);
 
-    const ORDER_FILES = {
-      1: [ { name: 'Vam_Papírok.pdf', ext: 'pdf', icon: 'fa-file-pdf' }, { name: 'Szallitasi_utvonal.docx', ext: 'docx', icon: 'fa-file-word' } ],
-      2: [ { name: 'Alairt_Szerzodes.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ],
-      4: [ { name: 'Szamla_20260320.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ]
-    };
-
-    const ORDER_HISTORY = {
-      1: [ { date: '2026-03-22 14:20', status: 'DELIVERY', note: 'Szállítmány úton van, vámkezelés befejezve.' }, { date: '2026-03-20 09:10', status: 'READY_FOR_DELIVERY', note: 'Termékek becsomagolva, átadva a fuvarozónak.' }, { date: '2026-03-15 11:30', status: 'ORDER_CONFIRMED', note: 'Ügyfél aláírta a megrendelőt.' } ],
-      2: [ { date: '2026-03-21 10:00', status: 'ORDER_CONFIRMED', note: 'Aláírt szerződés beérkezett emailben.' }, { date: '2026-03-18 14:00', status: 'OFFER_SENT', note: 'Ajánlat PDF kiküldve.' } ],
-      3: [ { date: '2026-03-14 12:00', status: 'OFFER_SENT', note: 'Ajánlat elküldve, 8 napja nincs válasz.' }, { date: '2026-03-12 10:30', status: 'NEW', note: 'Megkeresés rögzítve telefonon.' } ],
-      4: [ { date: '2026-03-20 16:00', status: 'INVOICED', note: 'Számla kiállítva és elküldve.' } ],
-      5: [ { date: '2026-03-22 13:55', status: 'NEW', note: 'Első kapcsolatfelvétel emailen.' } ],
-    };
-
-    const ORDER_ITEMS = {
-      1: [ { name: 'Brema CB 249', qty: 2, price: 450000 }, { name: 'Ipari Vízlágyító (10L)', qty: 2, price: 55000 } ],
-      2: [ { name: 'Lincat OE8113 Olajsütő', qty: 1, price: 890000 } ],
-      3: [ { name: 'Unox Anna XF023', qty: 1, price: 295000 } ],
-      4: [ { name: 'Rozsdamentes asztal', qty: 3, price: 85000 } ],
-      5: [],
-    };
-
-    const STATUS_LABELS = {
-      'NEW': 'Új', 'OFFER_SENT': 'Ajánlat', 'ORDER_CONFIRMED': 'Megrendelő', 'PURCHASE': 'Vásárlás',
-      'READY_FOR_DELIVERY': 'Kész', 'DELIVERY': 'Szállítás', 'DELIVERED': 'Kiszállítva', 'INVOICED': 'Számlázva'
-    };
-
-    // ---- RENDERS ---------------------------------------------------------
-    function renderWhatsNew() {
-      // Main dashboard view (first 3)
-      document.getElementById('whats-new-body').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-      
-      // All Updates Modal views (Mock grouping)
-      document.getElementById('all-updates-body-today').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-      // Just re-using the mock data to simulate "Yesterday" records
-      document.getElementById('all-updates-body-yesterday').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-    }
-
-    let currentSort = { key: 'updated', dir: -1 };
-    function statusPill(wf) { return `<span class="status-pill status-${wf}">${STATUS_LABELS[wf] ?? wf}</span>`; }
-
-    function renderOrders(data) {
-      document.getElementById('orders-body').innerHTML = data.map(o => {
-        const hasFiles = ORDER_FILES[o.id] && ORDER_FILES[o.id].length > 0;
-        const fileIconHtml = hasFiles ? `<i class="fas fa-paperclip text-ck-ocean dark:text-ck-cyan ml-3 opacity-70" title="Csatolt dokumentumok"></i>` : '';
-        
-        return `
-        <tr onclick="selectOrder(${o.id})" id="order-row-${o.id}">
-          <td><div class="order-logo-wrap"><i class="fas ${o.icon}"></i></div></td>
-          <td>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-client-name">${o.name}</span>
-            </div>
-          </td>
-          <td><span class="order-code-text">${o.orderCode}</span></td>
-          <td>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-status-text">${o.status}</span>
-              <span class="order-updated">${o.updated}</span>
-            </div>
-          </td>
-          <td>
-            <div class="flex items-center justify-between pr-4">
-              ${statusPill(o.workflow)}
-              ${fileIconHtml}
-            </div>
-          </td>
-        </tr>
-      `}).join('');
-    }
-
-    function sortOrders(key) {
-      if (currentSort.key === key) currentSort.dir *= -1;
-      else { currentSort.key = key; currentSort.dir = -1; }
-      const sorted = [...ORDERS].sort((a, b) => {
-        const av = a[key] || ''; const bv = b[key] || '';
-        return av < bv ? -currentSort.dir : av > bv ? currentSort.dir : 0;
-      });
-      renderOrders(sorted);
-      if (selectedOrderId) document.getElementById(`order-row-${selectedOrderId}`)?.classList.add('selected');
-    }
-
-    function filterOrders() {
-      const q = document.getElementById('orders-search').value.toLowerCase();
-      const filtered = ORDERS.filter(o => o.name.toLowerCase().includes(q) || o.orderCode.toLowerCase().includes(q) || o.workflow.toLowerCase().includes(q));
-      renderOrders(filtered);
-    }
-
-    // ---- DETAILS PANEL ---------------------------------------------------
-    let selectedOrderId = null;
-
-    function selectOrder(id) {
-      selectedOrderId = id;
-      document.querySelectorAll('.orders-table tbody tr').forEach(r => r.classList.remove('selected'));
-      document.getElementById(`order-row-${id}`)?.classList.add('selected');
-
-      const order = ORDERS.find(o => o.id === id);
-      const history = ORDER_HISTORY[id] ?? [];
-      const items = ORDER_ITEMS[id] ?? [];
-      const files = ORDER_FILES[id] ?? [];
-      const latest = history[0];
-
-      const htmlFormatter = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
-
-      // Build Items
-      let itemsHtml = '';
-      if (items.length > 0) {
-        let total = 0;
-        const rows = items.map(item => {
-          const rowTotal = item.qty * item.price; total += rowTotal;
-          return `<div class="details-item-row"><span class="details-item-name">${item.name}</span><span class="details-item-qty">${item.qty}x</span><span class="details-item-price">${htmlFormatter.format(rowTotal)}</span></div>`;
-        }).join('');
-        itemsHtml = `<h4 class="details-section-title">Termékek</h4><div>${rows}<div class="details-item-row total"><span class="details-item-name">Összesen:</span><span class="details-item-price">${htmlFormatter.format(total)}</span></div></div>`;
+      const chip = document.getElementById('design-status-chip');
+      if (status === 'saved') {
+        chip.textContent = 'Mentve';
+        chip.className = 'design-chip chip-saved';
+      } else {
+        chip.textContent = 'Kísérlet';
+        chip.className = 'design-chip chip-wip';
       }
+    }
 
-      // Build Files
-      let filesHtml = '';
-      if (files.length > 0) {
-        const fileChips = files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i> ${f.name}</div>`).join('');
-        filesHtml = `<h4 class="details-section-title">Dokumentumok</h4><div class="flex flex-wrap gap-3">${fileChips}</div>`;
+    // Restore last selected design on page load
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const sel = document.getElementById('design-select');
+      const opt = [...sel.options].find(o => o.value === saved);
+      if (opt) {
+        sel.value = saved;
+        switchDesign();
       }
-
-      // Build Timeline
-      const timelineHtml = `<h4 class="details-section-title">Előzmények</h4><div class="timeline">${history.map(h => `<div class="timeline-item"><p class="timeline-date">${h.date}</p><p class="timeline-event">${statusPill(h.status)}</p><p class="timeline-note">${h.note}</p></div>`).join('')}</div>`;
-
-      document.getElementById('details-panel').innerHTML = `
-        <div class="flex flex-col gap-2 mb-6">
-          <div class="flex items-center gap-5">
-            <div class="details-client-logo"><i class="fas ${order.icon}"></i></div>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-code-text" style="margin:0">${order.orderCode}</span>
-              <p class="details-name leading-tight">${order.name}</p>
-              <p class="details-updated">Frissítve: ${latest?.date ?? '–'}</p>
-            </div>
-          </div>
-        </div>
-        ${filesHtml}
-        ${itemsHtml}
-        ${timelineHtml}
-      `;
     }
-
-    // ---- THEME -----------------------------------------------------------
-    function toggleTheme() {
-      const html = document.documentElement; html.classList.toggle('dark');
-      document.getElementById('theme-label').textContent = html.classList.contains('dark') ? 'Sötét Mód' : 'Világos Mód';
-    }
-
-    // ---- MODALS ----------------------------------------------------------
-    function openModal(id) {
-      document.getElementById(id).classList.add('open');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-
-    function closeModalOnBg(event, id) {
-      if (event.target.id === id) closeModal(id);
-    }
-
-    function openEntryModal(index) {
-      const entry = WHATS_NEW[index];
-      if (!entry) return;
-
-      document.getElementById('entry-modal-logo').innerHTML = `<i class="fas ${entry.icon}"></i>`;
-      document.getElementById('entry-modal-code').textContent = entry.orderCode;
-      document.getElementById('entry-modal-name').textContent = entry.name;
-      document.getElementById('entry-modal-summary').textContent = entry.detail;
-      document.getElementById('entry-modal-suggestion').textContent = entry.suggestion;
-      document.getElementById('entry-modal-desc').innerHTML = `
-        <p class="entry-text">A rendszer automatikus ellenőrzése során új esemény generálódott. A P.I.S.T.A. integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>
-        <p class="entry-text">Javasolt az üzleti folyamat lépéseinek manuális felülvizsgálata, vagy az AI asszisztens bevonása a helyzet tisztázására és akcióterv készítésére.</p>
-      `;
-
-      openModal('entry-details-modal');
-    }
-
-    // ---- SIDEBAR RESIZER -------------------------------------------------
-    const resizer = document.getElementById('sidebar-resizer');
-    const sidebar = document.getElementById('main-sidebar');
-    let isResizing = false;
-
-    resizer.addEventListener('mousedown', (e) => {
-      isResizing = true;
-      resizer.classList.add('active');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isResizing) return;
-      
-      const bodyWidth = document.body.clientWidth;
-      const minWidth = bodyWidth * 0.1;
-      const maxWidth = bodyWidth * 0.3;
-      
-      let newWidth = e.clientX - 32; // Body p-8 (2rem = 32px) offset
-      
-      if (newWidth < minWidth) newWidth = minWidth;
-      if (newWidth > maxWidth) newWidth = maxWidth;
-      
-      sidebar.style.width = newWidth + 'px';
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (isResizing) {
-        isResizing = false;
-        resizer.classList.remove('active');
-        document.body.style.cursor = 'default';
-        document.body.style.userSelect = 'auto';
-      }
-    });
-
-    renderWhatsNew();
-    renderOrders([...ORDERS].sort((a, b) => b.updated.localeCompare(a.updated)));
   </script>
+
 </body>
 </html>
