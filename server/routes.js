@@ -28,6 +28,15 @@ router.get('/customers', async (req, res) => {
     }
 });
 
+router.post('/customers', async (req, res) => {
+    try {
+        const result = await dbRobot.createCustomer(req.body);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 router.get('/suppliers', async (req, res) => {
     try {
         const suppliers = await dbRobot.getSuppliers();
@@ -37,12 +46,30 @@ router.get('/suppliers', async (req, res) => {
     }
 });
 
+router.post('/suppliers', async (req, res) => {
+    try {
+        const result = await dbRobot.createSupplier(req.body);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 router.get('/products', async (req, res) => {
     try {
         const products = await dbRobot.getProducts();
         res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/products', async (req, res) => {
+    try {
+        const result = await dbRobot.createProduct(req.body);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
     }
 });
 

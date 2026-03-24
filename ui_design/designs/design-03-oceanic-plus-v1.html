@@ -4,1194 +4,1749 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoolKonyha – AI Asszisztens</title>
+  <title>CoolKonyha – Oceanic Plus</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../js/services/dataService.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'ck-bg':         'var(--ck-primary)',
-            'ck-card':       'var(--ck-secondary)',
-            'ck-text':       'var(--ck-text-main)',
-            'ck-muted':      'var(--ck-text-muted)',
-            'ck-ocean':      'var(--ck-accent)',
-            'ck-accent':     'var(--ck-accent)',
-            'ck-border':     'var(--ck-border-light)',
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-            head: ['Montserrat', 'sans-serif'],
-          },
-        }
-      }
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], head: ['Montserrat', 'sans-serif'] } } }
     }
   </script>
 
   <style>
-    /* =========================================================
-       THEME TOKENS (OCEANIC PLUS v1)
-    ========================================================= */
-    :root {
-      --ck-primary: #F8FAFC;
-      --ck-secondary: #E2E8F0;
-      --ck-accent: #0891B2;
-      --ck-text-main: #0F172A;
-      --ck-text-muted: #64748B;
-      --ck-border-light: rgba(15, 23, 42, 0.1);
-      --ck-success: #16A34A;
-      --ck-warning: #D97706;
-      --ck-ice-bg: rgba(226, 232, 240, 0.7);
+    /* ── Reset ─────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
+
+    /* ── Theme Tokens ───────────────── */
+    :root {
+      --bg: #F8FAFC;
+      --surface: #E2E8F0;
+      --accent: #0891B2;
+      --text: #0F172A;
+      --muted: #64748B;
+      --border: rgba(15, 23, 42, 0.1);
+      --success: #16A34A;
+      --warning: #D97706;
+      --card-bg: rgba(226, 232, 240, 0.72);
+    }
+
     .dark {
-      --ck-primary: #0F172A;
-      --ck-secondary: #1E293B;
-      --ck-accent: #22D3EE;
-      --ck-text-main: #F1F5F9;
-      --ck-text-muted: #94A3B8;
-      --ck-border-light: rgba(255, 255, 255, 0.05);
-      --ck-success: #4ADE80;
-      --ck-warning: #FBBF24;
-      --ck-ice-bg: rgba(30, 41, 59, 0.7);
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --accent: #22D3EE;
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --border: rgba(255, 255, 255, 0.06);
+      --success: #4ADE80;
+      --warning: #FBBF24;
+      --card-bg: rgba(30, 41, 59, 0.72);
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      margin: 0;
+      background: var(--bg);
+      color: var(--text);
       overflow: hidden;
-      background-color: var(--ck-primary);
-      color: var(--ck-text-main);
-      transition: background-color 0.3s, color 0.3s;
+      transition: background 0.4s, color 0.4s;
     }
 
-    /* Typography Overrides */
-    h1, h2, h3, h4, h5, h6, .section-header-title, .section-header-light-title, .modal-title, .entry-modal-h2 {
-      font-family: 'Montserrat', sans-serif;
-    }
-    .order-code-text, .timeline-date, .details-item-price, .chat-label {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* =========================================================
-       ICE-CARD (GLASSMORPHISM)
-    ========================================================= */
+    /* ── Ice-Card (glassmorphism) ───── */
     .ice-card {
-      background: var(--ck-ice-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--ck-border-light);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-      border-radius: 12px;
-      position: relative;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+      border-radius: 20px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      position: relative;
     }
-    .dark .ice-card { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
 
-    /* Noise Texture Overlay using SVG data URI */
-    .ice-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      opacity: 0.03;
+    .dark .ice-card {
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.42);
+    }
+
+    /* subtle noise grain */
+    .ice-card::after {
+      content: '';
       pointer-events: none;
-      z-index: 0; /* Behind content, above bg */
-    }
-    /* Ensure content inside stays above noise */
-    .ice-card > * { position: relative; z-index: 1; }
-
-    /* =========================================================
-       LAYOUT WRAPPERS (Replacing old card-shadow)
-    ========================================================= */
-    .layout-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      z-index: 0;
     }
 
-    /* =========================================================
-       CUSTOM SCROLLBAR
-    ========================================================= */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(8, 145, 178, 0.4);
+    .ice-card>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Scrollbar ──────────────────── */
+    .cscroll::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .cscroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .cscroll::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      opacity: 0.4;
       border-radius: 10px;
     }
-    .custom-scroll:hover::-webkit-scrollbar-thumb { background: var(--ck-accent); }
-    .dark .custom-scroll::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); }
-    .dark .custom-scroll:hover::-webkit-scrollbar-thumb { background: var(--ck-accent); }
 
-    .divider-line { border-color: var(--ck-border-light); }
-
-    /* =========================================================
-       SIDEBAR
-    ========================================================= */
-    .sidebar { background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%); }
-    .dark .sidebar { background: linear-gradient(180deg, #012340 0%, #081426 100%); }
-
-    .sidebar-logo-wrap {
-      width: 3.5rem;
-      height: 3.5rem;
-      border-radius: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.4);
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .dark .sidebar-logo-wrap {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.15);
+    /* ── Sidebar ────────────────────── */
+    .sidebar-bg {
+      background: linear-gradient(170deg, var(--surface) 0%, var(--bg) 100%);
     }
 
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 1.2rem;
-      padding: 1rem;
-      border-radius: 1rem;
-      font-size: 1rem;
+      gap: 0.9rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
       font-weight: 500;
-      color: var(--ck-text-muted);
+      color: var(--muted);
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       position: relative;
       overflow: hidden;
     }
-    .dark .nav-item { color: rgba(255,255,255,0.65); }
-    
+
+    /* sliding cyan glow from the left */
     .nav-item::before {
-      content: ''; position: absolute; left: -100%; top: 0; bottom: 0; width: 100%;
-      background: linear-gradient(90deg, transparent, rgba(8, 145, 178, 0.12));
-      transition: left 0.3s ease; pointer-events: none;
+      content: '';
+      position: absolute;
+      left: -110%;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), transparent);
+      transition: left 0.35s ease;
+      pointer-events: none;
     }
-    .dark .nav-item::before { background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.15)); }
-    .nav-item:hover::before, .nav-item.active::before { left: 0; }
 
-    .nav-item:hover { color: var(--ck-text-main); }
-    .dark .nav-item:hover { color: #ffffff; }
-    .nav-item.active { color: var(--ck-text-main); font-weight: 600; }
-    .dark .nav-item.active { color: #ffffff; }
+    .nav-item:hover::before,
+    .nav-item.active::before {
+      left: 0;
+    }
 
-    /* =========================================================
-       CHAT MESSAGES
-    ========================================================= */
-    .chat-scroll-area {
+    .nav-item:hover {
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .nav-item.active i {
+      color: var(--accent);
+    }
+
+    /* ── Section Header (blue bar) ───── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 1.75rem;
+      flex-shrink: 0;
+      background: linear-gradient(90deg, #0369a1 0%, #0891B2 100%);
+    }
+
+    .dark .section-header {
+      background: linear-gradient(90deg, #164e63 0%, #155e75 100%);
+    }
+
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #fff;
+    }
+
+    .section-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    /* ── KPI Sparkline Cards ─────────── */
+    .kpi-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 0.4rem 0.85rem;
+      min-width: 130px;
+    }
+
+    .kpi-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .kpi-sparkline {
+      width: 44px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .kpi-sparkline polyline {
+      fill: none;
+      stroke: #7ef8ff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .kpi-sparkline circle {
+      fill: #7ef8ff;
+    }
+
+    /* ── Date nav ────────────────────── */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0.2rem;
+      gap: 0;
+    }
+
+    .date-nav-btn {
+      width: 1.8rem;
+      height: 1.8rem;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+      font-size: 0.75rem;
+    }
+
+    .date-nav-btn:hover {
+      color: #fff;
+    }
+
+    .date-nav-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #fff;
+      padding: 0 0.5rem;
+      min-width: 8rem;
+      text-align: center;
+    }
+
+    /* ── Theme Toggle ────────────────── */
+    .theme-toggle {
+      width: 2.8rem;
+      height: 1.4rem;
+      background: #475569;
+      border-radius: 99px;
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--accent);
+      transition: background 0.3s;
+    }
+
+    .dark .theme-toggle {
+      background: var(--accent);
+    }
+
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 1rem;
+      height: 1rem;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .dark .theme-toggle::after {
+      transform: translateX(1.4rem);
+    }
+
+    .theme-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    /* ── Sub-header (Orders) ─────────── */
+    .sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.75rem;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sub-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text);
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-wrap i {
+      position: absolute;
+      left: 0.75rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .search-wrap input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem 0.5rem 2.2rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      outline: none;
+      width: 16rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--muted);
+    }
+
+    /* ── Orders Table ────────────────── */
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .orders-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 0.8rem 1.25rem;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-align: left;
+      color: var(--muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .orders-table thead th:hover {
+      color: var(--accent);
+    }
+
+    .orders-table thead th.col-ico {
+      cursor: default;
+      width: 3.5rem;
+    }
+
+    .orders-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Row hover lift */
+    .orders-table tbody tr:hover {
+      background: rgba(34, 211, 238, 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .dark .orders-table tbody tr:hover {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .orders-table tbody tr.selected {
+      background: rgba(34, 211, 238, 0.08);
+    }
+
+    .orders-table tbody td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    /* AI insight glow – on the FIRST TD to avoid layout bugs */
+    .ai-row>td:first-child {
+      position: relative;
+    }
+
+    .ai-row>td:first-child::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3.5px;
+      background: var(--accent);
+      animation: ai-pulse 2.2s ease-in-out infinite;
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+
+    @keyframes ai-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(34, 211, 238, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+      }
+    }
+
+    /* ── Pipeline Stepper ────────────── */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100px;
+      margin-top: 4px;
+    }
+
+    .pip-node {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: all 0.3s;
+      border: 1.5px solid var(--muted);
+    }
+
+    .pip-line {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .pip-node.done {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .pip-line.done {
+      background: var(--accent);
+      box-shadow: 0 0 4px var(--accent);
+    }
+
+    .pip-node.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      animation: pip-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pip-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 5px rgba(34, 211, 238, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+      }
+    }
+
+    /* ── Order cell elements ─────────── */
+    .ico-wrap {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: var(--accent);
+      background: rgba(34, 211, 238, 0.06);
+      transition: border-color 0.2s;
+    }
+
+    .orders-table tbody tr:hover .ico-wrap,
+    .orders-table tbody tr.selected .ico-wrap {
+      border-color: var(--accent);
+    }
+
+    .client-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .order-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(34, 211, 238, 0.08);
+      padding: 0.12rem 0.4rem;
+      border-radius: 5px;
+      display: inline-block;
+    }
+
+    .status-text {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ── Status Pills ────────────────── */
+    .pill {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fff;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .p-NEW {
+      background: #64748b;
+    }
+
+    .p-OFFER_SENT {
+      background: #d97706;
+    }
+
+    .p-ORDER_CONFIRMED {
+      background: #0369a1;
+    }
+
+    .p-PURCHASE {
+      background: #7c3aed;
+    }
+
+    .p-READY_FOR_DELIVERY {
+      background: #2563eb;
+    }
+
+    .p-DELIVERY {
+      background: #0891B2;
+    }
+
+    .p-DELIVERED {
+      background: #16a34a;
+    }
+
+    .p-INVOICED {
+      background: #65a30d;
+      color: #fff;
+    }
+
+    .p-CLOSED {
+      background: #059669;
+    }
+
+    .p-CANCELLED {
+      background: #dc2626;
+    }
+
+    /* ── What's New Table ────────────── */
+    .wn-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .wn-table td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .wn-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .wn-table tbody tr:hover {
+      background: rgba(34, 211, 238, 0.04);
+    }
+
+    .wn-ico {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: var(--accent);
+      background: rgba(34, 211, 238, 0.06);
+      margin: auto;
+    }
+
+    .wn-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .wn-detail {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5;
+    }
+
+    .wn-suggestion {
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Action buttons ──────────────── */
+    .btn-act {
+      width: 2.2rem;
+      height: 2.2rem;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: #fff;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-act:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-ok {
+      background: #16a34a;
+    }
+
+    .btn-edit {
+      background: #0891B2;
+    }
+
+    .wn-action-row {
+      display: flex;
+      flex-direction: row;
+      gap: 0.4rem;
+      width: 5rem;
+      align-items: center;
+    }
+
+    .done-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 5rem;
+      border-radius: 99px;
+      padding: 0.3rem 0;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ── Table footer ────────────────── */
+    .tbl-footer {
+      padding: 0.75rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .btn-see-all {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-see-all:hover {
+      opacity: 0.7;
+    }
+
+    /* ── Carved input ────────────────── */
+    .carved {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      padding: 0 0.5rem 0 0.9rem;
+      height: 2.8rem;
+    }
+
+    .carved input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .carved input::placeholder {
+      color: var(--muted);
+    }
+
+    .carved-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      border-radius: 6px;
+      transition: color 0.2s, transform 0.15s;
+    }
+
+    .carved-btn:hover {
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    /* ── Chat ────────────────────────── */
+    .chat-fade {
       mask-image: linear-gradient(to top, black 50%, transparent 100%);
       -webkit-mask-image: linear-gradient(to top, black 50%, transparent 100%);
     }
 
-    .chat-bubble-user, .chat-message-ai {
-      font-size: 0.85rem;
+    .chat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .chat-ai {
+      font-size: 0.82rem;
+      color: var(--text);
+      max-width: 95%;
+      align-self: flex-start;
       line-height: 1.6;
     }
 
-    .chat-bubble-user {
+    .chat-user {
+      font-size: 0.82rem;
       align-self: flex-end;
-      max-width: 90%;
-      padding: 0.75rem 1rem;
-      border-radius: 1.25rem 1.25rem 0 1.25rem;
-      background: rgba(0, 123, 182, 0.08);
-      border: 1px solid rgba(0, 123, 182, 0.06);
-      color: #1e293b;
-    }
-    .dark .chat-bubble-user {
-      background: rgba(220, 234, 247, 0.14);
-      border-color: transparent;
-      color: #DCEAF7;
+      max-width: 88%;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      border-radius: 1rem 1rem 0 1rem;
+      padding: 0.6rem 0.9rem;
+      color: var(--text);
     }
 
-    .chat-message-ai { align-self: flex-start; max-width: 95%; color: #1e293b; }
-    .dark .chat-message-ai { color: #DCEAF7; }
+    /* ── Status dot ──────────────────── */
+    @keyframes sdot {
 
-    .chat-label {
-      font-size: 0.7rem;
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.35
+      }
+    }
+
+    .status-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: sdot 2.5s infinite;
+    }
+
+    /* ── Details panel ───────────────── */
+    .det-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      height: 100%;
+      color: var(--muted);
+    }
+
+    .det-logo {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .det-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .det-upd {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .det-section {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      display: block;
-      margin-bottom: 0.25rem;
-      color: #0077B6;
+      color: var(--text);
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 0.4rem;
+      margin: 1.5rem 0 0.75rem;
     }
-    .dark .chat-label { color: #07B2D9; }
 
-    /* =========================================================
-       CARVED INPUT
-    ========================================================= */
-    .carved-input-wrap {
-      background: #e2e8f0;
-      box-shadow: inset 2px 2px 4px rgba(0,0,0,0.10);
-      border: 1px solid rgba(0,0,0,0.04);
-      border-radius: 1rem;
+    .det-row {
       display: flex;
-      align-items: center;
-      padding: 0 0.5rem 0 1rem;
-      height: 3rem;
-    }
-    .dark .carved-input-wrap {
-      background: #081426;
-      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.55);
-      border-color: rgba(255,255,255,0.04);
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 0.82rem;
     }
 
-    .carved-input {
-      flex: 1; background: transparent; border: none; outline: none;
-      font-size: 0.9rem; font-family: 'Inter', sans-serif; color: #1e293b;
-    }
-    .dark .carved-input { color: #DCEAF7; }
-    .carved-input::placeholder { color: #94a3b8; }
-    .dark .carved-input::placeholder { color: rgba(255,255,255,0.25); }
-
-    .carved-icon-btn {
-      background: transparent; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      width: 2.2rem; height: 2.2rem; border-radius: 0.625rem;
-      color: #94a3b8; transition: color 0.2s, transform 0.15s;
-    }
-    .carved-icon-btn i { font-size: 1rem; }
-    .carved-icon-btn:hover { color: #0077B6; transform: scale(1.1); }
-    .dark .carved-icon-btn:hover { color: #07B2D9; }
-
-    /* =========================================================
-       SECTION HEADERS
-    ========================================================= */
-    .section-header {
-      padding: 1.4rem 2rem;
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0; background: #0077B6;
-    }
-    .section-header-title {
-      font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.18em; color: var(--ck-text-main);
-    }
-    .dark .section-header-title { color: #ffffff; }
-    .section-badge {
-      padding: 0.3rem 0.75rem; font-size: 0.7rem; font-weight: 700;
-      border-radius: 99px; background: rgba(8, 145, 178, 0.15);
-      border: 1px solid rgba(8, 145, 178, 0.30); color: var(--ck-accent);
-    }
-    .dark .section-badge { background: rgba(34, 211, 238, 0.15); border-color: rgba(34, 211, 238, 0.30); color: var(--ck-accent); }
-
-    /* KPI Cards (The Chiller) */
-    .kpi-container {
-      display: flex; gap: 1rem; margin-left: auto; margin-right: 1.5rem;
-    }
-    .kpi-card {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.05) 0%, rgba(8, 145, 178, 0.05) 100%);
-      border: 1px solid rgba(8, 145, 178, 0.15);
-      border-radius: 0.75rem;
-      padding: 0.5rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      min-width: 140px;
-    }
-    .dark .kpi-card {
-      background: linear-gradient(135deg, rgba(226, 232, 240, 0.05) 0%, rgba(34, 211, 238, 0.08) 100%);
-      border-color: rgba(34, 211, 238, 0.2);
-    }
-    .kpi-info { display: flex; flex-direction: column; }
-    .kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ck-text-muted); }
-    .kpi-value { font-size: 1.1rem; font-weight: 800; color: var(--ck-text-main); font-family: 'JetBrains Mono', monospace; line-height: 1; margin-top: 0.1rem; }
-    .dark .kpi-value { color: #ffffff; }
-    
-    .kpi-sparkline {
-      width: 40px; height: 20px;
-    }
-    .kpi-sparkline path {
-      fill: none; stroke: var(--ck-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-    }
-    .kpi-sparkline circle {
-      fill: var(--ck-accent);
+    .det-row-name {
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
     }
 
-    .section-header-light {
-      padding: 1.4rem 2rem; border-bottom: 1px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0; background: transparent;
-    }
-    .dark .section-header-light { border-color: rgba(220,234,247,0.08); }
-
-    .section-header-light-title {
-      font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.18em; color: #1e293b;
-    }
-    .dark .section-header-light-title { color: #DCEAF7; }
-
-    /* =========================================================
-       SEARCH
-    ========================================================= */
-    .header-search { position: relative; display: flex; align-items: center; }
-    .header-search-icon { position: absolute; left: 1rem; font-size: 0.8rem; color: #94a3b8; }
-    .header-search input {
-      background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 1rem;
-      padding: 0.6rem 1rem 0.6rem 2.5rem; font-size: 0.9rem;
-      color: #1e293b; outline: none; width: 18rem; transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .dark .header-search input {
-      background: rgba(0,0,0,0.20); border-color: rgba(220,234,247,0.10); color: #DCEAF7;
-    }
-    .header-search input:focus { border-color: #0077B6; box-shadow: 0 0 0 3px rgba(0,119,182,0.12); }
-    .header-search input::placeholder { color: #94a3b8; }
-    .dark .header-search input::placeholder { color: rgba(255,255,255,0.30); }
-
-    /* =========================================================
-       TABLES
-    ========================================================= */
-    .whats-new-table { width: 100%; border-collapse: collapse; }
-    .whats-new-table tbody tr { cursor: pointer; transition: background 0.15s; }
-    .whats-new-table tbody tr:hover { background: rgba(0,119,182,0.05); }
-    .dark .whats-new-table tbody tr:hover { background: rgba(220,234,247,0.04); }
-    .whats-new-table td { padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .dark .whats-new-table td { border-color: rgba(220,234,247,0.06); }
-
-    .orders-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-    .orders-table thead th {
-      position: sticky; top: 0; z-index: 10;
-      padding: 1rem 1.25rem; font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.18em; text-align: left;
-      color: var(--ck-text-muted); background: var(--ck-primary);
-      border-bottom: 1px solid var(--ck-border-light); cursor: pointer; user-select: none;
-    }
-    .dark .orders-table thead th { background: var(--ck-primary); color: var(--ck-text-muted); }
-    .orders-table thead th:hover { color: var(--ck-accent); }
-    .orders-table thead th.col-logo { cursor: default; width: 4rem; }
-    
-    .orders-table tbody tr { 
-      cursor: pointer; transition: background 0.15s, transform 0.2s, box-shadow 0.2s; 
-      position: relative; z-index: 1;
-    }
-    .orders-table tbody tr:hover { 
-      background: rgba(8, 145, 178, 0.04); 
-      transform: translateY(-2px); 
-      box-shadow: 0 6px 16px rgba(0,0,0,0.06); 
-      z-index: 5;
-    }
-    .dark .orders-table tbody tr:hover { 
-      background: rgba(34, 211, 238, 0.05); 
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    }
-    .orders-table tbody tr.selected { background: rgba(8, 145, 178, 0.08); z-index: 2;}
-    .dark .orders-table tbody tr.selected { background: rgba(34, 211, 238, 0.14); }
-    .orders-table tbody td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--ck-border-light); vertical-align: middle; background: inherit; }
-
-    /* =========================================================
-       TYPOGRAPHY / ELEMENTS
-    ========================================================= */
-    .wn-logo-wrap { width: 3rem; height: 3rem; margin: 0 auto; border-radius: 0.875rem; display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 1rem; color: #0077B6; }
-    .dark .wn-logo-wrap { background: rgba(255,255,255,0.05); border-color: rgba(220,234,247,0.10); }
-
-    .wn-summary-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; text-decoration: underline; text-decoration-color: #D98032; text-underline-offset: 3px; margin-bottom: 0.3rem; font-style: italic; text-transform: uppercase; letter-spacing: 0.02em; }
-    .dark .wn-summary-title { color: #DCEAF7; }
-    .wn-summary-detail { font-size: 0.85rem; color: #64748b; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55; }
-    .dark .wn-summary-detail { color: #6B8CAE; }
-    .wn-suggestion { font-size: 0.85rem; font-weight: 500; font-style: italic; color: #0077B6; }
-    .dark .wn-suggestion { color: #07B2D9; }
-
-    .order-logo-wrap { width: 2.75rem; height: 2.75rem; border-radius: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #0077B6; }
-    .dark .order-logo-wrap { background: rgba(255,255,255,0.04); border-color: rgba(220,234,247,0.10); }
-    .orders-table tbody tr:hover .order-logo-wrap, .orders-table tbody tr.selected .order-logo-wrap { border-color: #0077B6; }
-
-    .order-client-name { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
-    .dark .order-client-name { color: #DCEAF7; }
-    .order-code-text { font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #0077B6; background: rgba(0,119,182,0.1); padding: 0.15rem 0.4rem; border-radius: 0.3rem; margin-top: 0.2rem; display: inline-block; }
-    .dark .order-code-text { color: #07B2D9; background: rgba(7,178,217,0.15); }
-    .order-status-text { font-size: 0.85rem; color: #64748b; }
-    .dark .order-status-text { color: #6B8CAE; }
-    .order-updated { font-size: 0.85rem; font-weight: 600; font-family: monospace; color: #64748b; }
-    .dark .order-updated { color: #6B8CAE; }
-
-    /* =========================================================
-       ORDER PIPELINE & AI INTEGRATION (Oceanic Plus v1)
-    ========================================================= */
-    .pipeline-wrapper { margin-top: 0.4rem; width: 120px; }
-    .pipeline-stepper { display: flex; align-items: center; width: 100%; }
-    .pipeline-node { width: 6px; height: 6px; border-radius: 50%; background: var(--ck-border-light); transition: all 0.3s; flex-shrink: 0; }
-    .pipeline-line { flex: 1; height: 4px; background: var(--ck-border-light); transition: all 0.3s; margin: 0 2px; border-radius: 2px;}
-    
-    .pipeline-node.completed { background: var(--ck-accent); box-shadow: 0 0 8px var(--ck-accent); }
-    .pipeline-line.completed { background: var(--ck-accent); }
-    .pipeline-node.active { background: var(--ck-accent); animation: pulse-node 1.5s infinite; }
-    
-    @keyframes pulse-node {
-      0% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.4); }
-      70% { box-shadow: 0 0 0 6px rgba(8, 145, 178, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0); }
-    }
-    .dark .pipeline-node.active { animation: pulse-node-dark 1.5s infinite; }
-    @keyframes pulse-node-dark {
-      0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); }
-      70% { box-shadow: 0 0 0 6px rgba(34, 211, 238, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+    .det-row-qty {
+      margin-right: 1.25rem;
+      font-weight: 600;
+      color: var(--muted);
     }
 
-    /* P.I.S.T.A. AI Row Insight */
-    .ai-insight-row > td:first-child {
+    .det-row-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #d97706;
+    }
+
+    .det-row.total {
+      border-top: 2px solid var(--border);
+      border-bottom: none;
+      padding-top: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .timeline-item {
+      padding-left: 1.25rem;
+      border-left: 2px solid var(--border);
+      padding-bottom: 1.25rem;
       position: relative;
     }
-    .ai-insight-row > td:first-child::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-      background: var(--ck-accent);
-      animation: ai-pulse 2.5s infinite;
-      border-top-right-radius: 4px; border-bottom-right-radius: 4px;
-    }
-    @keyframes ai-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(8, 145, 178, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0); }
-    }
-    .dark .ai-insight-row::before { animation: ai-pulse-dark 2.5s infinite; }
-    @keyframes ai-pulse-dark {
-      0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 1px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
     }
 
-    /* =========================================================
-       STATUS PILLS
-    ========================================================= */
-    .status-pill { font-size: 0.65em; font-weight: 800; padding: 0.3rem 0.75rem; border-radius: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; color: #ffffff; }
-    .status-NEW              { background: #94a3b8; }
-    .status-OFFER_SENT       { background: #D98032; }
-    .status-ORDER_CONFIRMED  { background: #0477BF; }
-    .status-PURCHASE         { background: #8b5cf6; }
-    .status-READY_FOR_DELIVERY { background: #3b82f6; }
-    .status-DELIVERY         { background: #07B2D9; }
-    .status-DELIVERED        { background: #10b981; }
-    .status-INVOICED         { background: #84cc16; color: #1e293b; }
-    .status-CLOSED           { background: #059669; }
-    .status-CANCELLED        { background: #ef4444; }
+    .timeline-item:last-child {
+      border-color: transparent;
+    }
 
-    /* =========================================================
-       DETAILS PANEL
-    ========================================================= */
-    .details-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #94a3b8; height: 100%; }
-    .dark .details-empty { color: #6B8CAE; }
-    .details-empty-icon { font-size: 3.5rem; opacity: 0.3; }
-    .details-empty-text { font-size: 0.9rem; font-weight: 500; }
+    .tl-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
 
-    .details-client-logo { width: 4.5rem; height: 4.5rem; border-radius: 1.25rem; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0077B6; flex-shrink: 0; }
-    .dark .details-client-logo { background: rgba(255,255,255,0.05); border-color: rgba(220,234,247,0.10); }
+    .tl-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 0.25rem;
+    }
 
-    .details-name { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-    .dark .details-name { color: #DCEAF7; }
-    .details-updated { font-size: 0.85rem; color: #64748b; margin-top: 0.35rem; }
-    .dark .details-updated { color: #6B8CAE; }
-
-    .details-section-title { font-size: 0.75rem; font-weight: 800; margin: 2rem 0 1rem 0; color: #1e293b; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
-    .dark .details-section-title { color: #DCEAF7; border-color: rgba(220,234,247,0.10); }
-
-    .details-item-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.85rem; color: #64748b; }
-    .dark .details-item-row { border-color: rgba(220,234,247,0.10); color: #6B8CAE; }
-    .details-item-name { font-weight: 600; color: #1e293b; flex: 1; }
-    .dark .details-item-name { color: #DCEAF7; }
-    .details-item-qty { margin-right: 1.5rem; font-weight: 600; }
-    .details-item-price { font-family: monospace; font-weight: 600; color: #D98032; }
-    .details-item-row.total { border-top: 2px solid #e2e8f0; border-bottom: none; padding-top: 1rem; font-size: 1rem; font-weight: 700; color: #1e293b; }
-    .dark .details-item-row.total { border-color: rgba(220,234,247,0.20); color: #DCEAF7; }
-
-    .timeline { margin-top: 0.5rem; }
-    .timeline-item { padding-left: 1.5rem; border-left: 2px solid #e2e8f0; padding-bottom: 1.5rem; position: relative; }
-    .dark .timeline-item { border-color: rgba(220,234,247,0.10); }
-    .timeline-item::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #0077B6; }
-    .timeline-item:last-child { border-color: transparent; }
-    .timeline-date { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.3rem; font-family: monospace; }
-    .timeline-event { font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 0.3rem; }
-    .dark .timeline-event { color: #DCEAF7; }
-    .timeline-note { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
-    .dark .timeline-note { color: #6B8CAE; }
-
-    /* Attached Files styling */
     .file-chip {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(0,119,182,0.06);
-      border: 1px solid rgba(0,119,182,0.15);
-      padding: 0.4rem 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.8rem;
+      gap: 0.4rem;
+      background: rgba(34, 211, 238, 0.07);
+      border: 1px solid rgba(34, 211, 238, 0.18);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #0077B6;
+      color: var(--accent);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
-    .dark .file-chip {
-      background: rgba(220,234,247,0.06);
-      border-color: rgba(220,234,247,0.15);
-      color: #7dd3fc;
+
+    .file-chip:hover {
+      background: rgba(34, 211, 238, 0.15);
     }
-    .file-chip:hover { background: rgba(0,119,182,0.15); }
-    .dark .file-chip:hover { background: rgba(220,234,247,0.12); }
 
-
-    /* Frost Flash Theme Transition */
-    .frost-flash {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.85);
-      z-index: 9999; pointer-events: none;
-      opacity: 0; transition: opacity 0.5s ease-out;
+    /* ── Modals ──────────────────────── */
+    .modal-ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(5px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
-    .dark .frost-flash { background: rgba(34, 211, 238, 0.35); }
-    .frost-flash.flash-active { opacity: 1; transition: none; }
 
-    /* =========================================================
-       MISC
-    ========================================================= */
-    .theme-toggle { width: 3rem; height: 1.5rem; background: #cbd5e1; border-radius: 99px; position: relative; cursor: pointer; border: 1px solid #0077B6; transition: background 0.3s; }
-    .dark .theme-toggle { background: #0077B6; }
-    .theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 1.125rem; height: 1.125rem; background: #ffffff; border-radius: 50%; transition: transform 0.3s ease; }
-    .dark .theme-toggle::after { transform: translateX(1.5rem); }
-
-    .date-nav { display: flex; align-items: center; gap: 0; background: rgba(0,0,0,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 0.875rem; padding: 0.3rem; }
-    .date-nav-btn { width: 2rem; height: 2rem; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.55); transition: color 0.15s; font-size: 0.8rem; }
-    .date-nav-btn:hover { color: #ffffff; }
-    .date-nav-label { font-size: 0.75rem; font-weight: 700; font-family: monospace; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; padding: 0 0.5rem; min-width: 8rem; text-align: center; }
-
-    @keyframes subtle-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .status-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #10b981; animation: subtle-pulse 2.5s infinite; }
-    .btn-action { width: 2.5rem; height: 2.5rem; border: none; border-radius: 0.625rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: white; transition: transform 0.15s, box-shadow 0.15s; }
-    .btn-action:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-    .btn-approve { background: #10b981; }
-    .btn-edit    { background: #0077B6; }
-    .table-footer { padding: 1rem 2rem; border-top: 1px solid #f1f5f9; background: #f8fafc; display: flex; justify-content: center; flex-shrink: 0; }
-    .dark .table-footer { border-color: rgba(220,234,247,0.06); background: rgba(0,0,0,0.15); }
-    .btn-show-all { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #0077B6; background: none; border: none; cursor: pointer; transition: color 0.2s; }
-    .btn-show-all:hover { color: #1e293b; }
-    .dark .btn-show-all:hover { color: #DCEAF7; }
-
-    /* =========================================================
-       MODALS
-    ========================================================= */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-      z-index: 50; display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    .modal-ov.open {
+      opacity: 1;
+      pointer-events: auto;
     }
-    .modal-overlay.open { opacity: 1; pointer-events: auto; }
-    
-    .modal-container {
-      background: #ffffff; border-radius: 1.5rem; width: 90%; max-width: 1200px;
-      max-height: 90vh; display: flex; flex-direction: column;
-      transform: translateY(20px); transition: transform 0.3s ease;
-      overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-    .dark .modal-container { background: #081426; border: 1px solid rgba(220, 234, 247, 0.1); }
-    .modal-overlay.open .modal-container { transform: translateY(0); }
 
-    .modal-header {
-      padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: center;
+    .modal-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 90%;
+      max-width: 1100px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(16px);
+      transition: transform 0.3s;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
     }
-    .dark .modal-header { border-color: rgba(220, 234, 247, 0.1); }
-    
-    .modal-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-    .dark .modal-title { color: #DCEAF7; }
+
+    .modal-ov.open .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-hd {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-ttl {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.75rem;
+    }
 
     .btn-close {
-      background: none; border: none; font-size: 1.5rem; color: #94a3b8;
-      cursor: pointer; transition: color 0.2s;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s;
     }
-    .btn-close:hover { color: #ef4444; }
 
-    .modal-body { flex: 1; overflow-y: auto; padding: 2rem; }
-
-    /* Entry Details Modal specifics */
-    .entry-modal-h2 { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #1e293b; border-left: 4px solid #0077B6; padding-left: 0.75rem; margin: 2rem 0 1rem 0; }
-    .dark .entry-modal-h2 { color: #DCEAF7; border-color: #07B2D9; }
-    
-    .entry-summary-box { background: #f8fafc; border-radius: 1rem; padding: 1.5rem; color: #64748b; font-size: 0.95rem; line-height: 1.6; }
-    .dark .entry-summary-box { background: rgba(255,255,255,0.03); color: #6B8CAE; }
-
-    .entry-text { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 1rem; }
-    .dark .entry-text { color: #94a3b8; }
-
-    .ai-suggestion-box { background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 1rem; padding: 1.5rem; display: flex; gap: 1rem; margin-top: 2rem; }
-    .dark .ai-suggestion-box { background: rgba(5, 150, 105, 0.1); border-color: rgba(5, 150, 105, 0.2); }
-    
-    .ai-suggest-icon { width: 2.5rem; height: 2.5rem; background: #ccfbf1; color: #0f766e; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
-    .dark .ai-suggest-icon { background: rgba(5, 150, 105, 0.2); color: #10b981; }
-
-    .ai-suggest-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #0f766e; margin-bottom: 0.25rem; }
-    .dark .ai-suggest-title { color: #34d399; }
-    .ai-suggest-text { font-size: 0.9rem; color: #0f766e; }
-    .dark .ai-suggest-text { color: #a7f3d0; }
-
-    .date-divider { font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.15em; margin: 1.5rem 0 0.5rem 0; padding-bottom: 0.5rem; border-bottom: 1px dashed #e2e8f0; }
-    .dark .date-divider { color: #6B8CAE; border-color: rgba(220, 234, 247, 0.1); }
-    
-    /* Action Buttons Row & Processed Badge */
-    .wn-action-row {
-      display: flex; flex-direction: row; align-items: center; gap: 0.5rem;
-      width: 5.5rem; /* 2×2.5rem buttons + 0.5rem gap */
+    .btn-close:hover {
+      color: #ef4444;
     }
-    .processed-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 5.5rem; /* Same fixed width as the two-button group */
-      background: #f1f5f9; border-radius: 99px; padding: 0.35rem 0;
-      color: #94a3b8; font-size: 0.8rem; font-style: italic; font-weight: 600;
-      border: 1px solid #e2e8f0;
-    }
-    .dark .processed-badge { background: rgba(255,255,255,0.03); color: #64748b; border-color: rgba(255,255,255,0.06); }
 
-    .sidebar-resizer {
-      position: absolute; right: 0; top: 0; width: 1.5rem; height: 100%;
-      cursor: col-resize; z-index: 40; display: flex; align-items: center; justify-content: center;
+    .em-h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      border-left: 3px solid var(--accent);
+      padding-left: 0.6rem;
+      margin: 1.5rem 0 0.75rem;
     }
-    .sidebar-resizer::after {
-      content: ''; width: 4px; height: 3rem; background: rgba(148, 163, 184, 0.4);
-      border-radius: 4px; transition: background 0.2s;
+
+    .em-sumbox {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 1.25rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
-    .sidebar-resizer:hover::after, .sidebar-resizer.active::after { background: var(--ck-accent); }
+
+    .em-txt {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .ai-box {
+      background: rgba(34, 211, 238, 0.05);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      gap: 0.9rem;
+      margin-top: 1.5rem;
+    }
+
+    .ai-icon {
+      width: 2.2rem;
+      height: 2.2rem;
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .ai-lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.2rem;
+    }
+
+    .date-div {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin: 1.25rem 0 0.4rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    /* ── Frost transition flash ──────── */
+    .frost-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      background: rgba(255, 255, 255, 0.8);
+      transition: opacity 0.45s ease-out;
+    }
+
+    .dark .frost-flash {
+      background: rgba(34, 211, 238, 0.28);
+    }
+
+    .frost-flash.on {
+      opacity: 1;
+      transition: none;
+    }
+
+    /* ── Sidebar resizer ─────────────── */
+    .resizer {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 1.2rem;
+      height: 100%;
+      z-index: 40;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .resizer::after {
+      content: '';
+      width: 3px;
+      height: 2.5rem;
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+
+    .resizer:hover::after {
+      background: var(--accent);
+    }
   </style>
 </head>
 
-<body class="bg-ck-bg text-ck-text h-screen flex p-8 gap-8" id="app-body">
+<body class="h-screen flex gap-6 p-6" id="app-body">
 
-  <aside id="main-sidebar" class="shrink-0 flex flex-col h-full layout-wrapper relative" style="width: 18vw; min-width: 200px;">
-    <div class="sidebar-resizer" id="sidebar-resizer"></div>
-    <div class="ice-card sidebar h-full">
-      <div class="p-8 shrink-0">
-        <div class="flex items-center gap-4 mb-10">
-          <div class="sidebar-logo-wrap"><i class="fas fa-snowflake text-3xl text-ck-ocean"></i></div>
-          <div>
-            <h1 class="font-bold text-2xl tracking-tight leading-none text-ck-ocean dark:text-ck-text">CoolKonyha</h1>
-            <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] mt-1 text-ck-ocean dark:text-ck-cyan">Enterprise AI</p>
-          </div>
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <aside id="main-sidebar" class="shrink-0 flex flex-col h-full ice-card sidebar-bg relative"
+    style="width:18vw; min-width:200px;">
+    <div class="resizer" id="sidebar-resizer"></div>
+
+    <!-- Logo -->
+    <div class="p-7 shrink-0">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+          style="background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.25);">
+          <i class="fas fa-snowflake text-2xl" style="color:var(--accent);"></i>
         </div>
-        <nav class="space-y-2">
-          <a href="#" class="nav-item active" id="nav-dashboard"><i class="fas fa-columns w-6 text-center text-lg"></i><span>Irányítópult</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-file-alt w-6 text-center text-lg"></i><span>Riportok</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-database w-6 text-center text-lg"></i><span>Adatbázis</span></a>
-          <a href="#" class="nav-item"><i class="fas fa-cog w-6 text-center text-lg"></i><span>Beállítások</span></a>
-        </nav>
-      </div>
-
-      <div class="flex-1 flex flex-col min-h-0 relative px-6">
-        <div class="flex-1 overflow-y-auto flex flex-col custom-scroll chat-scroll-area pb-6 gap-6">
-          <div class="flex-1"></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Üdv CK! Minden rendszerelem stabil. Készen állok a műveletekre.</p>
-          </div>
-          <div class="chat-bubble-user"><p>Mikor érkeznek a Brema egységek a Hiltonhoz?</p></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">A Hilton szállítmánya (HILT-00001) holnap reggel 10:00-ra van ütemezve. Vámkezelés kész.</p>
-          </div>
+        <div>
+          <h1 class="font-head font-extrabold text-xl leading-none" style="color:var(--text);">CoolKonyha</h1>
+          <p class="text-[0.6rem] font-bold uppercase tracking-[0.2em] mt-0.5" style="color:var(--accent);">Enterprise
+            AI</p>
         </div>
       </div>
 
-      <div class="p-6 shrink-0">
-        <div class="carved-input-wrap">
-          <button class="carved-icon-btn" title="Fájl csatolása"><i class="fas fa-paperclip"></i></button>
-          <input class="carved-input" type="text" placeholder="Kérdezz P.I.S.T.A.-tól...">
-          <button class="carved-icon-btn" title="Küldés"><i class="fas fa-paper-plane text-ck-ocean dark:text-ck-cyan"></i></button>
-        </div>
+      <nav class="space-y-1">
+        <a href="#" class="nav-item active" id="nav-dashboard">
+          <i class="fas fa-columns w-5 text-center"></i><span>Irányítópult</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-file-alt w-5 text-center"></i><span>Riportok</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-database w-5 text-center"></i><span>Adatbázis</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-cog w-5 text-center"></i><span>Beállítások</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- P.I.S.T.A. Chat -->
+    <div class="flex-1 flex flex-col min-h-0 px-5">
+      <p class="chat-label mb-3">P.I.S.T.A. Asszisztens</p>
+      <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade pb-4 gap-4 min-h-0">
+        <div class="flex-1"></div>
+        <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>Üdv CK! Minden rendszerelem stabil. Készen állok
+          a műveletekre.</div>
+        <div class="chat-user">Mikor érkeznek a Brema egységek a Hiltonhoz?</div>
+        <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>A Hilton szállítmánya (HILT-00001) holnap reggel
+          10:00-ra van ütemezve. Vámkezelés kész.</div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="p-5 shrink-0">
+      <div class="carved">
+        <button class="carved-btn"><i class="fas fa-paperclip"></i></button>
+        <input type="text" placeholder="Kérdezz P.I.S.T.A.-tól...">
+        <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
       </div>
     </div>
   </aside>
 
-  <main class="flex-1 flex flex-col overflow-hidden gap-8">
-    
-    <!-- TOP SECTION: WHAT'S NEW & KPI -->
-    <section class="shrink-0 layout-wrapper" style="max-height:35%">
-      <div class="ice-card h-full">
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
+
+    <!-- TOP: MI ÚJSÁG + STAT BOXES -->
+    <div class="shrink-0 flex flex-row gap-6" style="max-height:36%;">
+      <section class="flex-1 ice-card flex flex-col min-w-0">
+        <!-- Header bar -->
         <div class="section-header">
-          <div class="flex items-center gap-4">
-            <h2 class="section-header-title">Mi Újság?</h2>
-            <span class="section-badge" id="whats-new-count">3 ÚJ FRISSÍTÉS</span>
-          </div>
-          
-          <div class="kpi-container">
-            <div class="kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Aktív Rendelés</span>
-                <span class="kpi-value">124</span>
-              </div>
-              <svg class="kpi-sparkline" viewBox="0 0 40 20">
-                <path d="M0,15 L10,12 L20,18 L30,5 L40,8" />
-                <circle cx="40" cy="8" r="2" />
-              </svg>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Kiszállításra Kész</span>
-                <span class="kpi-value">18</span>
-              </div>
-              <svg class="kpi-sparkline" viewBox="0 0 40 20">
-                <path d="M0,18 L10,10 L20,12 L30,2 L40,4" />
-                <circle cx="40" cy="4" r="2" />
-              </svg>
-            </div>
+          <div class="flex items-center gap-3">
+            <h2 class="section-title">WHAT'S NEW?</h2>
+            <span class="section-badge" id="wn-count">3 ÚJ FRISSÍTÉS</span>
           </div>
 
-          <div class="flex items-center gap-6">
+
+
+          <!-- Controls -->
+          <div class="flex items-center gap-4">
             <div class="date-nav">
               <button class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
-              <span class="date-nav-label">2026. Március 22.</span>
+              <span class="date-nav-label">2026. Március 23.</span>
               <button class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white" id="theme-label">Sötét Mód</span>
+            <div class="flex items-center gap-2">
+              <span class="theme-label" id="theme-label">Sötét Mód</span>
               <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Téma váltása"></div>
             </div>
           </div>
         </div>
-        <div class="flex-1 overflow-y-auto custom-scroll">
-          <table class="whats-new-table"><tbody id="whats-new-body"></tbody></table>
-        </div>
-        <div class="table-footer">
-          <button class="btn-show-all" onclick="openModal('all-updates-modal')">Összes Frissítés Megtekintése (34)</button>
-        </div>
-      </div>
-    </section>
 
-    <!-- BOTTOM SECTION: MERGED ORDERS + DETAILS -->
-    <section class="flex-1 layout-wrapper min-h-0">
-      <div class="ice-card flex flex-row h-full">
-        
-        <!-- LEFT: ACTIVE ORDERS -->
-        <div class="flex flex-col border-r divider-line" style="width:65%">
-          <div class="section-header-light border-b-0 pb-4 pt-6">
-            <div class="flex flex-col gap-1">
-              <h3 class="section-header-light-title">Aktív Rendelések</h3>
-            </div>
-            <div class="header-search">
-              <i class="fas fa-search header-search-icon"></i>
-              <input type="text" placeholder="Szűrés (Ügyfél, Státusz...)" id="orders-search" oninput="filterOrders()">
-            </div>
-          </div>
-          <div class="flex-1 overflow-y-auto custom-scroll border-t divider-line">
-            <table class="orders-table">
-              <thead>
-                <tr>
-                  <th class="col-logo"></th>
-                  <th onclick="sortOrders('name')">Ügyfél neve <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('orderCode')">Azonosító <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('status')">Státusz <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                  <th onclick="sortOrders('workflow')">Folyamat <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                </tr>
-              </thead>
-              <tbody id="orders-body"></tbody>
-            </table>
+        <!-- Table -->
+        <div class="flex-1 overflow-y-auto cscroll min-h-0">
+          <table class="wn-table">
+            <tbody id="wn-body"></tbody>
+          </table>
+        </div>
+        <div class="tbl-footer">
+          <button class="btn-see-all" onclick="openModal('modal-all')">Összes Frissítés Megtekintése (34)</button>
+        </div>
+      </section>
+
+      <!-- Stat boxes column -->
+      <!-- Width = each box height: parent max-height 36vh → two boxes + 1 gap = (36vh - 1rem) / 2 ≈ 18vh - 0.5rem -->
+      <div class="shrink-0 flex flex-col gap-4 h-full" style="width: calc(18vh - 0.5rem);">
+
+        <!-- Box 1: Active orders — cyan -->
+        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+                 background: linear-gradient(160deg, rgba(8,145,178,0.25) 0%, rgba(34,211,238,0.08) 100%);
+                 border-color: rgba(34,211,238,0.35);">
+          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                       color:rgba(34,211,238,0.85); line-height:1.3;">Aktív rendelések</span>
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:36cqi; font-weight:700;
+                         color:#22d3ee; line-height:1;
+                         text-shadow: 0 0 24px rgba(34,211,238,0.55), 0 0 8px rgba(34,211,238,0.3);">124</span>
           </div>
         </div>
 
-        <!-- RIGHT: DETAILS PANEL -->
-        <div class="flex flex-col relative" style="width:35%">
-           <!-- Status Indicator top right corner -->
-           <div class="absolute top-6 right-6 z-10">
-             <div class="status-dot"></div>
-           </div>
-          <div class="flex-1 overflow-y-auto custom-scroll p-8" id="details-panel">
-            <div class="details-empty">
-              <i class="fas fa-mouse-pointer details-empty-icon"></i>
-              <p class="details-empty-text">Kattints egy rendelésre a részletekhez!</p>
-            </div>
+        <!-- Box 2: Closed orders — emerald -->
+        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+                 background: linear-gradient(160deg, rgba(5,150,105,0.25) 0%, rgba(74,222,128,0.08) 100%);
+                 border-color: rgba(74,222,128,0.35);">
+          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                       color:rgba(74,222,128,0.85); line-height:1.3;">30 napban lezárt</span>
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:42cqi; font-weight:700;
+                         color:#4ade80; line-height:1;
+                         text-shadow: 0 0 24px rgba(74,222,128,0.55), 0 0 8px rgba(74,222,128,0.3);">210</span>
           </div>
         </div>
 
       </div>
+
+
+    </div>
+
+    <!-- BOTTOM: ORDERS + DETAILS -->
+    <section class="flex-1 ice-card flex flex-row min-h-0 overflow-hidden">
+
+      <!-- Orders list -->
+      <div class="flex flex-col min-h-0" style="width:64%; border-right:1px solid var(--border);">
+        <div class="sub-header">
+          <h3 class="sub-title">ACTIVE ORDERS</h3>
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Szűrés (Ügyfél, Státusz...)" id="orders-search" oninput="filterOrders()">
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto cscroll min-h-0">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-ico"></th>
+                <th onclick="sortOrders('name')">Ügyfél neve <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('orderCode')">Azonosító <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('status')">Státusz <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('workflow')">Folyamat <i class="fas fa-sort ml-1 opacity-40"></i></th>
+              </tr>
+            </thead>
+            <tbody id="orders-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Details panel -->
+      <div class="flex flex-col relative" style="width:36%;">
+        <div class="absolute top-4 right-4 z-10">
+          <div class="status-dot"></div>
+        </div>
+        <div class="flex-1 overflow-y-auto cscroll p-7" id="details-panel">
+          <div class="det-empty">
+            <i class="fas fa-mouse-pointer" style="font-size:2.5rem; opacity:0.25;"></i>
+            <p style="font-size:0.85rem; font-weight:500;">Kattints egy rendelésre a részletekhez!</p>
+          </div>
+        </div>
+      </div>
+
     </section>
   </main>
 
-  <!-- MODALS -->
-  <div class="modal-overlay" id="all-updates-modal" onclick="closeModalOnBg(event, 'all-updates-modal')">
-    <div class="modal-container" style="max-width: 800px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Összes Frissítés Története</h2>
-        <button class="btn-close" onclick="closeModal('all-updates-modal')"><i class="fas fa-times"></i></button>
+  <!-- Frost flash overlay -->
+  <div class="frost-flash" id="frost-flash"></div>
+
+  <!-- ═══════════════════════════════════════════
+       MODALS
+  ═══════════════════════════════════════════ -->
+  <!-- All Updates Modal -->
+  <div class="modal-ov" id="modal-all" onclick="closeBg(event,'modal-all')">
+    <div class="modal-box" style="max-width:780px;">
+      <div class="modal-hd">
+        <h2 class="modal-ttl">Összes Frissítés Története</h2>
+        <button class="btn-close" onclick="closeModal('modal-all')"><i class="fas fa-times"></i></button>
       </div>
-      <div class="modal-body custom-scroll">
-        <div class="date-divider">Ma (2026. Március 22.)</div>
-        <table class="whats-new-table"><tbody id="all-updates-body-today"></tbody></table>
-        
-        <div class="date-divider">Tegnap (2026. Március 21.)</div>
-        <table class="whats-new-table"><tbody id="all-updates-body-yesterday"></tbody></table>
+      <div class="modal-body cscroll">
+        <div class="date-div">Ma (2026. Március 23.)</div>
+        <table class="wn-table">
+          <tbody id="modal-all-today"></tbody>
+        </table>
+        <div class="date-div">Tegnap (2026. Március 22.)</div>
+        <table class="wn-table">
+          <tbody id="modal-all-yesterday"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="entry-details-modal" onclick="closeModalOnBg(event, 'entry-details-modal')">
-    <div class="modal-container" style="flex-direction: row; height: 80vh;">
-      
-      <!-- LEFT COL: Core Content -->
-      <div class="flex flex-col border-r divider-line" style="width:65%">
-        <div class="modal-header border-b-0 pb-0">
-          <div class="flex items-center gap-4">
-            <div class="details-client-logo" id="entry-modal-logo"><i class="fas fa-hotel"></i></div>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-code-text" style="margin:0" id="entry-modal-code">HILT-00001</span>
-              <p class="details-name leading-tight" id="entry-modal-name">CRYSTAL PALACE RESORTS</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-body custom-scroll">
-          <h2 class="entry-modal-h2">Összegzés</h2>
-          <div class="entry-summary-box" id="entry-modal-summary">
-            A hűtőrendszer szenzorai kritikus eltérést észleltek a C-szektor 4-es moduljában...
-          </div>
-
-          <h2 class="entry-modal-h2">Részletes Leírás</h2>
-          <div id="entry-modal-desc">
-            <p class="entry-text">Az automatizált diagnosztika alapján a hűtőközeg nyomása stabil...</p>
-          </div>
-
-          <div class="ai-suggestion-box">
-            <div class="ai-suggest-icon"><i class="fas fa-bolt"></i></div>
+  <!-- Entry Detail Modal -->
+  <div class="modal-ov" id="modal-entry" onclick="closeBg(event,'modal-entry')">
+    <div class="modal-box" style="flex-direction:row; height:80vh; max-width:1100px;">
+      <!-- Left: Content -->
+      <div class="flex flex-col min-h-0" style="width:65%; border-right:1px solid var(--border);">
+        <div class="modal-hd" style="padding-bottom:0.75rem;">
+          <div class="flex items-center gap-3">
+            <div class="det-logo" id="em-logo"><i class="fas fa-hotel"></i></div>
             <div>
-              <p class="ai-suggest-title">AI Javaslat</p>
-              <p class="ai-suggest-text" id="entry-modal-suggestion">Az Arctic Core modul újraindítása javasolt.</p>
+              <span class="order-code" id="em-code">HILT-00001</span>
+              <p class="det-name mt-1" id="em-name">Hilton Budapest Ltd.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-body cscroll">
+          <h2 class="em-h2">Összegzés</h2>
+          <div class="em-sumbox" id="em-summary">A hűtőrendszer szenzorai kritikus eltérést észleltek...</div>
+          <h2 class="em-h2">Részletes Leírás</h2>
+          <div id="em-desc">
+            <p class="em-txt">Az automatizált diagnosztika alapján a hűtőközeg nyomása stabil...</p>
+          </div>
+          <div class="ai-box">
+            <div class="ai-icon"><i class="fas fa-bolt"></i></div>
+            <div>
+              <p class="ai-lbl">P.I.S.T.A. Javaslat</p>
+              <p style="font-size:0.88rem; color:var(--text);" id="em-suggestion">Az Arctic Core modul újraindítása
+                javasolt.</p>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- RIGHT COL: AI Chat Interface -->
-      <div class="flex flex-col bg-slate-50 dark:bg-ck-bg" style="width:35%">
-        <div class="modal-header bg-white dark:bg-ck-card border-b divider-line">
-          <div class="flex items-center gap-3 text-ck-ocean dark:text-ck-text font-bold text-sm tracking-wider uppercase">
-            <i class="fas fa-robot text-lg"></i> Rendszer AI
+      <!-- Right: AI Chat -->
+      <div class="flex flex-col" style="width:35%; background:var(--surface);">
+        <div class="modal-hd" style="background:var(--surface);">
+          <div class="flex items-center gap-2"
+            style="font-weight:700; font-size:0.82rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em;">
+            <i class="fas fa-robot"></i> Rendszer AI
           </div>
-          <button class="btn-close" onclick="closeModal('entry-details-modal')"><i class="fas fa-times"></i></button>
+          <button class="btn-close" onclick="closeModal('modal-entry')"><i class="fas fa-times"></i></button>
         </div>
-        
-        <div class="flex-1 overflow-y-auto custom-scroll p-6 flex flex-col gap-6">
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Üdvözlöm! Észleltem a problémát. Segíthetek az adatok elemzésében?</p>
-          </div>
-          <div class="chat-bubble-user"><p>Mikor volt az utolsó manuális kalibráció?</p></div>
-          <div class="chat-message-ai">
-            <span class="chat-label">P.I.S.T.A.</span>
-            <p class="opacity-90">Az utolsó manuális beavatkozás 72 órája történt. A jelenlegi hiba szoftveres úton is orvosolhatónak tűnik.</p>
+        <div class="flex-1 overflow-y-auto cscroll p-5 flex flex-col gap-4">
+          <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>Üdvözlöm! Észleltem a problémát. Segíthetek az
+            adatok elemzésében?</div>
+          <div class="chat-user">Mikor volt az utolsó manuális kalibráció?</div>
+          <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>Az utolsó manuális beavatkozás 72 órája
+            történt. Szoftveres úton orvosolható.</div>
+        </div>
+        <div class="p-4 shrink-0" style="border-top:1px solid var(--border);">
+          <div class="carved">
+            <button class="carved-btn"><i class="fas fa-plus-circle"></i></button>
+            <input type="text" placeholder="Kérdezzen...">
+            <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
           </div>
         </div>
-
-        <div class="p-6 bg-white dark:bg-ck-card border-t divider-line shrink-0">
-          <div class="carved-input-wrap">
-            <button class="carved-icon-btn"><i class="fas fa-plus-circle"></i></button>
-            <input class="carved-input" type="text" placeholder="Kérdezzen...">
-            <button class="carved-icon-btn"><i class="fas fa-paper-plane text-ck-ocean dark:text-ck-cyan"></i></button>
-          </div>
-          <p class="text-[0.6rem] text-center text-slate-400 dark:text-slate-500 mt-2 uppercase font-bold tracking-widest">Rendszer AI Asszisztens</p>
-        </div>
-
       </div>
     </div>
   </div>
+
+  <!-- ═══════════════════════════════════════════
+       TEMPLATES
+  ═══════════════════════════════════════════ -->
+  <!-- Template for "What's New" table rows -->
+  <template id="tpl-wn-row">
+    <tr>
+      <td style="width:3.5rem;">
+        <div class="wn-ico"><i class="fas"></i></div>
+      </td>
+      <td>
+        <p class="wn-title"></p>
+        <p class="wn-detail"></p>
+      </td>
+      <td><span class="wn-suggestion"></span></td>
+      <td style="width:5.5rem;" class="wn-action-cell">
+        <!-- Action Row (Default) -->
+        <div class="wn-action-row hidden">
+          <button class="btn-act btn-ok"><i class="fas fa-check"></i></button>
+          <button class="btn-act btn-edit"><i class="fas fa-pencil"></i></button>
+        </div>
+        <!-- Processed Badge -->
+        <div class="done-badge hidden">Feldolgozva</div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- Template for "Orders" table rows -->
+  <template id="tpl-order-row">
+    <tr class="order-row-el">
+      <td>
+        <div class="ico-wrap"><i class="fas"></i></div>
+      </td>
+      <td>
+        <div class="client-name"></div>
+      </td>
+      <td><span class="order-code"></span></td>
+      <td class="status-cell">
+        <div class="status-text mb-1"></div>
+        <!-- Pipeline Stepper -->
+        <div class="pipeline">
+          <div class="pip-node" data-step="1"></div>
+          <div class="pip-line" data-line="1"></div>
+          <div class="pip-node" data-step="2"></div>
+          <div class="pip-line" data-line="2"></div>
+          <div class="pip-node" data-step="3"></div>
+          <div class="pip-line" data-line="3"></div>
+          <div class="pip-node" data-step="4"></div>
+        </div>
+      </td>
+      <td>
+        <div class="flex items-center"><span class="pill"></span><i
+            class="fas fa-paperclip clip-icon hidden ml-2 opacity-50"
+            style="color:var(--accent); font-size:0.75rem;"></i></div>
+      </td>
+    </tr>
+  </template>
 
   <script>
-    // ---- MOCK DATA -------------------------------------------------------
-    const WHATS_NEW = [
-      { id: 1, icon: 'fa-hotel', title: 'Rendelés Frissítés: Hilton Budapest', detail: 'Vámkezelés igazolva 2x Brema CB 249 egységre a HILT-00001 rendelésben.', suggestion: 'Egyeztesd a logisztikát a technikai személyzettel.', orderCode: 'HILT-00001', name: 'Hilton Budapest Ltd.' },
-      { id: 2, icon: 'fa-envelope', title: 'Új Email: Kovács Kft.', detail: 'Aláírt szerződés csatolva a KOVA-00002 ajánlathoz.', suggestion: 'Indítsd el a gyártási folyamatot.', orderCode: 'KOVA-00002', name: 'Kovács Kft.' },
-      { id: 3, icon: 'fa-box', title: 'Korábbi Rendelés: Tóth Kft.', detail: 'A TÓTH-00004 rendelés teljesen feldolgozva, a szerelő ütemezve.', suggestion: '-', orderCode: 'TOTH-00004', name: 'Tóth Kft.', processed: true },
-      { id: 4, icon: 'fa-building', title: 'Beragadt Rendelés: Mező & Társa', detail: '8 napja nem volt státuszváltozás (MEZO-00003). Sürgős beavatkozás javasolt.', suggestion: 'Hívd fel az ügyfelet és tisztázd a státuszt.', orderCode: 'MEZO-00003', name: 'Mező & Társa' },
-    ];
-    
-    // Extracted logic for reusable row rendering
-    function getWhatsNewRowHTML(item, index) {
-      // RULE: Action column always occupies the same fixed width (5.5rem),
-      // whether showing the two action buttons or the Processed badge.
-      const actionHtml = item.processed
-        ? `<div class="processed-badge">Feldolgozva</div>`
-        : `<div class="wn-action-row">
-             <button class="btn-action btn-approve"><i class="fas fa-check"></i></button>
-             <button class="btn-action btn-edit" onclick="openEntryModal(${index})"><i class="fas fa-pencil"></i></button>
-           </div>`;
+    /* ── RENDERING LOGIC ─────────────────────────── */
 
-      return `
-        <tr>
-          <td class="wn-logo-cell"><div class="wn-logo-wrap"><i class="fas ${item.icon}"></i></div></td>
-          <td class="wn-summary-cell"><p class="wn-summary-title">${item.title}</p><p class="wn-summary-detail">${item.detail}</p></td>
-          <td class="wn-suggestion-cell"><span class="wn-suggestion">${item.suggestion}</span></td>
-          <td class="wn-actions-cell">${actionHtml}</td>
-        </tr>
-      `;
-    }
+    async function renderWN() {
+      const containerMain = document.getElementById('wn-body');
+      const containerToday = document.getElementById('modal-all-today');
+      const containerYest = document.getElementById('modal-all-yesterday');
+      const tpl = document.getElementById('tpl-wn-row');
 
-    const ORDERS = [
-      { id: 1, orderCode: 'HILT-00001', icon: 'fa-hotel',    name: 'Hilton Budapest Ltd.', status: 'Szállítás folyamatban', workflow: 'DELIVERY',         updated: '2026-03-22' },
-      { id: 2, orderCode: 'KOVA-00002', icon: 'fa-industry', name: 'Kovács Kft.',          status: 'Rendelés visszaigazolva', workflow: 'ORDER_CONFIRMED',  updated: '2026-03-21' },
-      { id: 3, orderCode: 'MEZO-00003', icon: 'fa-building', name: 'Mező & Társa',         status: 'Ajánlat kiküldve',      workflow: 'OFFER_SENT',        updated: '2026-03-14', hasAiInsight: true },
-      { id: 4, orderCode: 'PAPP-00004', icon: 'fa-store',    name: 'Papp Bútor Kft.',      status: 'Számlázva',             workflow: 'INVOICED',          updated: '2026-03-20' },
-      { id: 5, orderCode: 'BUDA-00005', icon: 'fa-landmark', name: 'Budapest Szálló Zrt.', status: 'Új megkeresés',         workflow: 'NEW',              updated: '2026-03-22' },
-    ];
+      const updates = await dataService.getUpdates();
 
-    const ORDER_FILES = {
-      1: [ { name: 'Vam_Papírok.pdf', ext: 'pdf', icon: 'fa-file-pdf' }, { name: 'Szallitasi_utvonal.docx', ext: 'docx', icon: 'fa-file-word' } ],
-      2: [ { name: 'Alairt_Szerzodes.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ],
-      4: [ { name: 'Szamla_20260320.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ]
-    };
+      const createRow = (item, idx) => {
+        const clone = tpl.content.cloneNode(true);
 
-    const ORDER_HISTORY = {
-      1: [ { date: '2026-03-22 14:20', status: 'DELIVERY', note: 'Szállítmány úton van, vámkezelés befejezve.' }, { date: '2026-03-20 09:10', status: 'READY_FOR_DELIVERY', note: 'Termékek becsomagolva, átadva a fuvarozónak.' }, { date: '2026-03-15 11:30', status: 'ORDER_CONFIRMED', note: 'Ügyfél aláírta a megrendelőt.' } ],
-      2: [ { date: '2026-03-21 10:00', status: 'ORDER_CONFIRMED', note: 'Aláírt szerződés beérkezett emailben.' }, { date: '2026-03-18 14:00', status: 'OFFER_SENT', note: 'Ajánlat PDF kiküldve.' } ],
-      3: [ { date: '2026-03-14 12:00', status: 'OFFER_SENT', note: 'Ajánlat elküldve, 8 napja nincs válasz.' }, { date: '2026-03-12 10:30', status: 'NEW', note: 'Megkeresés rögzítve telefonon.' } ],
-      4: [ { date: '2026-03-20 16:00', status: 'INVOICED', note: 'Számla kiállítva és elküldve.' } ],
-      5: [ { date: '2026-03-22 13:55', status: 'NEW', note: 'Első kapcsolatfelvétel emailen.' } ],
-    };
+        const icoCont = clone.querySelector('.wn-ico');
+        if (item.logo) {
+          icoCont.innerHTML = `<img src="${item.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${item.icon}\'></i>'">`;
+        } else {
+          icoCont.querySelector('i').className = `fas ${item.icon}`;
+        }
+        clone.querySelector('.wn-title').textContent = item.title;
+        clone.querySelector('.wn-detail').textContent = item.detail;
+        clone.querySelector('.wn-suggestion').textContent = item.suggestion;
 
-    const ORDER_ITEMS = {
-      1: [ { name: 'Brema CB 249', qty: 2, price: 450000 }, { name: 'Ipari Vízlágyító (10L)', qty: 2, price: 55000 } ],
-      2: [ { name: 'Lincat OE8113 Olajsütő', qty: 1, price: 890000 } ],
-      3: [ { name: 'Unox Anna XF023', qty: 1, price: 295000 } ],
-      4: [ { name: 'Rozsdamentes asztal', qty: 3, price: 85000 } ],
-      5: [],
-    };
+        if (item.processed) {
+          clone.querySelector('.done-badge').classList.remove('hidden');
+        } else {
+          const actionRow = clone.querySelector('.wn-action-row');
+          actionRow.classList.remove('hidden');
+          actionRow.querySelector('.btn-edit').onclick = () => openEntryModal(idx);
+        }
 
-    const STATUS_LABELS = {
-      'NEW': 'Új', 'OFFER_SENT': 'Ajánlat', 'ORDER_CONFIRMED': 'Megrendelő', 'PURCHASE': 'Vásárlás',
-      'READY_FOR_DELIVERY': 'Kész', 'DELIVERY': 'Szállítás', 'DELIVERED': 'Kiszállítva', 'INVOICED': 'Számlázva'
-    };
+        return clone;
+      };
 
-    // ---- RENDERS ---------------------------------------------------------
-    function renderWhatsNew() {
-      // Main dashboard view (first 3)
-      document.getElementById('whats-new-body').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-      
-      // All Updates Modal views (Mock grouping)
-      document.getElementById('all-updates-body-today').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-      // Just re-using the mock data to simulate "Yesterday" records
-      document.getElementById('all-updates-body-yesterday').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
+      containerMain.innerHTML = '';
+      containerToday.innerHTML = '';
+      containerYest.innerHTML = '';
+
+      updates.forEach((item, i) => {
+        containerMain.appendChild(createRow(item, i));
+        containerToday.appendChild(createRow(item, i));
+        containerYest.appendChild(createRow(item, i));
+      });
     }
 
     let currentSort = { key: 'updated', dir: -1 };
-    function statusPill(wf) { return `<span class="status-pill status-${wf}">${STATUS_LABELS[wf] ?? wf}</span>`; }
+    let selectedId = null;
 
-    function getPipelineStep(wf) {
-      if (['NEW', 'OFFER_SENT', 'ORDER_CONFIRMED'].includes(wf)) return 1;
-      if (['PURCHASE', 'READY_FOR_DELIVERY'].includes(wf)) return 2;
-      if (['DELIVERY'].includes(wf)) return 3;
-      if (['DELIVERED', 'INVOICED', 'CLOSED'].includes(wf)) return 4;
-      return 0;
+    async function renderOrders(data) {
+      const container = document.getElementById('orders-body');
+      const tpl = document.getElementById('tpl-order-row');
+      container.innerHTML = '';
+
+      if (!data) data = await dataService.getOrders();
+
+      data.forEach(async o => {
+        const clone = tpl.content.cloneNode(true);
+        const tr = clone.querySelector('tr');
+
+        tr.id = `order-row-${o.id}`;
+        tr.onclick = () => selectOrder(o.id);
+        if (o.aiInsight) tr.classList.add('ai-row');
+        if (selectedId === o.id) tr.classList.add('selected');
+
+        const icoCont = clone.querySelector('.ico-wrap');
+        if (o.logo) {
+          icoCont.innerHTML = `<img src="${o.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${o.icon}\'></i>'">`;
+        } else {
+          icoCont.querySelector('i').className = `fas ${o.icon}`;
+        }
+
+        clone.querySelector('.client-name').textContent = o.name;
+        clone.querySelector('.order-code').textContent = o.orderCode;
+        clone.querySelector('.status-text').textContent = o.status;
+
+        // Pipeline
+        const step = dataService.getWorkflowStep(o.workflow);
+        clone.querySelectorAll('.pip-node').forEach(node => {
+          const n = parseInt(node.dataset.step);
+          if (step > n) node.classList.add('done');
+          else if (step === n) node.classList.add('active');
+        });
+        clone.querySelectorAll('.pip-line').forEach(line => {
+          const l = parseInt(line.dataset.line);
+          if (step > l) line.classList.add('done');
+        });
+
+        // Pill
+        const pill = clone.querySelector('.pill');
+        pill.textContent = dataService.getStatusLabel(o.workflow);
+        pill.classList.add(`p-${o.workflow}`);
+
+        // Clip (awaitable if needed, but currently sync in service)
+        const details = await dataService.getOrderDetails(o.id);
+        if (details.files && details.files.length) {
+          clone.querySelector('.clip-icon').classList.remove('hidden');
+        }
+
+        container.appendChild(clone);
+      });
     }
 
-    function renderPipeline(step) {
-      return `
-        <div class="pipeline-wrapper">
-          <div class="pipeline-stepper">
-            <div class="pipeline-node ${step >= 1 ? (step === 1 ? 'active' : 'completed') : ''}"></div>
-            <div class="pipeline-line ${step > 1 ? 'completed' : ''}"></div>
-            <div class="pipeline-node ${step >= 2 ? (step === 2 ? 'active' : 'completed') : ''}"></div>
-            <div class="pipeline-line ${step > 2 ? 'completed' : ''}"></div>
-            <div class="pipeline-node ${step >= 3 ? (step === 3 ? 'active' : 'completed') : ''}"></div>
-            <div class="pipeline-line ${step > 3 ? 'completed' : ''}"></div>
-            <div class="pipeline-node ${step >= 4 ? (step === 4 ? 'active' : 'completed') : ''}"></div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderOrders(data) {
-      document.getElementById('orders-body').innerHTML = data.map(o => {
-        const hasFiles = ORDER_FILES[o.id] && ORDER_FILES[o.id].length > 0;
-        const fileIconHtml = hasFiles ? `<i class="fas fa-paperclip text-ck-ocean dark:text-ck-cyan ml-3 opacity-70" title="Csatolt dokumentumok"></i>` : '';
-        const step = getPipelineStep(o.workflow);
-        const aiClass = o.hasAiInsight ? 'ai-insight-row' : '';
-        
-        return `
-        <tr onclick="selectOrder(${o.id})" id="order-row-${o.id}" class="${aiClass}">
-          <td><div class="order-logo-wrap"><i class="fas ${o.icon}"></i></div></td>
-          <td>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-client-name">${o.name}</span>
-            </div>
-          </td>
-          <td><span class="order-code-text">${o.orderCode}</span></td>
-          <td>
-            <div class="flex flex-col items-start justify-center h-full gap-1">
-              <span class="order-status-text">${o.status}</span>
-              ${renderPipeline(step)}
-            </div>
-          </td>
-          <td>
-            <div class="flex items-center justify-between pr-4">
-              ${statusPill(o.workflow)}
-              ${fileIconHtml}
-            </div>
-          </td>
-        </tr>
-      `}).join('');
-    }
-
-    function sortOrders(key) {
+    async function sortOrders(key) {
       if (currentSort.key === key) currentSort.dir *= -1;
       else { currentSort.key = key; currentSort.dir = -1; }
-      const sorted = [...ORDERS].sort((a, b) => {
-        const av = a[key] || ''; const bv = b[key] || '';
-        return av < bv ? -currentSort.dir : av > bv ? currentSort.dir : 0;
-      });
+      const data = await dataService.getOrders();
+      const sorted = [...data].sort((a, b) => (a[key] || '') < (b[key] || '') ? -currentSort.dir : (a[key] || '') > (b[key] || '') ? currentSort.dir : 0);
       renderOrders(sorted);
-      if (selectedOrderId) document.getElementById(`order-row-${selectedOrderId}`)?.classList.add('selected');
     }
 
-    function filterOrders() {
+    async function filterOrders() {
       const q = document.getElementById('orders-search').value.toLowerCase();
-      const filtered = ORDERS.filter(o => o.name.toLowerCase().includes(q) || o.orderCode.toLowerCase().includes(q) || o.workflow.toLowerCase().includes(q));
+      const orders = await dataService.getOrders();
+      const filtered = orders.filter(o =>
+        o.name.toLowerCase().includes(q) ||
+        o.orderCode.toLowerCase().includes(q) ||
+        o.workflow.toLowerCase().includes(q)
+      );
       renderOrders(filtered);
     }
 
-    // ---- DETAILS PANEL ---------------------------------------------------
-    let selectedOrderId = null;
-
-    function selectOrder(id) {
-      selectedOrderId = id;
-      document.querySelectorAll('.orders-table tbody tr').forEach(r => r.classList.remove('selected'));
+    /* ── DETAILS PANEL ───────────────────────────── */
+    async function selectOrder(id) {
+      selectedId = id;
+      document.querySelectorAll('.order-row-el').forEach(r => r.classList.remove('selected'));
       document.getElementById(`order-row-${id}`)?.classList.add('selected');
 
-      const order = ORDERS.find(o => o.id === id);
-      const history = ORDER_HISTORY[id] ?? [];
-      const items = ORDER_ITEMS[id] ?? [];
-      const files = ORDER_FILES[id] ?? [];
-      const latest = history[0];
+      const { order, history, items, files } = await dataService.getOrderDetails(id);
+      if (!order) return;
+      const fmt = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
 
-      const htmlFormatter = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
-
-      // Build Items
       let itemsHtml = '';
-      if (items.length > 0) {
-        let total = 0;
-        const rows = items.map(item => {
-          const rowTotal = item.qty * item.price; total += rowTotal;
-          return `<div class="details-item-row"><span class="details-item-name">${item.name}</span><span class="details-item-qty">${item.qty}x</span><span class="details-item-price">${htmlFormatter.format(rowTotal)}</span></div>`;
+      if (items.length) {
+        let tot = 0;
+        const rows = items.map(it => {
+          const rt = it.qty * it.price;
+          tot += rt;
+          return `<div class="det-row"><span class="det-row-name">${it.name}</span><span class="det-row-qty">${it.qty}x</span><span class="det-row-price">${fmt.format(rt)}</span></div>`;
         }).join('');
-        itemsHtml = `<h4 class="details-section-title">Termékek</h4><div>${rows}<div class="details-item-row total"><span class="details-item-name">Összesen:</span><span class="details-item-price">${htmlFormatter.format(total)}</span></div></div>`;
+        itemsHtml = `<div class="det-section">Termékek</div><div>${rows}<div class="det-row total"><span class="det-row-name">Összesen:</span><span class="det-row-price">${fmt.format(tot)}</span></div></div>`;
       }
 
-      // Build Files
       let filesHtml = '';
-      if (files.length > 0) {
-        const fileChips = files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i> ${f.name}</div>`).join('');
-        filesHtml = `<h4 class="details-section-title">Dokumentumok</h4><div class="flex flex-wrap gap-3">${fileChips}</div>`;
+      if (files && files.length) {
+        filesHtml = `<div class="det-section">Dokumentumok</div><div class="flex flex-wrap gap-2">${files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i>${f.name}</div>`).join('')}</div>`;
       }
 
-      // Build Timeline
-      const timelineHtml = `<h4 class="details-section-title">Előzmények</h4><div class="timeline">${history.map(h => `<div class="timeline-item"><p class="timeline-date">${h.date}</p><p class="timeline-event">${statusPill(h.status)}</p><p class="timeline-note">${h.note}</p></div>`).join('')}</div>`;
+      const tlHtml = `<div class="det-section">Előzmények</div><div style="margin-top:0.5rem;">${[...history].reverse().map(h => `
+        <div class="timeline-item">
+          <p class="tl-date">${h.date}</p>
+          <span class="pill p-${h.status}">${dataService.getStatusLabel(h.status)}</span>
+          <p class="tl-note">${h.note}</p>
+        </div>`).join('')}</div>`;
 
       document.getElementById('details-panel').innerHTML = `
-        <div class="flex flex-col gap-2 mb-6">
-          <div class="flex items-center gap-5">
-            <div class="details-client-logo"><i class="fas ${order.icon}"></i></div>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-code-text" style="margin:0">${order.orderCode}</span>
-              <p class="details-name leading-tight">${order.name}</p>
-              <p class="details-updated">Frissítve: ${latest?.date ?? '–'}</p>
+        <div class="flex items-center gap-4 mb-5">
+          <div class="det-logo">
+            ${order.logo ? `<img src="${order.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\\\'fas ${order.icon}\\\'></i>'">` : `<i class="fas ${order.icon}"></i>`}
+          </div>
+          <div>
+            <span class="order-code">${order.orderCode}</span>
+            <p class="det-name mt-1">${order.name}</p>
+            <div class="flex flex-col gap-0.5 mt-1">
+              <p class="det-upd">Létrehozva: ${order.orderDate || '–'}</p>
+              <p class="det-upd">Frissítve: ${history[0]?.date ?? '–'}</p>
             </div>
           </div>
         </div>
-        ${filesHtml}
-        ${itemsHtml}
-        ${timelineHtml}
+        ${filesHtml}${itemsHtml}${tlHtml}
       `;
     }
 
-    // ---- THEME -----------------------------------------------------------
+    /* ── THEME & MODALS ──────────────────────────── */
     function toggleTheme() {
-      // Create flash overlay
-      const overlay = document.createElement('div');
-      overlay.className = 'frost-flash flash-active';
-      document.body.appendChild(overlay);
-
+      const ff = document.getElementById('frost-flash');
+      ff.classList.add('on');
       setTimeout(() => {
-        const html = document.documentElement;
-        html.classList.toggle('dark');
-        const isDark = html.classList.contains('dark');
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
         document.getElementById('theme-label').textContent = isDark ? 'Sötét Mód' : 'Világos Mód';
-        
-        // Remove class to trigger CSS fade out transition
-        requestAnimationFrame(() => {
-          overlay.classList.remove('flash-active');
-        });
-
-        setTimeout(() => overlay.remove(), 500); // 500ms match CSS exit transition
-      }, 50);
+        requestAnimationFrame(() => ff.classList.remove('on'));
+      }, 55);
     }
 
-    // ---- MODALS ----------------------------------------------------------
-    function openModal(id) {
-      document.getElementById(id).classList.add('open');
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeBg(e, id) { if (e.target.id === id) closeModal(id); }
+
+    async function openEntryModal(idx) {
+      const updates = await dataService.getUpdates();
+      const it = updates[idx];
+      if (!it) return;
+      document.getElementById('em-logo').innerHTML = `<i class="fas ${it.icon}"></i>`;
+      document.getElementById('em-code').textContent = it.orderCode;
+      document.getElementById('em-name').textContent = it.name;
+      document.getElementById('em-summary').textContent = it.detail;
+      document.getElementById('em-suggestion').textContent = it.suggestion;
+      document.getElementById('em-desc').innerHTML = `<p class="em-txt">A rendszer automatikus ellenőrzése során új esemény generálódott. A P.I.S.T.A. integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>`;
+      openModal('modal-entry');
     }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
+    /* ── INIT ─────────────────────────────────────── */
+    (async () => {
+      const resizer = document.getElementById('sidebar-resizer');
+      const sidebar = document.getElementById('main-sidebar');
+      let dragging = false, startX = 0, startW = 0, hasMoved = false;
+      resizer.addEventListener('mousedown', e => {
+        dragging = true;
+        hasMoved = false;
+        startX = e.clientX;
+        startW = sidebar.offsetWidth;
+        resizer.classList.add('active');
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        hasMoved = true;
+        // Allow ±5vw around the default 18vw  →  clamp to 13vw – 23vw
+        const minW = Math.round(window.innerWidth * 0.13);
+        const maxW = Math.round(window.innerWidth * 0.23);
+        sidebar.style.width = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX))) + 'px';
+      });
+      document.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
 
-    function closeModalOnBg(event, id) {
-      if (event.target.id === id) closeModal(id);
-    }
-
-    function openEntryModal(index) {
-      const entry = WHATS_NEW[index];
-      if (!entry) return;
-
-      document.getElementById('entry-modal-logo').innerHTML = `<i class="fas ${entry.icon}"></i>`;
-      document.getElementById('entry-modal-code').textContent = entry.orderCode;
-      document.getElementById('entry-modal-name').textContent = entry.name;
-      document.getElementById('entry-modal-summary').textContent = entry.detail;
-      document.getElementById('entry-modal-suggestion').textContent = entry.suggestion;
-      document.getElementById('entry-modal-desc').innerHTML = `
-        <p class="entry-text">A rendszer automatikus ellenőrzése során új esemény generálódott. A P.I.S.T.A. integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>
-        <p class="entry-text">Javasolt az üzleti folyamat lépéseinek manuális felülvizsgálata, vagy az AI asszisztens bevonása a helyzet tisztázására és akcióterv készítésére.</p>
-      `;
-
-      openModal('entry-details-modal');
-    }
-
-    // ---- SIDEBAR RESIZER -------------------------------------------------
-    const resizer = document.getElementById('sidebar-resizer');
-    const sidebar = document.getElementById('main-sidebar');
-    let isResizing = false;
-
-    resizer.addEventListener('mousedown', (e) => {
-      isResizing = true;
-      resizer.classList.add('active');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isResizing) return;
-      
-      const bodyWidth = document.body.clientWidth;
-      const minWidth = bodyWidth * 0.1;
-      const maxWidth = bodyWidth * 0.3;
-      
-      let newWidth = e.clientX - 32; // Body p-8 (2rem = 32px) offset
-      
-      if (newWidth < minWidth) newWidth = minWidth;
-      if (newWidth > maxWidth) newWidth = maxWidth;
-      
-      sidebar.style.width = newWidth + 'px';
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (isResizing) {
-        isResizing = false;
-        resizer.classList.remove('active');
-        document.body.style.cursor = 'default';
-        document.body.style.userSelect = 'auto';
-      }
-    });
-
-    renderWhatsNew();
-    renderOrders([...ORDERS].sort((a, b) => b.updated.localeCompare(a.updated)));
+      await renderWN();
+      const orders = await dataService.getOrders();
+      renderOrders([...orders].sort((a, b) => b.updated.localeCompare(a.updated)));
+    })();
   </script>
 </body>
+
 </html>

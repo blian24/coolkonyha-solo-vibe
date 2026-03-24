@@ -223,6 +223,102 @@ class DBRobot {
         }
     }
 
+    /**
+     * Creates a new customer record.
+     * 
+     * @param {Object} data - Customer data
+     * @param {string} data.cust_name - Customer name (required)
+     * @param {string} data.cust_email - Primary email (required)
+     * @param {string} [data.cust_contact] - Contact person
+     * @param {string} [data.cust_phone] - Phone number
+     * @param {string} [data.cust_web] - Website URL
+     * @param {string} [data.notes] - Internal notes
+     * @param {string} [data.logo_path] - Path to logo asset
+     * @returns {Promise<{id: number}>} Created customer ID
+     */
+    async createCustomer(data) {
+        if (!data.cust_name || !data.cust_email) {
+            throw new Error('Name and email are required');
+        }
+        const result = await this.run(`
+            INSERT INTO customers (cust_name, cust_contact, cust_email, cust_phone, cust_web, notes, logo_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+            data.cust_name,
+            data.cust_contact || null,
+            data.cust_email,
+            data.cust_phone || null,
+            data.cust_web || null,
+            data.notes || null,
+            data.logo_path || null
+        ]);
+        return { id: result.lastID };
+    }
+
+    /**
+     * Creates a new product supplier.
+     * 
+     * @param {Object} data - Supplier data
+     * @param {string} data.prod_supp_co - Company name (required)
+     * @param {string} [data.prod_supp_name] - Contact person
+     * @param {string} [data.prod_supp_email] - Primary email
+     * @param {string} [data.prod_supp_phone] - Phone number
+     * @param {string} [data.prod_supp_web] - Website URL
+     * @param {string} [data.notes] - Internal notes
+     * @param {string} [data.logo_path] - Path to logo asset
+     * @returns {Promise<{id: number}>} Created supplier ID
+     */
+    async createSupplier(data) {
+        if (!data.prod_supp_co) {
+            throw new Error('Company name is required');
+        }
+        const result = await this.run(`
+            INSERT INTO product_suppliers (prod_supp_co, prod_supp_name, prod_supp_email, prod_supp_phone, prod_supp_web, notes, logo_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+            data.prod_supp_co,
+            data.prod_supp_name || null,
+            data.prod_supp_email || null,
+            data.prod_supp_phone || null,
+            data.prod_supp_web || null,
+            data.notes || null,
+            data.logo_path || null
+        ]);
+        return { id: result.lastID };
+    }
+
+    /**
+     * Creates a new product.
+     * 
+     * @param {Object} data - Product data
+     * @param {string} data.prod_name - Product name (required)
+     * @param {number} data.prod_supp_id - Supplier ID (required)
+     * @param {number} data.unit_price - Base price (required)
+     * @param {string} [data.prod_type] - Category/Type
+     * @param {string} [data.prod_size] - Size/Dimensions
+     * @param {string} [data.notes] - Internal notes
+     * @param {string} [data.image_path] - Path to product image
+     * @returns {Promise<{id: number}>} Created product ID
+     */
+    async createProduct(data) {
+        if (!data.prod_name || !data.prod_supp_id || data.unit_price === undefined) {
+            throw new Error('Name, supplier ID, and unit price are required');
+        }
+        const result = await this.run(`
+            INSERT INTO products (prod_name, prod_supp_id, unit_price, prod_type, prod_size, notes, image_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+            data.prod_name,
+            data.prod_supp_id,
+            data.unit_price,
+            data.prod_type || null,
+            data.prod_size || null,
+            data.notes || null,
+            data.image_path || null
+        ]);
+        return { id: result.lastID };
+    }
+
     async getOrders() {
         return await this.all('SELECT * FROM orders ORDER BY order_date DESC');
     }
@@ -234,16 +330,20 @@ class DBRobot {
      * @returns {Promise<{order: Object, items: Array, history: Array}>}
      */
     async getOrderDetails(orderId) {
-        const order = await this.get(
-            'SELECT * FROM orders WHERE order_id = ?',
-            [orderId]
-        );
+        const order = await this.get(`
+      SELECT o.*, c.cust_name, c.logo_path
+      FROM orders o
+      JOIN customers c ON o.cust_id = c.cust_id
+      WHERE o.order_id = ?
+    `, [orderId]);
+
         const items = await this.all(`
       SELECT oi.*, p.prod_name
       FROM order_items oi
       JOIN products p ON oi.prod_id = p.prod_id
       WHERE oi.order_id = ?
     `, [orderId]);
+
         const history = await this.all(
             'SELECT * FROM order_status_history WHERE order_id = ? ORDER BY update_date DESC',
             [orderId]

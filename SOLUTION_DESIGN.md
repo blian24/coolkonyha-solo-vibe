@@ -77,6 +77,7 @@ Gmail Robot              CK's Chat Input
 - [Database Connection](./docs/architecture/database-connection.md) - Singleton connection management
 - [P.I.S.T.A. Agent](./docs/assistant_team/pista-agent.md) - AI Agent definition & logic
 - [Email Robot](./docs/assistant_team/email-robot.md) - Email fetching robot definition
+- [UI Architecture](./docs/architecture/ui-data-flow.md) - Separation of concerns & data binding
 
 ### Business Logic Documentation
 
@@ -102,6 +103,7 @@ Gmail Robot              CK's Chat Input
 | DBRobot | `server/agent.js` | Data access, business rules | [database-robot.md](./docs/assistant_team/database-robot.md) |
 | Routes | `server/routes.js` | REST API endpoints | [api-routes.md](./docs/architecture/api-routes.md) |
 | DB Connection | `server/db.js` | SQLite connection | [database-connection.md](./docs/architecture/database-connection.md) |
+| Data Service | `ui_design/js/services/dataService.js` | Centralized UI data provider | [ui-data-flow.md](./docs/architecture/ui-data-flow.md) |
 | Server | `server/index.js` | Express app entry | - |
 
 ## Quick Reference
@@ -114,6 +116,7 @@ Gmail Robot              CK's Chat Input
 - Database tables → `docs/architecture/database-schema.md`
 - Business rules → `docs/assistant_team/db_robot_logic_tools.md`
 - `server/pista.js` → `docs/assistant_team/pista-agent.md`
+- `ui_design/js/services/dataService.js` → `docs/architecture/ui-data-flow.md`
 
 ### Documentation → Code Map
 

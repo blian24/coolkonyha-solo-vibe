@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="../js/services/dataService.js"></script>
 
   <script>
     tailwind.config = {
@@ -718,168 +719,177 @@
     </div>
   </div>
 
+  <!-- TEMPLATES -->
+  <template id="tpl-wn-row">
+    <tr>
+      <td class="wn-logo-cell"><div class="wn-logo-wrap"><i class="fas"></i></div></td>
+      <td class="wn-summary-cell"><p class="wn-summary-title"></p><p class="wn-summary-detail"></p></td>
+      <td class="wn-suggestion-cell"><span class="wn-suggestion"></span></td>
+      <td class="wn-actions-cell">
+        <div class="wn-action-row hidden">
+          <button class="btn-action btn-approve"><i class="fas fa-check"></i></button>
+          <button class="btn-action btn-edit"><i class="fas fa-pencil"></i></button>
+        </div>
+        <div class="processed-badge hidden">Feldolgozva</div>
+      </td>
+    </tr>
+  </template>
+
+  <template id="tpl-order-row">
+    <tr class="order-row-el">
+      <td><div class="order-logo-wrap"><i class="fas"></i></div></td>
+      <td>
+        <div class="flex flex-col items-start gap-1">
+          <span class="order-client-name"></span>
+        </div>
+      </td>
+      <td><span class="order-code-text"></span></td>
+      <td>
+        <div class="flex flex-col items-start gap-1">
+          <span class="order-status-text"></span>
+          <span class="order-updated"></span>
+        </div>
+      </td>
+      <td>
+        <div class="flex items-center justify-between pr-4">
+          <span class="status-pill"></span>
+          <i class="fas fa-paperclip clip-icon text-ck-ocean dark:text-ck-cyan ml-3 opacity-70 hidden" title="Csatolt dokumentumok"></i>
+        </div>
+      </td>
+    </tr>
+  </template>
+
   <script>
-    // ---- MOCK DATA -------------------------------------------------------
-    const WHATS_NEW = [
-      { id: 1, icon: 'fa-hotel', title: 'Rendelés Frissítés: Hilton Budapest', detail: 'Vámkezelés igazolva 2x Brema CB 249 egységre a HILT-00001 rendelésben.', suggestion: 'Egyeztesd a logisztikát a technikai személyzettel.', orderCode: 'HILT-00001', name: 'Hilton Budapest Ltd.' },
-      { id: 2, icon: 'fa-envelope', title: 'Új Email: Kovács Kft.', detail: 'Aláírt szerződés csatolva a KOVA-00002 ajánlathoz.', suggestion: 'Indítsd el a gyártási folyamatot.', orderCode: 'KOVA-00002', name: 'Kovács Kft.' },
-      { id: 3, icon: 'fa-box', title: 'Korábbi Rendelés: Tóth Kft.', detail: 'A TÓTH-00004 rendelés teljesen feldolgozva, a szerelő ütemezve.', suggestion: '-', orderCode: 'TOTH-00004', name: 'Tóth Kft.', processed: true },
-      { id: 4, icon: 'fa-building', title: 'Beragadt Rendelés: Mező & Társa', detail: '8 napja nem volt státuszváltozás (MEZO-00003). Sürgős beavatkozás javasolt.', suggestion: 'Hívd fel az ügyfelet és tisztázd a státuszt.', orderCode: 'MEZO-00003', name: 'Mező & Társa' },
-    ];
+    /* ── RENDERING LOGIC ─────────────────────────── */
     
-    // Extracted logic for reusable row rendering
-    function getWhatsNewRowHTML(item, index) {
-      // RULE: Action column always occupies the same fixed width (5.5rem),
-      // whether showing the two action buttons or the Processed badge.
-      const actionHtml = item.processed
-        ? `<div class="processed-badge">Feldolgozva</div>`
-        : `<div class="wn-action-row">
-             <button class="btn-action btn-approve"><i class="fas fa-check"></i></button>
-             <button class="btn-action btn-edit" onclick="openEntryModal(${index})"><i class="fas fa-pencil"></i></button>
-           </div>`;
-
-      return `
-        <tr>
-          <td class="wn-logo-cell"><div class="wn-logo-wrap"><i class="fas ${item.icon}"></i></div></td>
-          <td class="wn-summary-cell"><p class="wn-summary-title">${item.title}</p><p class="wn-summary-detail">${item.detail}</p></td>
-          <td class="wn-suggestion-cell"><span class="wn-suggestion">${item.suggestion}</span></td>
-          <td class="wn-actions-cell">${actionHtml}</td>
-        </tr>
-      `;
-    }
-
-    const ORDERS = [
-      { id: 1, orderCode: 'HILT-00001', icon: 'fa-hotel',    name: 'Hilton Budapest Ltd.', status: 'Szállítás folyamatban', workflow: 'DELIVERY',         updated: '2026-03-22' },
-      { id: 2, orderCode: 'KOVA-00002', icon: 'fa-industry', name: 'Kovács Kft.',          status: 'Rendelés visszaigazolva', workflow: 'ORDER_CONFIRMED',  updated: '2026-03-21' },
-      { id: 3, orderCode: 'MEZO-00003', icon: 'fa-building', name: 'Mező & Társa',         status: 'Ajánlat kiküldve',      workflow: 'OFFER_SENT',        updated: '2026-03-14' },
-      { id: 4, orderCode: 'PAPP-00004', icon: 'fa-store',    name: 'Papp Bútor Kft.',      status: 'Számlázva',             workflow: 'INVOICED',          updated: '2026-03-20' },
-      { id: 5, orderCode: 'BUDA-00005', icon: 'fa-landmark', name: 'Budapest Szálló Zrt.', status: 'Új megkeresés',         workflow: 'NEW',              updated: '2026-03-22' },
-    ];
-
-    const ORDER_FILES = {
-      1: [ { name: 'Vam_Papírok.pdf', ext: 'pdf', icon: 'fa-file-pdf' }, { name: 'Szallitasi_utvonal.docx', ext: 'docx', icon: 'fa-file-word' } ],
-      2: [ { name: 'Alairt_Szerzodes.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ],
-      4: [ { name: 'Szamla_20260320.pdf', ext: 'pdf', icon: 'fa-file-pdf' } ]
-    };
-
-    const ORDER_HISTORY = {
-      1: [ { date: '2026-03-22 14:20', status: 'DELIVERY', note: 'Szállítmány úton van, vámkezelés befejezve.' }, { date: '2026-03-20 09:10', status: 'READY_FOR_DELIVERY', note: 'Termékek becsomagolva, átadva a fuvarozónak.' }, { date: '2026-03-15 11:30', status: 'ORDER_CONFIRMED', note: 'Ügyfél aláírta a megrendelőt.' } ],
-      2: [ { date: '2026-03-21 10:00', status: 'ORDER_CONFIRMED', note: 'Aláírt szerződés beérkezett emailben.' }, { date: '2026-03-18 14:00', status: 'OFFER_SENT', note: 'Ajánlat PDF kiküldve.' } ],
-      3: [ { date: '2026-03-14 12:00', status: 'OFFER_SENT', note: 'Ajánlat elküldve, 8 napja nincs válasz.' }, { date: '2026-03-12 10:30', status: 'NEW', note: 'Megkeresés rögzítve telefonon.' } ],
-      4: [ { date: '2026-03-20 16:00', status: 'INVOICED', note: 'Számla kiállítva és elküldve.' } ],
-      5: [ { date: '2026-03-22 13:55', status: 'NEW', note: 'Első kapcsolatfelvétel emailen.' } ],
-    };
-
-    const ORDER_ITEMS = {
-      1: [ { name: 'Brema CB 249', qty: 2, price: 450000 }, { name: 'Ipari Vízlágyító (10L)', qty: 2, price: 55000 } ],
-      2: [ { name: 'Lincat OE8113 Olajsütő', qty: 1, price: 890000 } ],
-      3: [ { name: 'Unox Anna XF023', qty: 1, price: 295000 } ],
-      4: [ { name: 'Rozsdamentes asztal', qty: 3, price: 85000 } ],
-      5: [],
-    };
-
-    const STATUS_LABELS = {
-      'NEW': 'Új', 'OFFER_SENT': 'Ajánlat', 'ORDER_CONFIRMED': 'Megrendelő', 'PURCHASE': 'Vásárlás',
-      'READY_FOR_DELIVERY': 'Kész', 'DELIVERY': 'Szállítás', 'DELIVERED': 'Kiszállítva', 'INVOICED': 'Számlázva'
-    };
-
-    // ---- RENDERS ---------------------------------------------------------
-    function renderWhatsNew() {
-      // Main dashboard view (first 3)
-      document.getElementById('whats-new-body').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
+    async function renderWhatsNew() {
+      const containerMain = document.getElementById('whats-new-body');
+      const containerToday = document.getElementById('all-updates-body-today');
+      const containerYest = document.getElementById('all-updates-body-yesterday');
+      const tpl = document.getElementById('tpl-wn-row');
       
-      // All Updates Modal views (Mock grouping)
-      document.getElementById('all-updates-body-today').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
-      // Just re-using the mock data to simulate "Yesterday" records
-      document.getElementById('all-updates-body-yesterday').innerHTML = WHATS_NEW.map((item, index) => getWhatsNewRowHTML(item, index)).join('');
+      const updates = await dataService.getUpdates();
+      
+      const createRow = (item, idx) => {
+        const clone = tpl.content.cloneNode(true);
+        clone.querySelector('.wn-logo-wrap i').className = `fas ${item.icon}`;
+        clone.querySelector('.wn-summary-title').textContent = item.title;
+        clone.querySelector('.wn-summary-detail').textContent = item.detail;
+        clone.querySelector('.wn-suggestion').textContent = item.suggestion;
+        
+        if (item.processed) {
+          clone.querySelector('.processed-badge').classList.remove('hidden');
+        } else {
+          const actionRow = clone.querySelector('.wn-action-row');
+          actionRow.classList.remove('hidden');
+          actionRow.querySelector('.btn-edit').onclick = () => openEntryModal(idx);
+        }
+        return clone;
+      };
+
+      containerMain.innerHTML = '';
+      containerToday.innerHTML = '';
+      containerYest.innerHTML = '';
+      
+      updates.forEach((item, i) => {
+        containerMain.appendChild(createRow(item, i));
+        containerToday.appendChild(createRow(item, i));
+        containerYest.appendChild(createRow(item, i));
+      });
     }
 
     let currentSort = { key: 'updated', dir: -1 };
-    function statusPill(wf) { return `<span class="status-pill status-${wf}">${STATUS_LABELS[wf] ?? wf}</span>`; }
+    let selectedOrderId = null;
 
-    function renderOrders(data) {
-      document.getElementById('orders-body').innerHTML = data.map(o => {
-        const hasFiles = ORDER_FILES[o.id] && ORDER_FILES[o.id].length > 0;
-        const fileIconHtml = hasFiles ? `<i class="fas fa-paperclip text-ck-ocean dark:text-ck-cyan ml-3 opacity-70" title="Csatolt dokumentumok"></i>` : '';
+    async function renderOrders(data) {
+      const container = document.getElementById('orders-body');
+      const tpl = document.getElementById('tpl-order-row');
+      container.innerHTML = '';
+
+      if (!data) data = await dataService.getOrders();
+
+      data.forEach(async o => {
+        const clone = tpl.content.cloneNode(true);
+        const tr = clone.querySelector('tr');
         
-        return `
-        <tr onclick="selectOrder(${o.id})" id="order-row-${o.id}">
-          <td><div class="order-logo-wrap"><i class="fas ${o.icon}"></i></div></td>
-          <td>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-client-name">${o.name}</span>
-            </div>
-          </td>
-          <td><span class="order-code-text">${o.orderCode}</span></td>
-          <td>
-            <div class="flex flex-col items-start gap-1">
-              <span class="order-status-text">${o.status}</span>
-              <span class="order-updated">${o.updated}</span>
-            </div>
-          </td>
-          <td>
-            <div class="flex items-center justify-between pr-4">
-              ${statusPill(o.workflow)}
-              ${fileIconHtml}
-            </div>
-          </td>
-        </tr>
-      `}).join('');
+        tr.id = `order-row-${o.id}`;
+        tr.onclick = () => selectOrder(o.id);
+        if (selectedOrderId === o.id) tr.classList.add('selected');
+
+        clone.querySelector('.order-logo-wrap i').className = `fas ${o.icon}`;
+        clone.querySelector('.order-client-name').textContent = o.name;
+        clone.querySelector('.order-code-text').textContent = o.orderCode;
+        clone.querySelector('.order-status-text').textContent = o.status;
+        clone.querySelector('.order-updated').textContent = o.updated;
+
+        const pill = clone.querySelector('.status-pill');
+        pill.textContent = dataService.getStatusLabel(o.workflow);
+        pill.className = `status-pill status-${o.workflow}`;
+
+        const details = await dataService.getOrderDetails(o.id);
+        if (details.files && details.files.length) {
+          clone.querySelector('.clip-icon').classList.remove('hidden');
+        }
+
+        container.appendChild(clone);
+      });
     }
 
-    function sortOrders(key) {
+    async function sortOrders(key) {
       if (currentSort.key === key) currentSort.dir *= -1;
       else { currentSort.key = key; currentSort.dir = -1; }
-      const sorted = [...ORDERS].sort((a, b) => {
+      const data = await dataService.getOrders();
+      const sorted = [...data].sort((a,b) => {
         const av = a[key] || ''; const bv = b[key] || '';
         return av < bv ? -currentSort.dir : av > bv ? currentSort.dir : 0;
       });
       renderOrders(sorted);
-      if (selectedOrderId) document.getElementById(`order-row-${selectedOrderId}`)?.classList.add('selected');
     }
 
-    function filterOrders() {
+    async function filterOrders() {
       const q = document.getElementById('orders-search').value.toLowerCase();
-      const filtered = ORDERS.filter(o => o.name.toLowerCase().includes(q) || o.orderCode.toLowerCase().includes(q) || o.workflow.toLowerCase().includes(q));
+      const orders = await dataService.getOrders();
+      const filtered = orders.filter(o => 
+        o.name.toLowerCase().includes(q) || 
+        o.orderCode.toLowerCase().includes(q) || 
+        o.workflow.toLowerCase().includes(q)
+      );
       renderOrders(filtered);
     }
 
-    // ---- DETAILS PANEL ---------------------------------------------------
-    let selectedOrderId = null;
-
-    function selectOrder(id) {
+    /* ── DETAILS PANEL ───────────────────────────── */
+    async function selectOrder(id) {
       selectedOrderId = id;
-      document.querySelectorAll('.orders-table tbody tr').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('.order-row-el').forEach(r => r.classList.remove('selected'));
       document.getElementById(`order-row-${id}`)?.classList.add('selected');
 
-      const order = ORDERS.find(o => o.id === id);
-      const history = ORDER_HISTORY[id] ?? [];
-      const items = ORDER_ITEMS[id] ?? [];
-      const files = ORDER_FILES[id] ?? [];
+      const { order, history, items, files } = await dataService.getOrderDetails(id);
+      if (!order) return;
       const latest = history[0];
+      const fmt = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
 
-      const htmlFormatter = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
-
-      // Build Items
       let itemsHtml = '';
-      if (items.length > 0) {
+      if (items && items.length > 0) {
         let total = 0;
         const rows = items.map(item => {
           const rowTotal = item.qty * item.price; total += rowTotal;
-          return `<div class="details-item-row"><span class="details-item-name">${item.name}</span><span class="details-item-qty">${item.qty}x</span><span class="details-item-price">${htmlFormatter.format(rowTotal)}</span></div>`;
+          return `<div class="details-item-row"><span class="details-item-name">${item.name}</span><span class="details-item-qty">${item.qty}x</span><span class="details-item-price">${fmt.format(rowTotal)}</span></div>`;
         }).join('');
-        itemsHtml = `<h4 class="details-section-title">Termékek</h4><div>${rows}<div class="details-item-row total"><span class="details-item-name">Összesen:</span><span class="details-item-price">${htmlFormatter.format(total)}</span></div></div>`;
+        itemsHtml = `<h4 class="details-section-title">Termékek</h4><div>${rows}<div class="details-item-row total"><span class="details-item-name">Összesen:</span><span class="details-item-price">${fmt.format(total)}</span></div></div>`;
       }
 
-      // Build Files
       let filesHtml = '';
-      if (files.length > 0) {
+      if (files && files.length > 0) {
         const fileChips = files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i> ${f.name}</div>`).join('');
         filesHtml = `<h4 class="details-section-title">Dokumentumok</h4><div class="flex flex-wrap gap-3">${fileChips}</div>`;
       }
 
-      // Build Timeline
-      const timelineHtml = `<h4 class="details-section-title">Előzmények</h4><div class="timeline">${history.map(h => `<div class="timeline-item"><p class="timeline-date">${h.date}</p><p class="timeline-event">${statusPill(h.status)}</p><p class="timeline-note">${h.note}</p></div>`).join('')}</div>`;
+      const timelineHtml = `<h4 class="details-section-title">Előzmények</h4><div class="timeline">${history.map(h => `
+        <div class="timeline-item">
+          <p class="timeline-date">${h.date}</p>
+          <p class="timeline-event"><span class="status-pill status-${h.status}">${dataService.getStatusLabel(h.status)}</span></p>
+          <p class="timeline-note">${h.note}</p>
+        </div>`).join('')}</div>`;
 
       document.getElementById('details-panel').innerHTML = `
         <div class="flex flex-col gap-2 mb-6">
@@ -892,33 +902,24 @@
             </div>
           </div>
         </div>
-        ${filesHtml}
-        ${itemsHtml}
-        ${timelineHtml}
+        ${filesHtml}${itemsHtml}${timelineHtml}
       `;
     }
 
-    // ---- THEME -----------------------------------------------------------
+    /* ── THEME & MODALS ──────────────────────────── */
     function toggleTheme() {
-      const html = document.documentElement; html.classList.toggle('dark');
+      const html = document.documentElement; 
+      html.classList.toggle('dark');
       document.getElementById('theme-label').textContent = html.classList.contains('dark') ? 'Sötét Mód' : 'Világos Mód';
     }
 
-    // ---- MODALS ----------------------------------------------------------
-    function openModal(id) {
-      document.getElementById(id).classList.add('open');
-    }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeModalOnBg(event, id) { if (event.target.id === id) closeModal(id); }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-
-    function closeModalOnBg(event, id) {
-      if (event.target.id === id) closeModal(id);
-    }
-
-    function openEntryModal(index) {
-      const entry = WHATS_NEW[index];
+    async function openEntryModal(index) {
+      const updates = await dataService.getUpdates();
+      const entry = updates[index];
       if (!entry) return;
 
       document.getElementById('entry-modal-logo').innerHTML = `<i class="fas ${entry.icon}"></i>`;
@@ -930,48 +931,46 @@
         <p class="entry-text">A rendszer automatikus ellenőrzése során új esemény generálódott. A P.I.S.T.A. integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>
         <p class="entry-text">Javasolt az üzleti folyamat lépéseinek manuális felülvizsgálata, vagy az AI asszisztens bevonása a helyzet tisztázására és akcióterv készítésére.</p>
       `;
-
       openModal('entry-details-modal');
     }
 
-    // ---- SIDEBAR RESIZER -------------------------------------------------
-    const resizer = document.getElementById('sidebar-resizer');
-    const sidebar = document.getElementById('main-sidebar');
-    let isResizing = false;
+    /* ── INIT & SIDEBAR ──────────────────────────── */
+    (async () => {
+      const resizer = document.getElementById('sidebar-resizer');
+      const sidebar = document.getElementById('main-sidebar');
+      let isResizing = false;
 
-    resizer.addEventListener('mousedown', (e) => {
-      isResizing = true;
-      resizer.classList.add('active');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    });
+      resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('active');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
 
-    document.addEventListener('mousemove', (e) => {
-      if (!isResizing) return;
-      
-      const bodyWidth = document.body.clientWidth;
-      const minWidth = bodyWidth * 0.1;
-      const maxWidth = bodyWidth * 0.3;
-      
-      let newWidth = e.clientX - 32; // Body p-8 (2rem = 32px) offset
-      
-      if (newWidth < minWidth) newWidth = minWidth;
-      if (newWidth > maxWidth) newWidth = maxWidth;
-      
-      sidebar.style.width = newWidth + 'px';
-    });
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const bodyWidth = document.body.clientWidth;
+        const minWidth = bodyWidth * 0.1;
+        const maxWidth = bodyWidth * 0.3;
+        let newWidth = e.clientX - 32; 
+        if (newWidth < minWidth) newWidth = minWidth;
+        if (newWidth > maxWidth) newWidth = maxWidth;
+        sidebar.style.width = newWidth + 'px';
+      });
 
-    document.addEventListener('mouseup', () => {
-      if (isResizing) {
-        isResizing = false;
-        resizer.classList.remove('active');
-        document.body.style.cursor = 'default';
-        document.body.style.userSelect = 'auto';
-      }
-    });
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizer.classList.remove('active');
+          document.body.style.cursor = 'default';
+          document.body.style.userSelect = 'auto';
+        }
+      });
 
-    renderWhatsNew();
-    renderOrders([...ORDERS].sort((a, b) => b.updated.localeCompare(a.updated)));
+      await renderWhatsNew();
+      const orders = await dataService.getOrders();
+      renderOrders([...orders].sort((a,b) => b.updated.localeCompare(a.updated)));
+    })();
   </script>
 </body>
 </html>

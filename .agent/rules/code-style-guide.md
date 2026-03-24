@@ -33,13 +33,16 @@ trigger: always_on
 * **Key Management:** The user’s password serves as the encryption key. Documentation must warn that password loss results in irreversible data loss.
 * **Storage Security:** Files in `/data/attachments/` must use **UUID** filenames and have encrypted contents.
 
-## 5. HTML and TailwindCSS
+## 5. HTML and TailwindCSS (The "Hybrid" Approach)
 * **Semantic HTML:** Use semantic tags (`<nav>`, `<main>`, `<footer>`) instead of generic `<div>` containers where possible.
 * **Tailwind Class Order:** Class lists must be organized by:
     1. Layout (Positioning/Display)
     2. Box Model (Sizing/Margin/Padding)
     3. Typography
     4. Visuals (Colors/Borders/Shadows)
+* **Tailwind for Scaffolding (Zero Layout Redundancy):** Always strictly use Tailwind utility classes directly in the HTML for layout, spacing, flexbox, generic padding/margins, and typography to eliminate unnecessary CSS wrappers. 
+* **Custom CSS strictly for Brand Identity:** Only use custom CSS classes in `<style>` blocks or `.css` files for global identity tokens (CSS variables) and highly complex visual effects that can't be achieved with simple utilities (e.g., glassmorphism panels like `.ice-card`, complex keyframe animations). Do NOT repeat generic structural rules (like `display: flex; align-items: center;`) in custom CSS classes.
+* **The DRY CSS Rule (Don't Repeat Yourself):** Eliminate redundancy. If multiple elements (like buttons) share identical layout properties, do not duplicate CSS properties across multiple class names. Either use a shared utility class via HTML or define a single highly-reusable base component class.
 * **Inline Styles:** Inline `style` attributes are prohibited; use Tailwind utility classes or dedicated CSS files.
 
 ## 6. Error Handling and Logging
@@ -56,3 +59,9 @@ trigger: always_on
 * **The "Master Index" Rule:** A central `SOLUTION_DESIGN.md` (or `README.md`) must be maintained at the root, acting as a table of contents that links all individual documentation files.
 * **Traceability:** Any change in the core logic must be immediately reflected in the corresponding documentation file.
 * **Standardized Diagrams:** Where visual representation is needed, use Mermaid.js or similar text-based diagramming tools within the Markdown to ensure version-control compatibility.
+
+## 8. UI Architecture & Data Rendering
+* **Separation of Concerns (Data vs View):** The data-fetching/mocking logic must be strictly separated from visual representation. Never hardcode data structures directly inside HTML presentation scripts.
+* **Template-Based Vanilla MVC Pattern:** All dynamic lists, table rows, and repeated UI components MUST use standard HTML `<template>` tags defined natively in the `.html` file.
+* **Data Service Modules:** Data retrieval must occur in a dedicated service function (e.g., `dataService.js`).
+* **View Renderers:** The renderer script must only request data from the service module, select the matching `<template>` element by ID, clone its contents, safely inject textual data, and append it to the DOM.

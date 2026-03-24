@@ -15,13 +15,21 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import routes from './routes.js';
 
 const app = express();
 const PORT = 3001;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 app.use(cors());
 app.use(bodyParser.json());
+
+// Serve static assets (logos, etc.) from the public/ directory
+app.use(express.static(join(__dirname, '..', 'public')));
 
 app.use('/api', routes);
 
