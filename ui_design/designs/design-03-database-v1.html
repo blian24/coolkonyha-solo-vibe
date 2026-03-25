@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoolKonyha – Adatbázis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], head: ['Montserrat', 'sans-serif'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/oceanic-plus.css">
+</head>
+
+<body class="h-screen flex flex-row gap-5 p-5 overflow-hidden" id="app-body">
+  <!-- Frost flash on theme change -->
+  <div class="frost-flash" id="frost"></div>
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <aside id="main-sidebar" class="shrink-0 flex flex-col h-full ice-card sidebar-bg relative" style="width:18vw; min-width:200px;">
+      <div class="resizer" id="sidebar-resizer"></div>
+
+      <div class="flex-1 overflow-y-auto cscroll p-5 flex flex-col gap-1">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.25);">
+            <i class="fas fa-snowflake text-2xl" style="color:var(--accent);"></i>
+          </div>
+          <div>
+            <h1 class="font-head font-extrabold text-lg leading-none" style="color:var(--text);">CoolKonyha</h1>
+            <p class="text-[0.6rem] font-bold uppercase tracking-[0.2em] mt-0.5" style="color:var(--accent);">Enterprise AI</p>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <a href="design-03-oceanic-plus-v1.html" class="nav-item"><i class="fas fa-tachometer-alt w-4 text-center"></i>Irányítópult</a>
+        <a href="#" class="nav-item"><i class="fas fa-file-alt w-4 text-center"></i>Riportok</a>
+        <a href="design-03-database-v1.html" class="nav-item active"><i class="fas fa-database w-4 text-center"></i>Adatbázis</a>
+        <a href="#" class="nav-item"><i class="fas fa-cog w-4 text-center"></i>Beállítások</a>
+      </div>
+
+      <!-- P.I.S.T.A. chat -->
+      <div class="shrink-0 p-4 flex flex-col gap-3" style="border-top:1px solid var(--border);">
+        <div class="flex items-center gap-2 mb-1">
+          <div class="status-dot"></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em;">P.I.S.T.A.</span>
+        </div>
+        <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade pb-2 gap-3 min-h-0" style="max-height:10rem;">
+          <div class="flex-1"></div>
+          <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>Üdv CK! Az adatbázis modul betöltve.</div>
+        </div>
+        <div class="carved mt-1">
+          <input type="text" placeholder="Kérdezz P.I.S.T.A.-tól...">
+          <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <main class="flex-1 flex flex-col gap-5 overflow-hidden min-w-0">
+
+      <!-- Database card -->
+      <div class="flex-1 ice-card flex flex-col min-h-0">
+
+        <!-- Header -->
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <h2 class="section-title">Adatbázis</h2>
+            <span class="section-badge" id="row-count">–</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="search-wrap">
+              <i class="fas fa-search"></i>
+              <input type="text" id="db-search" placeholder="Szűrés..." oninput="applySearch()">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="theme-label" id="theme-label">Sötét Mód</span>
+              <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Téma váltása"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="db-tabs">
+          <button class="db-tab active" id="tab-customers" onclick="switchTab('customers')">
+            <i class="fas fa-users"></i> Ügyfelek
+          </button>
+          <button class="db-tab" id="tab-suppliers" onclick="switchTab('suppliers')">
+            <i class="fas fa-truck"></i> Szállítók
+          </button>
+          <button class="db-tab" id="tab-products" onclick="switchTab('products')">
+            <i class="fas fa-box"></i> Termékek
+          </button>
+          <button class="db-tab" id="tab-orders" onclick="switchTab('orders')">
+            <i class="fas fa-clipboard-list"></i> Rendelések
+          </button>
+          <button class="db-tab" id="tab-workflow" onclick="switchTab('workflow')">
+            <i class="fas fa-stream"></i> Workflow
+          </button>
+        </div>
+
+        <!-- Table area -->
+        <div class="flex-1 overflow-y-auto cscroll min-h-0" id="table-area">
+          <div class="empty-state" id="loading-indicator">
+            <i class="fas fa-circle-notch fa-spin text-3xl" style="color:var(--accent);"></i>
+            <span class="text-sm">Betöltés...</span>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  <!-- ═══════════════ CUSTOMER MODAL ═══════════════ -->
+  <div class="modal-overlay" id="customer-modal" onclick="handleModalBgClick(event)">
+    <div class="modal-card">
+
+      <!-- Left: Details -->
+      <div class="modal-left">
+        <!-- Hero -->
+        <div class="modal-hero">
+          <div class="modal-logo" id="m-logo"><i class="fas fa-building"></i></div>
+          <div class="modal-hero-text">
+            <div class="modal-name" id="m-name">–</div>
+            <div class="modal-id" id="m-id">ID: –</div>
+            <div style="margin-top:0.5rem;" id="m-order-badge"></div>
+          </div>
+          <button class="modal-edit-btn" id="modal-edit-btn" title="Szerkesztés" onclick="toggleModalEdit()"><i class="fas fa-pencil-alt"></i></button>
+          <button class="modal-close-btn" onclick="closeCustomerModal()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Body: view or edit -->
+        <div class="modal-body" id="modal-body-content"></div>
+      </div>
+
+      <!-- Right: P.I.S.T.A. chat -->
+      <div class="modal-right">
+        <div class="modal-chat-header"><div class="status-dot"></div> P.I.S.T.A.</div>
+        <div class="modal-chat-msgs cscroll" id="modal-chat-msgs"></div>
+        <div class="carved" style="margin:0.75rem; border-radius:10px;">
+          <input type="text" id="modal-chat-input" placeholder="Kérdezz..." onkeydown="if(event.key==='Enter') sendModalChat()">
+          <button class="carved-btn" onclick="sendModalChat()"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ ORDER MODAL ════════════ -->
+  <div class="modal-overlay" id="order-modal" onclick="handleOrderModalBgClick(event)">
+    <div class="modal-card" style="width:min(96vw,1100px); max-height:90vh;">
+
+      <!-- Left: Details + Timeline -->
+      <div class="modal-left" style="flex:1.3;">
+        <!-- Hero -->
+        <div class="modal-hero">
+          <div class="modal-logo" id="om-logo"><i class="fas fa-file-invoice"></i></div>
+          <div class="modal-hero-text">
+            <div class="modal-name" id="om-code" style="font-size:1.2rem;">–</div>
+            <div class="modal-id" id="om-customer">–</div>
+            <div style="margin-top:0.5rem;" id="om-status-badge"></div>
+          </div>
+          <button class="modal-edit-btn" id="order-edit-btn" title="Státusz frissítés" onclick="toggleOrderEdit()"><i class="fas fa-pencil-alt"></i></button>
+          <button class="modal-close-btn" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Split: info + timeline -->
+        <div style="display:flex; flex:1; overflow:hidden; min-height:0;">
+          <!-- Details + edit -->
+          <div class="modal-body cscroll" id="om-body" style="flex:1; border-right:1px solid var(--border); overflow-y:auto;"></div>
+          <!-- History timeline -->
+          <div class="modal-body cscroll" id="om-history" style="width:260px; flex-shrink:0; overflow-y:auto;">
+            <div style="font-family:'Montserrat',sans-serif; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:1rem;">Történet</div>
+            <div class="timeline" id="om-timeline"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: P.I.S.T.A. chat -->
+      <div class="modal-right">
+        <div class="modal-chat-header"><div class="status-dot"></div> P.I.S.T.A.</div>
+        <div class="modal-chat-msgs cscroll" id="om-chat-msgs"></div>
+        <div class="carved" style="margin:0.75rem;">
+          <input type="text" id="om-chat-input" placeholder="Kérdezz..." onkeydown="if(event.key==='Enter') sendOrderChat()">
+          <button class="carved-btn" onclick="sendOrderChat()"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Constants & State ─────────────────────────── */
+    const API_BASE = 'http://localhost:3001/api';
+    const STATIC_BASE = 'http://localhost:3001';
+    let currentTab = 'customers';
+    let currentData = [];
+    let expandedRows = new Set();
+    let allOrders = [];           // cached for order counts
+    let orderCountMap = {};       // { cust_id: count }
+    let modalCustomer = null;     // currently open customer object
+    let modalEditMode = false;
+    let customersCache = null;    // all customers, pre-fetched for order enrichment
+
+    /* ── Logo URL resolution ───────────────────────── */
+    const resolveLogoUrl = (logoPath) => {
+      if (!logoPath) return null;
+      if (logoPath.startsWith('http')) return logoPath;
+      return STATIC_BASE + (logoPath.startsWith('/') ? '' : '/') + logoPath;
+    };
+
+    const logoThumb = (logoPath, size = '2.6rem') => {
+      const url = resolveLogoUrl(logoPath);
+      if (url) return `<div class="logo-thumb" style="width:${size};height:${size};"><img src="${url}" onerror="setFallbackIcon(this)"></div>`;
+      return `<div class="logo-thumb" style="width:${size};height:${size};"><i class="fas fa-building"></i></div>`;
+    };
+
+    /* Global helper — avoids any quote-escaping in onerror attributes */
+    window.setFallbackIcon = (imgEl) => {
+      imgEl.parentElement.innerHTML = '<i class="fas fa-building"></i>';
+    };
+
+    /* ── Theme ─────────────────────────────────────── */
+    const toggleTheme = () => {
+      const html = document.documentElement;
+      const isNowDark = html.classList.toggle('dark');
+      document.getElementById('theme-label').textContent = isNowDark ? 'Sötét Mód' : 'Világos Mód';
+    };
+
+    /* ── Tab switching ─────────────────────────────── */
+    const switchTab = async (tab) => {
+      if (currentTab === tab) return;
+      currentTab = tab;
+      expandedRows.clear();
+      document.getElementById('db-search').value = '';
+
+      document.querySelectorAll('.db-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+
+      await loadTab(tab);
+    };
+
+    /* ── Load data for tab ─────────────────────────── */
+    const loadTab = async (tab) => {
+      showLoading();
+      try {
+        const resp = await fetch(`${API_BASE}/${tab}`);
+        if (!resp.ok) throw new Error(resp.statusText);
+        currentData = await resp.json();
+        renderTab(tab, currentData);
+      } catch (err) {
+        showError(err.message);
+      }
+    };
+
+    /* ── Render dispatcher ─────────────────────────── */
+    const renderTab = (tab, data) => {
+      switch (tab) {
+        case 'customers': renderCustomers(data); break;
+        case 'suppliers': renderSuppliers(data); break;
+        case 'products':  renderProducts(data); break;
+        case 'orders':    renderOrders(data); break;
+        case 'workflow':  renderWorkflow(data); break;
+      }
+      updateRowCount(data.length);
+    };
+
+    /* ── Search ────────────────────────────────────── */
+    const applySearch = () => {
+      const q = document.getElementById('db-search').value.toLowerCase();
+      const filtered = currentData.filter(row =>
+        Object.values(row).some(v => String(v ?? '').toLowerCase().includes(q))
+      );
+      renderTab(currentTab, filtered);
+    };
+
+    /* ── Helpers ───────────────────────────────────── */
+    const showLoading = () => {
+      document.getElementById('table-area').innerHTML = `
+        <div class="empty-state" id="loading-indicator">
+          <i class="fas fa-circle-notch fa-spin text-3xl" style="color:var(--accent);"></i>
+          <span class="text-sm">Betöltés...</span>
+        </div>`;
+    };
+
+    const showError = (msg) => {
+      document.getElementById('table-area').innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-exclamation-triangle text-3xl" style="color:#f59e0b;"></i>
+          <span class="text-sm">Hiba: ${msg}</span>
+        </div>`;
+    };
+
+    const updateRowCount = (n) => {
+      document.getElementById('row-count').textContent = `${n} rekord`;
+    };
+
+    const toggleRow = (id) => {
+      const drawer = document.getElementById(`drawer-${id}`);
+      const rowEl  = document.getElementById(`row-${id}`);
+      if (!drawer) return;
+      if (expandedRows.has(id)) {
+        expandedRows.delete(id);
+        drawer.classList.remove('open');
+        rowEl.classList.remove('expanded');
+      } else {
+        expandedRows.add(id);
+        drawer.classList.add('open');
+        rowEl.classList.add('expanded');
+      }
+    };
+
+    const fmt = (v) => v ?? '–';
+
+    const statusPill = (s) =>
+      `<span class="pill p-${s}">${s.replace(/_/g, ' ')}</span>`;
+
+    const fieldHtml = (label, value) =>
+      `<div class="detail-field">
+        <span class="detail-label">${label}</span>
+        <span class="detail-value">${fmt(value)}</span>
+      </div>`;
+
+    /* ── CUSTOMERS ─────────────────────────────────── */
+    const renderCustomers = (data) => {
+      if (!data.length) { document.getElementById('table-area').innerHTML = '<div class="empty-state"><i class="fas fa-users text-4xl opacity-20"></i><span>Nincs adat</span></div>'; return; }
+
+      const rows = data.map(c => {
+        const count = orderCountMap[c.cust_id] ?? 0;
+        return `
+        <tr onclick="openCustomerModal(${c.cust_id})" style="cursor:pointer;">
+          <td style="padding-left:1.25rem;">${logoThumb(c.logo_path)}</td>
+          <td><strong style="font-family:'Montserrat',sans-serif; font-size:0.83rem;">${c.cust_name}</strong></td>
+          <td style="color:var(--muted);">${c.cust_contact ?? '–'}</td>
+          <td><a href="mailto:${c.cust_email}" onclick="event.stopPropagation()" style="color:var(--accent);">${c.cust_email ?? '–'}</a></td>
+          <td>${c.cust_phone ?? '–'}</td>
+          <td><span class="order-badge"><i class="fas fa-clipboard-list" style="font-size:0.55rem;"></i> ${count} rendelés</span></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('table-area').innerHTML = `
+        <table class="db-table">
+          <thead><tr>
+            <th style="width:3.5rem;">Logo</th>
+            <th>Cégnév</th><th>Kapcsolattartó</th><th>Email</th><th>Telefon</th><th>Rendelések</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    };
+
+    /* ── CUSTOMER MODAL ────────────────────────────── */
+    const openCustomerModal = (custId) => {
+      modalCustomer = currentData.find(c => c.cust_id === custId) || null;
+      if (!modalCustomer) return;
+      modalEditMode = false;
+      renderModalContent();
+      document.getElementById('customer-modal').classList.add('open');
+      seedModalChat(modalCustomer);
+    };
+
+    const closeCustomerModal = () => {
+      document.getElementById('customer-modal').classList.remove('open');
+    };
+
+    const handleModalBgClick = (e) => {
+      if (e.target === document.getElementById('customer-modal')) closeCustomerModal();
+    };
+
+    const toggleModalEdit = () => {
+      modalEditMode = !modalEditMode;
+      document.getElementById('modal-edit-btn').classList.toggle('active', modalEditMode);
+      renderModalContent();
+    };
+
+    const renderModalContent = () => {
+      const c = modalCustomer;
+      if (!c) return;
+
+      // Hero
+      const logoUrl = resolveLogoUrl(c.logo_path);
+      document.getElementById('m-logo').innerHTML = logoUrl
+        ? `<img src="${logoUrl}" onerror="setFallbackIcon(this)">`
+        : `<i class="fas fa-building"></i>`;
+      document.getElementById('m-name').textContent = c.cust_name;
+      document.getElementById('m-id').textContent = `ID: ${c.cust_id}`;
+      const count = orderCountMap[c.cust_id] ?? 0;
+      document.getElementById('m-order-badge').innerHTML =
+        `<span class="order-badge"><i class="fas fa-clipboard-list" style="font-size:0.55rem;"></i> ${count} rendelés</span>`;
+
+      // Body
+      const body = document.getElementById('modal-body-content');
+      if (modalEditMode) {
+        body.innerHTML = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div class="edit-field"><label>Cégnév</label><input id="ef-name" value="${c.cust_name ?? ''}"></div>
+            <div class="edit-field"><label>Kapcsolattartó</label><input id="ef-contact" value="${c.cust_contact ?? ''}"></div>
+            <div class="edit-field"><label>Email 1</label><input id="ef-email" type="email" value="${c.cust_email ?? ''}"></div>
+            <div class="edit-field"><label>Email 2</label><input id="ef-email2" type="email" value="${c.cust_email2 ?? ''}"></div>
+            <div class="edit-field"><label>Telefon</label><input id="ef-phone" value="${c.cust_phone ?? ''}"></div>
+            <div class="edit-field"><label>Web</label><input id="ef-web" value="${c.cust_web ?? ''}"></div>
+            <div class="edit-field" style="grid-column:1/-1;"><label>Logo útvonal</label><input id="ef-logo" value="${c.logo_path ?? ''}"></div>
+            <div class="edit-field" style="grid-column:1/-1;"><label>Megjegyzés</label><textarea id="ef-notes">${c.notes ?? ''}</textarea></div>
+          </div>
+          <div style="display:flex; gap:0.75rem;">
+            <button class="modal-save-btn" onclick="saveModalCustomer()">Mentés</button>
+            <button class="modal-cancel-btn" onclick="toggleModalEdit()">Mégse</button>
+          </div>`;
+      } else {
+        const row = (label, val) =>
+          `<div class="detail-field"><span class="detail-label">${label}</span><span class="detail-value">${val || '–'}</span></div>`;
+        body.innerHTML = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem 1.5rem; min-height:14rem;">
+            ${row('Cégnév', c.cust_name)}
+            ${row('Kapcsolattartó', c.cust_contact)}
+            ${row('Email', c.cust_email)}
+            ${row('Email 2', c.cust_email2)}
+            ${row('Telefon', c.cust_phone)}
+            ${row('Web', c.cust_web)}
+            <div class="detail-field" style="grid-column:1/-1;">
+              <span class="detail-label">Logo útvonal</span>
+              <span class="detail-value">${c.logo_path || '–'}</span>
+            </div>
+            <div class="detail-field" style="grid-column:1/-1;">
+              <span class="detail-label">Megjegyzés</span>
+              <span class="detail-value">${c.notes || '–'}</span>
+            </div>
+          </div>`;
+      }
+    };
+
+    const saveModalCustomer = async () => {
+      const c = modalCustomer;
+      const body = {
+        cust_name: document.getElementById('ef-name').value,
+        cust_contact: document.getElementById('ef-contact').value,
+        cust_email: document.getElementById('ef-email').value,
+        cust_email2: document.getElementById('ef-email2').value,
+        cust_phone: document.getElementById('ef-phone').value,
+        cust_web: document.getElementById('ef-web').value,
+        logo_path: document.getElementById('ef-logo').value,
+        notes: document.getElementById('ef-notes').value
+      };
+      try {
+        const resp = await fetch(`${API_BASE}/customers/${c.cust_id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+        // Update local cache + re-render
+        Object.assign(c, body);
+        modalEditMode = false;
+        document.getElementById('modal-edit-btn').classList.remove('active');
+        renderModalContent();
+        renderCustomers(currentData);
+      } catch (err) { alert('Mentési hiba: ' + err.message); }
+    };
+
+    /* ── Modal Chat (P.I.S.T.A. context-aware) ─────── */
+    const seedModalChat = (c) => {
+      const msgs = document.getElementById('modal-chat-msgs');
+      msgs.innerHTML = `
+        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>
+          Betöltöttem <strong>${c.cust_name}</strong> kapcsolatát. ${orderCountMap[c.cust_id] ?? 0} rendelésük van rögzítve. Miben segíthetek?</div>`;
+    };
+
+    const sendModalChat = () => {
+      const input = document.getElementById('modal-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const msgs = document.getElementById('modal-chat-msgs');
+      msgs.innerHTML += `<div class="mc-user">${text}</div>`;
+      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>Ez a funkció hamarosan elérhető lesz.</div>`;
+      input.value = '';
+      msgs.scrollTop = msgs.scrollHeight;
+    };
+
+    /* ── SUPPLIERS ─────────────────────────────────── */
+    const renderSuppliers = (data) => {
+      if (!data.length) { document.getElementById('table-area').innerHTML = '<div class="empty-state"><i class="fas fa-truck text-4xl opacity-20"></i><span>Nincs adat</span></div>'; return; }
+
+      const rows = data.map(s => `
+        <tr id="row-s${s.prod_supp_id}" class="${expandedRows.has('s'+s.prod_supp_id) ? 'expanded' : ''}" onclick="toggleRow('s${s.prod_supp_id}')">
+          <td><i class="fas fa-chevron-right expand-chevron mr-2"></i></td>
+          <td><strong style="font-family:'Montserrat',sans-serif; font-size:0.83rem;">${s.prod_supp_co ?? '–'}</strong></td>
+          <td>${s.prod_supp_name ?? '–'}</td>
+          <td><a href="mailto:${s.prod_supp_email}" onclick="event.stopPropagation()" style="color:var(--accent);">${s.prod_supp_email ?? '–'}</a></td>
+          <td>${s.prod_supp_phone ?? '–'}</td>
+          <td>${s.prod_supp_web ? `<a href="${s.prod_supp_web}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent); font-size:0.75rem;">${s.prod_supp_web}</a>` : '–'}</td>
+        </tr>
+        <tr id="drawer-s${s.prod_supp_id}" class="detail-drawer ${expandedRows.has('s'+s.prod_supp_id) ? 'open' : ''}">
+          <td colspan="6" class="detail-cell">
+            <div class="detail-grid">
+              ${fieldHtml('ID', s.prod_supp_id)}
+              ${fieldHtml('Cég', s.prod_supp_co)}
+              ${fieldHtml('Kapcsolattartó', s.prod_supp_name)}
+              ${fieldHtml('Email', s.prod_supp_email)}
+              ${fieldHtml('Telefon', s.prod_supp_phone)}
+              ${fieldHtml('Web', s.prod_supp_web)}
+              ${fieldHtml('Megjegyzés', s.notes)}
+            </div>
+          </td>
+        </tr>`).join('');
+
+      document.getElementById('table-area').innerHTML = `
+        <table class="db-table">
+          <thead><tr>
+            <th style="width:2rem;"></th>
+            <th>Cég</th><th>Kapcsolattartó</th><th>Email</th><th>Telefon</th><th>Web</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    };
+
+    /* ── PRODUCTS ──────────────────────────────────── */
+    const renderProducts = (data) => {
+      if (!data.length) { document.getElementById('table-area').innerHTML = '<div class="empty-state"><i class="fas fa-box text-4xl opacity-20"></i><span>Nincs adat</span></div>'; return; }
+
+      const fmtPrice = (n) => n != null ? new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(n) : '–';
+
+      const rows = data.map(p => `
+        <tr id="row-p${p.prod_id}" class="${expandedRows.has('p'+p.prod_id) ? 'expanded' : ''}" onclick="toggleRow('p${p.prod_id}')">
+          <td><i class="fas fa-chevron-right expand-chevron mr-2"></i></td>
+          <td><strong style="font-family:'Montserrat',sans-serif; font-size:0.83rem;">${p.prod_name}</strong></td>
+          <td><span class="mono-tag">${p.prod_type ?? '–'}</span></td>
+          <td>${p.prod_size ?? '–'}</td>
+          <td style="font-family:'JetBrains Mono',monospace; color:#f59e0b;">${fmtPrice(p.unit_price)}</td>
+          <td>${p.prod_supp_id ?? '–'}</td>
+        </tr>
+        <tr id="drawer-p${p.prod_id}" class="detail-drawer ${expandedRows.has('p'+p.prod_id) ? 'open' : ''}">
+          <td colspan="6" class="detail-cell">
+            <div class="detail-grid">
+              ${fieldHtml('ID', p.prod_id)}
+              ${fieldHtml('Terméknév', p.prod_name)}
+              ${fieldHtml('Típus', p.prod_type)}
+              ${fieldHtml('Méret', p.prod_size)}
+              ${fieldHtml('Egységár', fmtPrice(p.unit_price))}
+              ${fieldHtml('Szállító ID', p.prod_supp_id)}
+              ${fieldHtml('Kép útvonal', p.image_path)}
+              ${fieldHtml('Megjegyzés', p.notes)}
+            </div>
+          </td>
+        </tr>`).join('');
+
+      document.getElementById('table-area').innerHTML = `
+        <table class="db-table">
+          <thead><tr>
+            <th style="width:2rem;"></th>
+            <th>Terméknév</th><th>Típus</th><th>Méret</th><th>Egységár</th><th>Szállító ID</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    };
+
+    /* ── ORDERS ────────────────────────────────────── */
+    const renderOrders = (data) => {
+      if (!data.length) { document.getElementById('table-area').innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list text-4xl opacity-20"></i><span>Nincs adat</span></div>'; return; }
+
+      const fmtDt = (d) => d ? new Date(d).toLocaleDateString('hu-HU') : '–';
+
+      const rows = data.map(o => {
+        const cust = customersCache ? customersCache.find(c => c.cust_id === o.cust_id) : null;
+        const custName = cust ? cust.cust_name : `#${o.cust_id}`;
+        const custLogo = logoThumb(cust ? cust.logo_path : null);
+        return `
+        <tr onclick="openOrderModal(${o.order_id})" style="cursor:pointer;">
+          <td style="padding-left:1.25rem;"><span class="mono-tag">${o.order_code ?? o.order_id}</span></td>
+          <td>${custLogo}</td>
+          <td style="color:var(--muted); font-size:0.75rem;">${o.cust_id}</td>
+          <td><strong style="font-family:'Montserrat',sans-serif; font-size:0.82rem;">${custName}</strong></td>
+          <td>${statusPill(o.current_status ?? 'NEW')}</td>
+          <td style="color:var(--muted); font-size:0.75rem; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${o.update_event || '–'}</td>
+          <td style="color:var(--muted); font-size:0.75rem; white-space:nowrap;">${fmtDt(o.current_status_update)}</td>
+          <td style="color:var(--muted); font-size:0.75rem; white-space:nowrap;">${fmtDt(o.order_date)}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('table-area').innerHTML = `
+        <table class="db-table">
+          <thead><tr>
+            <th>Order kód</th>
+            <th style="width:3.5rem;">Logo</th>
+            <th>ID</th>
+            <th>Ügyfél</th>
+            <th>Státusz</th>
+            <th>Utolsó tény</th>
+            <th>Frissítve</th>
+            <th>Létrehozva</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    };
+
+    /* ── ORDER MODAL ────────────────────────────────── */
+    let orderModalData = null;
+    let orderEditMode = false;
+
+    const openOrderModal = async (orderId) => {
+      document.getElementById('order-modal').classList.add('open');
+      document.getElementById('om-body').innerHTML = '<div class="empty-state" style="padding:2rem;"><i class="fas fa-circle-notch fa-spin" style="color:var(--accent);"></i></div>';
+      document.getElementById('om-timeline').innerHTML = '';
+      orderEditMode = false;
+      document.getElementById('order-edit-btn').classList.remove('active');
+      try {
+        const resp = await fetch(`${API_BASE}/orders/${orderId}`);
+        if (!resp.ok) throw new Error(resp.statusText);
+        orderModalData = await resp.json();
+        renderOrderModal();
+        seedOrderChat(orderModalData);
+      } catch (err) {
+        document.getElementById('om-body').innerHTML = `<div class="empty-state" style="padding:2rem;"><i class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i><span>Hiba: ${err.message}</span></div>`;
+      }
+    };
+
+    const closeOrderModal = () => { document.getElementById('order-modal').classList.remove('open'); };
+    const handleOrderModalBgClick = (e) => { if (e.target === document.getElementById('order-modal')) closeOrderModal(); };
+
+    const toggleOrderEdit = () => {
+      orderEditMode = !orderEditMode;
+      document.getElementById('order-edit-btn').classList.toggle('active', orderEditMode);
+      renderOrderModal();
+    };
+
+    const renderOrderModal = () => {
+      if (!orderModalData) return;
+      const { order: o, items, history } = orderModalData;
+
+      const cust = customersCache ? customersCache.find(c => c.cust_id === o.cust_id) : null;
+      const custLogoUrl = resolveLogoUrl(cust ? cust.logo_path : null);
+      document.getElementById('om-logo').innerHTML = custLogoUrl
+        ? `<img src="${custLogoUrl}" onerror="setFallbackIcon(this)">`
+        : `<i class="fas fa-file-invoice"></i>`;
+      document.getElementById('om-code').textContent = o.order_code ?? `#${o.order_id}`;
+      document.getElementById('om-customer').textContent = cust
+        ? `${cust.cust_name} • ID: ${o.cust_id}` : `Ügyfél ID: ${o.cust_id}`;
+      document.getElementById('om-status-badge').innerHTML = statusPill(o.current_status ?? 'NEW');
+
+      const fmtDt = (d) => d ? new Date(d).toLocaleString('hu-HU') : '–';
+      const body = document.getElementById('om-body');
+
+      if (orderEditMode) {
+        body.innerHTML = `
+          <div style="margin-bottom:1.25rem;">
+            <div style="font-family:'Montserrat',sans-serif; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:0.75rem;">Státusz frissítés</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; margin-bottom:0.9rem;">
+              <div class="edit-field"><label>Performer</label><input id="oe-performer" value="admin" placeholder="Ki végezte?"></div>
+              <div class="edit-field"><label>Új Státusz</label>
+                <select id="oe-status" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;font-size:0.84rem;color:var(--text);outline:none;">
+                  ${['NEW','OFFER_SENT','ORDER_CONFIRMED','PURCHASE','READY_FOR_DELIVERY','DELIVERY','DELIVERED','INVOICED','CLOSED','CANCELLED'].map(s =>
+                    `<option value="${s}" ${s === o.current_status ? 'selected' : ''}>${s.replace(/_/, ' ')}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="edit-field" style="margin-bottom:0.9rem;"><label>Esemény leírás</label><textarea id="oe-event" style="min-height:5rem;">${o.update_event ?? ''}</textarea></div>
+            <div style="display:flex;gap:0.75rem;">
+              <button class="modal-save-btn" onclick="saveOrderStatus()">Mentés</button>
+              <button class="modal-cancel-btn" onclick="toggleOrderEdit()">Mégse</button>
+            </div>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:0.75rem;">Tételek</div>
+          ${renderOrderItems(items)}`;
+      } else {
+        body.innerHTML = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 1.5rem; margin-bottom:1.25rem;">
+            ${[['Order ID', o.order_id],['Order kód', o.order_code],['Deviza', o.currency],
+               ['Létrehozva', fmtDt(o.order_date)],['Utolsó státusz', fmtDt(o.current_status_update)],
+               ['Utolsó tény', o.update_event]].map(([l,v]) =>
+              `<div class="detail-field"><span class="detail-label">${l}</span><span class="detail-value">${v || '–'}</span></div>`).join('')}
+          </div>
+          <div style="font-family:'Montserrat',sans-serif; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:0.75rem;">Tételek</div>
+          ${renderOrderItems(items)}`;
+      }
+
+      const tl = document.getElementById('om-timeline');
+      if (!history || !history.length) {
+        tl.innerHTML = '<p style="font-size:0.75rem; color:var(--muted);">Nincs történet.</p>';
+      } else {
+        tl.innerHTML = history.map(h => `
+          <div class="tl-item">
+            <div class="tl-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-status">${statusPill(h.status ?? 'NEW')}</div>
+              <div class="tl-event">${h.update_event || '–'}</div>
+              <div class="tl-meta">${h.performed_by ? `${h.performed_by} • ` : ''}${h.update_date ? new Date(h.update_date).toLocaleString('hu-HU') : '–'}</div>
+            </div>
+          </div>`).join('');
+      }
+    };
+
+    const renderOrderItems = (items) => {
+      if (!items || !items.length) return '<p style="font-size:0.78rem; color:var(--muted);">Nincs tétel.</p>';
+      const fmtPrice = (n) => n != null ? new Intl.NumberFormat('hu-HU', { style:'currency', currency:'HUF', maximumFractionDigits:0 }).format(n) : '–';
+      return `<table style="width:100%; border-collapse:collapse; font-size:0.79rem;">
+        <thead><tr>
+          <th style="text-align:left; padding:0.4rem 0.6rem; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border);">Termék</th>
+          <th style="text-align:right; padding:0.4rem 0.6rem; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border);">Menny.</th>
+          <th style="text-align:right; padding:0.4rem 0.6rem; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border);">Egységár</th>
+          <th style="text-align:right; padding:0.4rem 0.6rem; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border);">Összesen</th>
+        </tr></thead>
+        <tbody>${items.map(i => `
+          <tr>
+            <td style="padding:0.4rem 0.6rem; border-bottom:1px solid var(--border);">${i.prod_name || i.prod_id}</td>
+            <td style="padding:0.4rem 0.6rem; text-align:right; border-bottom:1px solid var(--border);">${i.quantity}</td>
+            <td style="padding:0.4rem 0.6rem; text-align:right; font-family:'JetBrains Mono',monospace; color:#f59e0b; border-bottom:1px solid var(--border);">${fmtPrice(i.unit_price)}</td>
+            <td style="padding:0.4rem 0.6rem; text-align:right; font-family:'JetBrains Mono',monospace; color:var(--accent); border-bottom:1px solid var(--border);">${fmtPrice(i.unit_price * i.quantity)}</td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    };
+
+    const saveOrderStatus = async () => {
+      if (!orderModalData) return;
+      const { order: o } = orderModalData;
+      const status = document.getElementById('oe-status').value;
+      const performer = document.getElementById('oe-performer').value || 'admin';
+      const event = document.getElementById('oe-event').value;
+      try {
+        const resp = await fetch(`${API_BASE}/orders/${o.order_id}/status`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, performedBy: performer, eventDescription: event })
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+        const detailResp = await fetch(`${API_BASE}/orders/${o.order_id}`);
+        orderModalData = await detailResp.json();
+        orderEditMode = false;
+        document.getElementById('order-edit-btn').classList.remove('active');
+        renderOrderModal();
+        await loadTab('orders');
+      } catch (err) { alert('Mentési hiba: ' + err.message); }
+    };
+
+    const seedOrderChat = ({ order: o }) => {
+      const cust = customersCache ? customersCache.find(c => c.cust_id === o.cust_id) : null;
+      const msgs = document.getElementById('om-chat-msgs');
+      msgs.innerHTML = `
+        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>
+          Megnyitottam a <strong>${o.order_code ?? '#'+o.order_id}</strong> rendelést${cust ? ` (${cust.cust_name})` : ''}. Jelenlegi státusz: ${o.current_status}. Miben segíthetek?</div>`;
+    };
+
+    const sendOrderChat = () => {
+      const input = document.getElementById('om-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const msgs = document.getElementById('om-chat-msgs');
+      msgs.innerHTML += `<div class="mc-user">${text}</div>`;
+      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>Ez a funkció hamarosan elérhető lesz.</div>`;
+      input.value = '';
+      msgs.scrollTop = msgs.scrollHeight;
+    };
+
+    /* ── WORKFLOW ──────────────────────────────────── */
+    const renderWorkflow = (data) => {
+      if (!data.length) { document.getElementById('table-area').innerHTML = '<div class="empty-state"><i class="fas fa-stream text-4xl opacity-20"></i><span>Nincs adat</span></div>'; return; }
+
+      const rows = data.map((w, i) => `
+        <tr>
+          <td style="width:2rem; color:var(--muted); font-size:0.72rem;">${i + 1}</td>
+          <td>${statusPill(w.status_name ?? w.status ?? w.name ?? '–')}</td>
+          <td style="color:var(--muted); font-size:0.8rem;">${fmt(w.description ?? w.label)}</td>
+          <td><span class="mono-tag">${fmt(w.sort_order ?? i)}</span></td>
+        </tr>`).join('');
+
+      document.getElementById('table-area').innerHTML = `
+        <table class="db-table">
+          <thead><tr>
+            <th style="width:2rem;">#</th>
+            <th>Státusz</th><th>Leírás</th><th>Sorrend</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    };
+
+    /* ── Sidebar resizer ───────────────────────────── */
+    (() => {
+      const resizer = document.getElementById('sidebar-resizer');
+      const sidebar = document.getElementById('main-sidebar');
+      let dragging = false, startX = 0, startW = 0;
+      resizer.addEventListener('mousedown', e => {
+        dragging = true; startX = e.clientX; startW = sidebar.offsetWidth;
+        resizer.classList.add('active'); e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const minW = Math.round(window.innerWidth * 0.13);
+        const maxW = Math.round(window.innerWidth * 0.23);
+        sidebar.style.width = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX))) + 'px';
+      });
+      document.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
+    })();
+
+    /* ── Pre-fetch all orders for count map ───────── */
+    const prefetchOrders = async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/orders`);
+        if (!resp.ok) return;
+        allOrders = await resp.json();
+        orderCountMap = {};
+        allOrders.forEach(o => {
+          orderCountMap[o.cust_id] = (orderCountMap[o.cust_id] ?? 0) + 1;
+        });
+      } catch (_) { /* non-fatal */ }
+    };
+
+    /* ── Keyboard: Escape closes any modal ─────────── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeCustomerModal(); closeOrderModal(); }
+    });
+
+    /* ── Bootstrap ─────────────────────────────────── */
+    (async () => {
+      // Pre-fetch customers for order enrichment (logo, name)
+      try {
+        const cr = await fetch(`${API_BASE}/customers`);
+        customersCache = await cr.json();
+      } catch (_) { /* non-fatal */ }
+      await prefetchOrders();
+      await loadTab('customers');
+    })();
+  </script>
+</body>
+
+</html>

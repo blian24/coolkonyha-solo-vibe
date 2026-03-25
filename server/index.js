@@ -30,6 +30,8 @@ app.use(bodyParser.json());
 
 // Serve static assets (logos, etc.) from the public/ directory
 app.use(express.static(join(__dirname, '..', 'public')));
+// Serve ui_design directory for previewing designs
+app.use('/ui_design', express.static(join(__dirname, '..', 'ui_design')));
 
 app.use('/api', routes);
 
