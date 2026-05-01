@@ -368,7 +368,7 @@ Prioritise by urgency (days_stuck DESC) and business impact.
       if (totalTokens > this.maxTokensPerRequest) {
         console.warn(`[P.I.S.T.A.] 🚨 COST WARNING: Request exceeds limit (${totalTokens} > ${this.maxTokensPerRequest}). Aborting API call.`);
         return {
-          summary: `🚨 KÖLTSÉGVÉDELEM: A beérkező kérés kontextusa túl nagy (${totalTokens} token), ami feleslegesen sokba kerülne. Pista blokkolta az LLM hívást a biztonságod érdekében.`,
+          summary: `🚨 COST PROTECTION: The incoming request context is too large (${totalTokens} tokens), which would be unnecessarily expensive. Pista blocked the LLM call for your safety.`,
           proposed_actions: [],
           requires_approval: true,
           confidence: 'HIGH',

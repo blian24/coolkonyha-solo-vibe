@@ -1,13 +1,590 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>temp_app</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoolKonyha – Oceanic Plus</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/ui_design/js/services/dataService.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], head: ['Montserrat', 'sans-serif'] } } }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/ui_design/css/oceanic-plus.css">
+</head>
+
+<body class="h-screen flex gap-6 p-6" id="app-body">
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <aside id="main-sidebar" class="shrink-0 flex flex-col h-full ice-card sidebar-bg relative"
+    style="width:18vw; min-width:200px;">
+    <div class="resizer" id="sidebar-resizer"></div>
+
+    <!-- Logo -->
+    <div class="p-7 shrink-0">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+          style="background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.25);">
+          <i class="fas fa-snowflake text-2xl" style="color:var(--accent);"></i>
+        </div>
+        <div>
+          <h1 class="font-head font-extrabold text-xl leading-none" style="color:var(--text);">CoolKonyha</h1>
+          <p class="text-[0.6rem] font-bold uppercase tracking-[0.2em] mt-0.5" style="color:var(--accent);">Enterprise
+            AI</p>
+        </div>
+      </div>
+
+      <nav class="space-y-1">
+        <a href="#" class="nav-item active" id="nav-dashboard">
+          <i class="fas fa-columns w-5 text-center"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-file-alt w-5 text-center"></i><span>Reports</span>
+        </a>
+        <a href="/ui_design/designs/design-03-database-v1.html" class="nav-item">
+          <i class="fas fa-database w-5 text-center"></i><span>Database</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-cog w-5 text-center"></i><span>Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- PISTA Chat -->
+    <div class="flex-1 flex flex-col min-h-0 px-5">
+      <p class="chat-label mb-3">Proactive Intelligent System for Task Automation</p>
+      <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade pb-4 gap-4 min-h-0">
+        <div class="flex-1"></div>
+        <div class="chat-ai"><span class="chat-label">PISTA</span>Üdv CK! Minden rendszerelem stabil. Készen állok
+          a műveletekre.</div>
+        <div class="chat-user">Mikor érkeznek a Brema egységek a Hiltonhoz?</div>
+        <div class="chat-ai"><span class="chat-label">PISTA</span>A Hilton szállítmánya (HILT-00001) holnap reggel
+          10:00-ra van ütemezve. Vámkezelés kész.</div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="p-5 shrink-0">
+      <div class="carved">
+        <button class="carved-btn"><i class="fas fa-paperclip"></i></button>
+        <input type="text" placeholder="Ask PISTA...">
+        <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
+
+    <!-- TOP: MI ÚJSÁG + STAT BOXES -->
+    <div class="shrink-0 flex flex-row gap-6" style="max-height:36%;">
+      <section class="flex-1 ice-card flex flex-col min-w-0">
+        <!-- Header bar -->
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <h2 class="section-title">WHAT'S NEW?</h2>
+            <span class="section-badge" id="wn-count">3 NEW UPDATES</span>
+          </div>
+
+
+
+          <!-- Controls -->
+          <div class="flex items-center gap-4">
+            <div class="date-nav">
+              <button class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
+              <span class="date-nav-label">2026. Március 23.</span>
+              <button class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="theme-label" id="theme-label">Dark Mode</span>
+              <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Téma váltása"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="flex-1 overflow-y-auto cscroll min-h-0">
+          <table class="wn-table">
+            <tbody id="wn-body"></tbody>
+          </table>
+        </div>
+        <div class="tbl-footer">
+          <button class="btn-see-all" onclick="openModal('modal-all')">View All Updates (34)</button>
+        </div>
+      </section>
+
+      <!-- Stat boxes column -->
+      <!-- Width = each box height: parent max-height 36vh → two boxes + 1 gap = (36vh - 1rem) / 2 ≈ 18vh - 0.5rem -->
+      <div class="shrink-0 flex flex-col gap-4 h-full" style="width: calc(18vh - 0.5rem);">
+
+        <!-- Box 1: Active orders — cyan -->
+        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+                 background: linear-gradient(160deg, rgba(8,145,178,0.25) 0%, rgba(34,211,238,0.08) 100%);
+                 border-color: rgba(34,211,238,0.35);">
+          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                       color:rgba(34,211,238,0.85); line-height:1.3;">Active Orders</span>
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:36cqi; font-weight:700;
+                         color:#22d3ee; line-height:1;
+                         text-shadow: 0 0 24px rgba(34,211,238,0.55), 0 0 8px rgba(34,211,238,0.3);">124</span>
+          </div>
+        </div>
+
+        <!-- Box 2: Closed orders — emerald -->
+        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+                 background: linear-gradient(160deg, rgba(5,150,105,0.25) 0%, rgba(74,222,128,0.08) 100%);
+                 border-color: rgba(74,222,128,0.35);">
+          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                       color:rgba(74,222,128,0.85); line-height:1.3;">Closed in 30 days</span>
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:42cqi; font-weight:700;
+                         color:#4ade80; line-height:1;
+                         text-shadow: 0 0 24px rgba(74,222,128,0.55), 0 0 8px rgba(74,222,128,0.3);">210</span>
+          </div>
+        </div>
+
+      </div>
+
+
+    </div>
+
+    <!-- BOTTOM: ORDERS + DETAILS -->
+    <section class="flex-1 ice-card flex flex-row min-h-0 overflow-hidden">
+
+      <!-- Orders list -->
+      <div class="flex flex-col min-h-0" style="width:64%; border-right:1px solid var(--border);">
+        <div class="sub-header">
+          <h3 class="sub-title">ACTIVE ORDERS</h3>
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Filter (Customer, Status...)" id="orders-search" oninput="filterOrders()">
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto cscroll min-h-0">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-ico"></th>
+                <th onclick="sortOrders('name')">Customer Name <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('orderCode')">Azonosító <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('status')">Status <i class="fas fa-sort ml-1 opacity-40"></i></th>
+                <th onclick="sortOrders('workflow')">Workflow <i class="fas fa-sort ml-1 opacity-40"></i></th>
+              </tr>
+            </thead>
+            <tbody id="orders-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Details panel -->
+      <div class="flex flex-col relative" style="width:36%;">
+        <div class="absolute top-4 right-4 z-10">
+          <div class="status-dot"></div>
+        </div>
+        <div class="flex-1 overflow-y-auto cscroll p-7" id="details-panel">
+          <div class="det-empty">
+            <i class="fas fa-mouse-pointer" style="font-size:2.5rem; opacity:0.25;"></i>
+            <p style="font-size:0.85rem; font-weight:500;">Click an order to see its details!</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Frost flash overlay -->
+  <div class="frost-flash" id="frost-flash"></div>
+
+  <!-- ═══════════════════════════════════════════
+       MODALS
+  ═══════════════════════════════════════════ -->
+  <!-- All Updates Modal -->
+  <div class="modal-ov" id="modal-all" onclick="closeBg(event,'modal-all')">
+    <div class="modal-box" style="max-width:780px;">
+      <div class="modal-hd">
+        <h2 class="modal-ttl">Full Update History</h2>
+        <button class="btn-close" onclick="closeModal('modal-all')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body cscroll">
+        <div class="date-div">Ma (2026. Március 23.)</div>
+        <table class="wn-table">
+          <tbody id="modal-all-today"></tbody>
+        </table>
+        <div class="date-div">Tegnap (2026. Március 22.)</div>
+        <table class="wn-table">
+          <tbody id="modal-all-yesterday"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Detail Modal -->
+  <div class="modal-ov" id="modal-entry" onclick="closeBg(event,'modal-entry')">
+    <div class="modal-box" style="flex-direction:row; height:80vh; max-width:1100px;">
+      <!-- Left: Content -->
+      <div class="flex flex-col min-h-0" style="width:65%; border-right:1px solid var(--border);">
+        <div class="modal-hd" style="padding-bottom:0.75rem;">
+          <div class="flex items-center gap-3">
+            <div class="det-logo" id="em-logo"><i class="fas fa-hotel"></i></div>
+            <div>
+              <span class="order-code" id="em-code">HILT-00001</span>
+              <p class="det-name mt-1" id="em-name">Hilton Budapest Ltd.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-body cscroll">
+          <h2 class="em-h2">Summary</h2>
+          <div class="em-sumbox" id="em-summary">A hűtőrendszer szenzorai kritikus eltérést észleltek...</div>
+          <h2 class="em-h2">Detailed Description</h2>
+          <div id="em-desc">
+            <p class="em-txt">Az automatizált diagnosztika alapján a hűtőközeg nyomása stabil...</p>
+          </div>
+          <div class="ai-box">
+            <div class="ai-icon"><i class="fas fa-bolt"></i></div>
+            <div>
+              <p class="ai-lbl">PISTA Suggestion</p>
+              <p style="font-size:0.88rem; color:var(--text);" id="em-suggestion">Az Arctic Core modul újraindítása
+                javasolt.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: AI Chat -->
+      <div class="flex flex-col" style="width:35%; background:var(--surface);">
+        <div class="modal-hd" style="background:var(--surface);">
+          <div class="flex items-center gap-2"
+            style="font-weight:700; font-size:0.82rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em;">
+            <i class="fas fa-robot"></i> System AI
+          </div>
+          <button class="btn-close" onclick="closeModal('modal-entry')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto cscroll p-5 flex flex-col gap-4">
+          <div class="chat-ai"><span class="chat-label">PISTA</span>Üdvözlöm! Észleltem a problémát. Segíthetek az
+            adatok elemzésében?</div>
+          <div class="chat-user">Mikor volt az utolsó manuális kalibráció?</div>
+          <div class="chat-ai"><span class="chat-label">PISTA</span>Az utolsó manuális beavatkozás 72 órája
+            történt. Szoftveres úton orvosolható.</div>
+        </div>
+        <div class="p-4 shrink-0" style="border-top:1px solid var(--border);">
+          <div class="carved">
+            <button class="carved-btn"><i class="fas fa-plus-circle"></i></button>
+            <input type="text" placeholder="Ask...">
+            <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TEMPLATES
+  ═══════════════════════════════════════════ -->
+  <!-- Template for "What's New" table rows -->
+  <template id="tpl-wn-row">
+    <tr>
+      <td style="width:3.5rem;">
+        <div class="wn-ico"><i class="fas"></i></div>
+      </td>
+      <td>
+        <p class="wn-title"></p>
+        <p class="wn-detail"></p>
+      </td>
+      <td><span class="wn-suggestion"></span></td>
+      <td style="width:5.5rem;" class="wn-action-cell">
+        <!-- Action Row (Default) -->
+        <div class="wn-action-row hidden">
+          <button class="btn-act btn-ok"><i class="fas fa-check"></i></button>
+          <button class="btn-act btn-edit"><i class="fas fa-pencil"></i></button>
+        </div>
+        <!-- Processed Badge -->
+        <div class="done-badge hidden">Processed</div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- Template for "Orders" table rows -->
+  <template id="tpl-order-row">
+    <tr class="order-row-el">
+      <td>
+        <div class="ico-wrap"><i class="fas"></i></div>
+      </td>
+      <td>
+        <div class="client-name"></div>
+      </td>
+      <td><span class="order-code"></span></td>
+      <td class="status-cell">
+        <div class="status-text mb-1"></div>
+        <!-- Pipeline Stepper -->
+        <div class="pipeline">
+          <div class="pip-node" data-step="1"></div>
+          <div class="pip-line" data-line="1"></div>
+          <div class="pip-node" data-step="2"></div>
+          <div class="pip-line" data-line="2"></div>
+          <div class="pip-node" data-step="3"></div>
+          <div class="pip-line" data-line="3"></div>
+          <div class="pip-node" data-step="4"></div>
+          <div class="pip-line" data-line="4"></div>
+          <div class="pip-node" data-step="5"></div>
+        </div>
+      </td>
+      <td>
+        <div class="flex items-center"><span class="pill"></span><i
+            class="fas fa-paperclip clip-icon hidden ml-2 opacity-50"
+            style="color:var(--accent); font-size:0.75rem;"></i></div>
+      </td>
+    </tr>
+  </template>
+
+  <script>
+    /* ── RENDERING LOGIC ─────────────────────────── */
+
+    async function renderWN() {
+      const containerMain = document.getElementById('wn-body');
+      const containerToday = document.getElementById('modal-all-today');
+      const containerYest = document.getElementById('modal-all-yesterday');
+      const tpl = document.getElementById('tpl-wn-row');
+
+      const updates = await dataService.getUpdates();
+
+      const createRow = (item, idx) => {
+        const clone = tpl.content.cloneNode(true);
+
+        const icoCont = clone.querySelector('.wn-ico');
+        if (item.logo) {
+          icoCont.innerHTML = `<img src="${item.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${item.icon}\'></i>'">`;
+        } else {
+          icoCont.querySelector('i').className = `fas ${item.icon}`;
+        }
+        clone.querySelector('.wn-title').textContent = item.title;
+        clone.querySelector('.wn-detail').textContent = item.detail;
+        clone.querySelector('.wn-suggestion').textContent = item.suggestion;
+
+        if (item.processed) {
+          clone.querySelector('.done-badge').classList.remove('hidden');
+        } else {
+          const actionRow = clone.querySelector('.wn-action-row');
+          actionRow.classList.remove('hidden');
+          actionRow.querySelector('.btn-edit').onclick = () => openEntryModal(idx);
+        }
+
+        return clone;
+      };
+
+      containerMain.innerHTML = '';
+      containerToday.innerHTML = '';
+      containerYest.innerHTML = '';
+
+      updates.forEach((item, i) => {
+        containerMain.appendChild(createRow(item, i));
+        containerToday.appendChild(createRow(item, i));
+        containerYest.appendChild(createRow(item, i));
+      });
+    }
+
+    let currentSort = { key: 'updated', dir: -1 };
+    let selectedId = null;
+
+    async function renderOrders(data) {
+      const container = document.getElementById('orders-body');
+      const tpl = document.getElementById('tpl-order-row');
+      container.innerHTML = '';
+
+      if (!data) data = await dataService.getOrders();
+
+      data.forEach(async o => {
+        const clone = tpl.content.cloneNode(true);
+        const tr = clone.querySelector('tr');
+
+        tr.id = `order-row-${o.id}`;
+        tr.onclick = () => selectOrder(o.id);
+        if (o.aiInsight) tr.classList.add('ai-row');
+        if (selectedId === o.id) tr.classList.add('selected');
+
+        const icoCont = clone.querySelector('.ico-wrap');
+        if (o.logo) {
+          icoCont.innerHTML = `<img src="${o.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${o.icon}\'></i>'">`;
+        } else {
+          icoCont.querySelector('i').className = `fas ${o.icon}`;
+        }
+
+        clone.querySelector('.client-name').textContent = o.name;
+        clone.querySelector('.order-code').textContent = o.orderCode;
+        clone.querySelector('.status-text').textContent = o.status;
+
+        // Pipeline
+        const step = dataService.getWorkflowStep(o.workflow);
+        clone.querySelectorAll('.pip-node').forEach(node => {
+          const n = parseInt(node.dataset.step);
+          if (step > n) node.classList.add('done');
+          else if (step === n) node.classList.add('active');
+        });
+        clone.querySelectorAll('.pip-line').forEach(line => {
+          const l = parseInt(line.dataset.line);
+          if (step > l) line.classList.add('done');
+        });
+
+        // Pill
+        const pill = clone.querySelector('.pill');
+        pill.textContent = dataService.getStatusLabel(o.workflow);
+        pill.classList.add(`p-${o.workflow}`);
+
+        // Clip (awaitable if needed, but currently sync in service)
+        const details = await dataService.getOrderDetails(o.id);
+        if (details.files && details.files.length) {
+          clone.querySelector('.clip-icon').classList.remove('hidden');
+        }
+
+        container.appendChild(clone);
+      });
+    }
+
+    async function sortOrders(key) {
+      if (currentSort.key === key) currentSort.dir *= -1;
+      else { currentSort.key = key; currentSort.dir = -1; }
+      const data = await dataService.getOrders();
+      const sorted = [...data].sort((a, b) => (a[key] || '') < (b[key] || '') ? -currentSort.dir : (a[key] || '') > (b[key] || '') ? currentSort.dir : 0);
+      renderOrders(sorted);
+    }
+
+    async function filterOrders() {
+      const q = document.getElementById('orders-search').value.toLowerCase();
+      const orders = await dataService.getOrders();
+      const filtered = orders.filter(o =>
+        o.name.toLowerCase().includes(q) ||
+        o.orderCode.toLowerCase().includes(q) ||
+        o.workflow.toLowerCase().includes(q)
+      );
+      renderOrders(filtered);
+    }
+
+    /* ── DETAILS PANEL ───────────────────────────── */
+    async function selectOrder(id) {
+      selectedId = id;
+      document.querySelectorAll('.order-row-el').forEach(r => r.classList.remove('selected'));
+      document.getElementById(`order-row-${id}`)?.classList.add('selected');
+
+      const { order, history, items, files } = await dataService.getOrderDetails(id);
+      if (!order) return;
+      const fmt = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
+
+      let itemsHtml = '';
+      if (items.length) {
+        let tot = 0;
+        const rows = items.map(it => {
+          const rt = it.qty * it.price;
+          tot += rt;
+          return `<div class="det-row"><span class="det-row-name">${it.name}</span><span class="det-row-qty">${it.qty}x</span><span class="det-row-price">${fmt.format(rt)}</span></div>`;
+        }).join('');
+        itemsHtml = `<div class="det-section">Products</div><div>${rows}<div class="det-row total"><span class="det-row-name">Total:</span><span class="det-row-price">${fmt.format(tot)}</span></div></div>`;
+      }
+
+      let filesHtml = '';
+      if (files && files.length) {
+        filesHtml = `<div class="det-section">Documents</div><div class="flex flex-wrap gap-2">${files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i>${f.name}</div>`).join('')}</div>`;
+      }
+
+      const tlHtml = `<div class="det-section">History</div><div style="margin-top:0.5rem;">${[...history].reverse().map(h => `
+        <div class="timeline-item">
+          <p class="tl-date">${h.date}</p>
+          <span class="pill p-${h.status}">${dataService.getStatusLabel(h.status)}</span>
+          <p class="tl-note">${h.note}</p>
+        </div>`).join('')}</div>`;
+
+      document.getElementById('details-panel').innerHTML = `
+        <div class="flex items-center gap-4 mb-5">
+          <div class="det-logo">
+            ${order.logo ? `<img src="${order.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\\\'fas ${order.icon}\\\'></i>'">` : `<i class="fas ${order.icon}"></i>`}
+          </div>
+          <div>
+            <span class="order-code">${order.orderCode}</span>
+            <p class="det-name mt-1">${order.name}</p>
+            <div class="flex flex-col gap-0.5 mt-1">
+              <p class="det-upd">Létrehozva: ${order.orderDate || '–'}</p>
+              <p class="det-upd">Frissítve: ${history[0]?.date ?? '–'}</p>
+            </div>
+          </div>
+        </div>
+        ${filesHtml}${itemsHtml}${tlHtml}
+      `;
+    }
+
+    /* ── THEME & MODALS ──────────────────────────── */
+    function toggleTheme() {
+      const ff = document.getElementById('frost-flash');
+      ff.classList.add('on');
+      setTimeout(() => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        document.getElementById('theme-label').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+        requestAnimationFrame(() => ff.classList.remove('on'));
+      }, 55);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeBg(e, id) { if (e.target.id === id) closeModal(id); }
+
+    async function openEntryModal(idx) {
+      const updates = await dataService.getUpdates();
+      const it = updates[idx];
+      if (!it) return;
+      document.getElementById('em-logo').innerHTML = `<i class="fas ${it.icon}"></i>`;
+      document.getElementById('em-code').textContent = it.orderCode;
+      document.getElementById('em-name').textContent = it.name;
+      document.getElementById('em-summary').textContent = it.detail;
+      document.getElementById('em-suggestion').textContent = it.suggestion;
+      document.getElementById('em-desc').innerHTML = `<p class="em-txt">A rendszer automatikus ellenőrzése során új esemény generálódott. A PISTA integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>`;
+      openModal('modal-entry');
+    }
+
+    /* ── INIT ─────────────────────────────────────── */
+    (async () => {
+      const resizer = document.getElementById('sidebar-resizer');
+      const sidebar = document.getElementById('main-sidebar');
+      let dragging = false, startX = 0, startW = 0, hasMoved = false;
+      resizer.addEventListener('mousedown', e => {
+        dragging = true;
+        hasMoved = false;
+        startX = e.clientX;
+        startW = sidebar.offsetWidth;
+        resizer.classList.add('active');
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        hasMoved = true;
+        // Allow ±5vw around the default 18vw  →  clamp to 13vw – 23vw
+        const minW = Math.round(window.innerWidth * 0.13);
+        const maxW = Math.round(window.innerWidth * 0.23);
+        sidebar.style.width = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX))) + 'px';
+      });
+      document.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
+
+      await renderWN();
+      const orders = await dataService.getOrders();
+      renderOrders([...orders].sort((a, b) => b.updated.localeCompare(a.updated)));
+    })();
+  </script>
+</body>
+
 </html>

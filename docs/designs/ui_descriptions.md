@@ -14,14 +14,14 @@ If an order or email becomes processed outside of the dashboard (for example CK 
 - The entire left sidebar (Menu + AI chat) has a draggable right edge. It can be dynamically resized between 10% and 30% of the total screen width.
 
 ### Modals
-- **All Updates Modal:** Triggered by "Összes frissítés megtekintése". Opens a pop-up showing the history of all updates out of the 40% height constraint. The updates are visually grouped by Day.
+- **All Updates Modal:** Triggered by "View all updates". Opens a pop-up showing the history of all updates out of the 40% height constraint. The updates are visually grouped by Day.
 - **Entry Details Modal:** Triggered by the Pencil icon on a specific entry row. A large pop-up window divided into two columns:
-  - **Left Column (Context & AI Analysis):** Client name and ID at the top. Below that, an "Összegzés" (Summary) box, a "Részletes Leírás" (Detailed description) plain text area, and an "AI Javaslat" (AI Suggestion) highlighted box at the bottom.
+  - **Left Column (Context & AI Analysis):** Client name and ID at the top. Below that, a "Summary" box, a "Detailed Description" plain text area, and an "AI Suggestion" highlighted box at the bottom.
   - **Right Column (P.I.S.T.A. Assistant):** A dedicated chat interface on the right side to converse with the AI specifically about this update/order, complete with an input field and close button.
 
 ## Active orders + Details section
 Below the "What's new?" section there should be one single overarching card container that is split into 2 columns vertically, with a visual divider line in between. The one on the left taking up 65% of the width, and the one on the right taking up 35%. 
-There is no "Részletek" title shown on the right side, just the content.
+There is no "Details" title shown on the right side, just the content.
 
 The one on the left should be named "Active Orders". This should be a list of all the active business orders, and each row should multiple columns as information:
 

@@ -130,16 +130,16 @@ const ORDER_ITEMS = {
 };
 
 const STATUS_LABELS = { 
-  NEW: 'Új', 
-  OFFER_SENT: 'Ajánlat', 
-  ORDER_CONFIRMED: 'Megrendelő', 
-  PURCHASE: 'Vásárlás', 
-  READY_FOR_DELIVERY: 'Kész', 
-  DELIVERY: 'Szállítás', 
-  DELIVERED: 'Kiszállítva', 
-  INVOICED: 'Számlázva', 
-  CLOSED: 'Lezárva', 
-  CANCELLED: 'Törölt' 
+  NEW: 'New', 
+  OFFER_SENT: 'Offer Sent', 
+  ORDER_CONFIRMED: 'Order Confirmed', 
+  PURCHASE: 'Purchase', 
+  READY_FOR_DELIVERY: 'Ready for Delivery', 
+  DELIVERY: 'Delivery', 
+  DELIVERED: 'Delivered', 
+  INVOICED: 'Invoiced', 
+  CLOSED: 'Closed', 
+  CANCELLED: 'Cancelled' 
 };
 
 const API_BASE = 'http://localhost:3001/api';
@@ -176,7 +176,7 @@ const dataService = {
           detail: o.update_event,
           suggestion: 'Folyamatban lévő rendelés.',
           orderCode: o.order_code,
-          name: cust?.cust_name || `Ügyfél #${o.cust_id}`,
+          name: cust?.cust_name || `Customer #${o.cust_id}`,
           processed: o.current_status === 'CLOSED'
         };
       });
@@ -203,7 +203,7 @@ const dataService = {
           orderCode: o.order_code,
           icon: cust?.logo_path ? 'fa-building' : 'fa-box',
           logo: resolveLogoUrl(cust?.logo_path),
-          name: cust?.cust_name || `Ügyfél #${o.cust_id}`,
+          name: cust?.cust_name || `Customer #${o.cust_id}`,
           status: o.update_event || o.current_status,
           workflow: o.current_status,
           updated: o.order_date.split(' ')[0]
@@ -233,13 +233,13 @@ const dataService = {
         order: {
           id: data.order.order_id,
           orderCode: data.order.order_code,
-          name: data.order.cust_name || `Ügyfél #${data.order.cust_id}`,
+          name: data.order.cust_name || `Customer #${data.order.cust_id}`,
           icon: data.order.logo_path ? 'fa-building' : 'fa-box',
           logo: resolveLogoUrl(data.order.logo_path),
           orderDate: data.order.order_date
         },
         items: data.items.map(i => ({
-          name: i.prod_name || `Termék #${i.prod_id}`,
+          name: i.prod_name || `Product #${i.prod_id}`,
           qty: i.quantity,
           price: i.unit_price
         })),
@@ -251,7 +251,14 @@ const dataService = {
         files: [] 
       };
     } catch (e) {
-      return { order: null, history: [], items: [], files: [] };
+      // RULE: Graceful degradation — always return usable data so the UI doesn't silently fail.
+      console.warn('API unavailable for order details, falling back to mock data');
+      return {
+        order: ORDERS.find(o => o.id === id) || null,
+        history: ORDER_HISTORY[id] || [],
+        items: ORDER_ITEMS[id] || [],
+        files: ORDER_FILES[id] || []
+      };
     }
   },
   
