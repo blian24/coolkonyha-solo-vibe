@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hu" class="dark">
 
 <head>
@@ -46,18 +46,18 @@
         <a href="#" class="nav-item"><i class="fas fa-cog w-4 text-center"></i>Beállítások</a>
       </div>
 
-      <!-- P.I.S.T.A. chat -->
+      <!-- PISTA chat -->
       <div class="shrink-0 p-4 flex flex-col gap-3" style="border-top:1px solid var(--border);">
         <div class="flex items-center gap-2 mb-1">
           <div class="status-dot"></div>
-          <span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em;">P.I.S.T.A.</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em;">PISTA</span>
         </div>
-        <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade pb-2 gap-3 min-h-0" style="max-height:10rem;">
+        <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade gap-3 min-h-0 chat-container" style="max-height:10rem;">
           <div class="flex-1"></div>
-          <div class="chat-ai"><span class="chat-label">P.I.S.T.A.</span>Üdv CK! Az adatbázis modul betöltve.</div>
+          <div class="chat-ai"><span class="chat-label">PISTA</span>Üdv CK! Az adatbázis modul betöltve.</div>
         </div>
         <div class="carved mt-1">
-          <input type="text" placeholder="Kérdezz P.I.S.T.A.-tól...">
+          <input type="text" placeholder="Kérdezz PISTA-tól...">
           <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
         </div>
       </div>
@@ -139,9 +139,9 @@
         <div class="modal-body" id="modal-body-content"></div>
       </div>
 
-      <!-- Right: P.I.S.T.A. chat -->
+      <!-- Right: PISTA chat -->
       <div class="modal-right">
-        <div class="modal-chat-header"><div class="status-dot"></div> P.I.S.T.A.</div>
+        <div class="modal-chat-header"><div class="status-dot"></div> PISTA</div>
         <div class="modal-chat-msgs cscroll" id="modal-chat-msgs"></div>
         <div class="carved" style="margin:0.75rem; border-radius:10px;">
           <input type="text" id="modal-chat-input" placeholder="Kérdezz..." onkeydown="if(event.key==='Enter') sendModalChat()">
@@ -181,9 +181,9 @@
         </div>
       </div>
 
-      <!-- Right: P.I.S.T.A. chat -->
+      <!-- Right: PISTA chat -->
       <div class="modal-right">
-        <div class="modal-chat-header"><div class="status-dot"></div> P.I.S.T.A.</div>
+        <div class="modal-chat-header"><div class="status-dot"></div> PISTA</div>
         <div class="modal-chat-msgs cscroll" id="om-chat-msgs"></div>
         <div class="carved" style="margin:0.75rem;">
           <input type="text" id="om-chat-input" placeholder="Kérdezz..." onkeydown="if(event.key==='Enter') sendOrderChat()">
@@ -462,7 +462,7 @@
     const seedModalChat = (c) => {
       const msgs = document.getElementById('modal-chat-msgs');
       msgs.innerHTML = `
-        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>
+        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">PISTA</span>
           Betöltöttem <strong>${c.cust_name}</strong> kapcsolatát. ${orderCountMap[c.cust_id] ?? 0} rendelésük van rögzítve. Miben segíthetek?</div>`;
     };
 
@@ -472,7 +472,7 @@
       if (!text) return;
       const msgs = document.getElementById('modal-chat-msgs');
       msgs.innerHTML += `<div class="mc-user">${text}</div>`;
-      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>Ez a funkció hamarosan elérhető lesz.</div>`;
+      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">PISTA</span>Ez a funkció hamarosan elérhető lesz.</div>`;
       input.value = '';
       msgs.scrollTop = msgs.scrollHeight;
     };
@@ -734,7 +734,7 @@
       const cust = customersCache ? customersCache.find(c => c.cust_id === o.cust_id) : null;
       const msgs = document.getElementById('om-chat-msgs');
       msgs.innerHTML = `
-        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>
+        <div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">PISTA</span>
           Megnyitottam a <strong>${o.order_code ?? '#'+o.order_id}</strong> rendelést${cust ? ` (${cust.cust_name})` : ''}. Jelenlegi státusz: ${o.current_status}. Miben segíthetek?</div>`;
     };
 
@@ -744,7 +744,7 @@
       if (!text) return;
       const msgs = document.getElementById('om-chat-msgs');
       msgs.innerHTML += `<div class="mc-user">${text}</div>`;
-      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">P.I.S.T.A.</span>Ez a funkció hamarosan elérhető lesz.</div>`;
+      msgs.innerHTML += `<div class="mc-ai"><span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.2rem;">PISTA</span>Ez a funkció hamarosan elérhető lesz.</div>`;
       input.value = '';
       msgs.scrollTop = msgs.scrollHeight;
     };

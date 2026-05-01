@@ -1686,3 +1686,18 @@ body {
   color: var(--muted);
   font-family: 'JetBrains Mono', monospace;
 }
+/* ── Chat Container (Option 3 Elevated Surface) ── */
+.chat-container {
+  background: var(--surface);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.dark .chat-container {
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}

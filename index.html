@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
 
 <head>
@@ -67,7 +67,7 @@
     <!-- PISTA Chat -->
     <div class="flex-1 flex flex-col min-h-0 px-5">
       <p class="chat-label mb-3">Proactive Intelligent System for Task Automation</p>
-      <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade pb-4 gap-4 min-h-0">
+      <div class="flex-1 overflow-y-auto flex flex-col cscroll chat-fade gap-4 min-h-0 chat-container">
         <div class="flex-1"></div>
         <div class="chat-ai"><span class="chat-label">PISTA</span>Üdv CK! Minden rendszerelem stabil. Készen állok
           a műveletekre.</div>
@@ -553,7 +553,7 @@
       document.getElementById('em-name').textContent = it.name;
       document.getElementById('em-summary').textContent = it.detail;
       document.getElementById('em-suggestion').textContent = it.suggestion;
-      document.getElementById('em-desc').innerHTML = `<p class="em-txt">A rendszer automatikus ellenőrzése során új esemény generálódott. A PISTA integrált elemzése megállapította, hogy az aktuális metrikák eltérnek a várakozástól.</p>`;
+      document.getElementById('em-desc').innerHTML = `<p class="em-txt">A new event was generated during the automatic system check. PISTA's integrated analysis determined that current metrics deviate from expectations.</p>`;
       openModal('modal-entry');
     }
 
