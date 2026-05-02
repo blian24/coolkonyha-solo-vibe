@@ -1,0 +1,118 @@
+<!-- TOP: MI ÚJSÁG + STAT BOXES -->
+<div class="shrink-0 flex flex-row gap-6" style="max-height:36%;">
+  <section class="flex-1 ice-card flex flex-col min-w-0">
+    <!-- Header bar -->
+    <div class="section-header">
+      <div class="flex items-center gap-3">
+        <h2 class="section-title">WHAT'S NEW?</h2>
+        <span class="section-badge" id="wn-count">3 NEW UPDATES</span>
+      </div>
+
+
+
+      <!-- Controls -->
+      <div class="flex items-center gap-4">
+        <div class="date-nav">
+          <button class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
+          <span class="date-nav-label">March 23, 2026</span>
+          <button class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="theme-label" id="theme-label">Dark Mode</span>
+          <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-1 overflow-y-auto cscroll min-h-0">
+      <table class="wn-table">
+        <tbody id="wn-body"></tbody>
+      </table>
+    </div>
+    <div class="tbl-footer">
+      <button class="btn-see-all" onclick="openModal('modal-all')">View All Updates (34)</button>
+    </div>
+  </section>
+
+  <!-- Stat boxes column -->
+  <!-- Width = each box height: parent max-height 36vh → two boxes + 1 gap = (36vh - 1rem) / 2 ≈ 18vh - 0.5rem -->
+  <div class="shrink-0 flex flex-col gap-4 h-full" style="width: calc(18vh - 0.5rem);">
+
+    <!-- Box 1: Active orders — cyan -->
+    <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+             background: linear-gradient(160deg, rgba(8,145,178,0.25) 0%, rgba(34,211,238,0.08) 100%);
+             border-color: rgba(34,211,238,0.35);">
+      <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                   font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                   font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                   color:rgba(34,211,238,0.85); line-height:1.3;">Active Orders</span>
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:36cqi; font-weight:700;
+                     color:#22d3ee; line-height:1;
+                     text-shadow: 0 0 24px rgba(34,211,238,0.55), 0 0 8px rgba(34,211,238,0.3);">124</span>
+      </div>
+    </div>
+
+    <!-- Box 2: Closed orders — emerald -->
+    <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
+             background: linear-gradient(160deg, rgba(5,150,105,0.25) 0%, rgba(74,222,128,0.08) 100%);
+             border-color: rgba(74,222,128,0.35);">
+      <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
+                   font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
+                   font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+                   color:rgba(74,222,128,0.85); line-height:1.3;">Closed in 30 days</span>
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:42cqi; font-weight:700;
+                     color:#4ade80; line-height:1;
+                     text-shadow: 0 0 24px rgba(74,222,128,0.55), 0 0 8px rgba(74,222,128,0.3);">210</span>
+      </div>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- BOTTOM: ORDERS + DETAILS -->
+<section class="flex-1 ice-card flex flex-row min-h-0 overflow-hidden">
+
+  <!-- Orders list -->
+  <div class="flex flex-col min-h-0" style="width:64%; border-right:1px solid var(--border);">
+    <div class="sub-header">
+      <h3 class="sub-title">ACTIVE ORDERS</h3>
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Filter (Customer, Status...)" id="orders-search" oninput="filterOrders()">
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto cscroll min-h-0">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="col-ico"></th>
+            <th onclick="sortOrders('name')">Customer Name <i class="fas fa-sort ml-1 opacity-40"></i></th>
+            <th onclick="sortOrders('orderCode')">ID <i class="fas fa-sort ml-1 opacity-40"></i></th>
+            <th onclick="sortOrders('status')">Status <i class="fas fa-sort ml-1 opacity-40"></i></th>
+            <th onclick="sortOrders('workflow')">Workflow <i class="fas fa-sort ml-1 opacity-40"></i></th>
+          </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Details panel -->
+  <div class="flex flex-col relative" style="width:36%;">
+    <div class="absolute top-4 right-4 z-10">
+      <div class="status-dot"></div>
+    </div>
+    <div class="flex-1 overflow-y-auto cscroll p-7" id="details-panel">
+      <div class="det-empty">
+        <i class="fas fa-mouse-pointer" style="font-size:2.5rem; opacity:0.25;"></i>
+        <p style="font-size:0.85rem; font-weight:500;">Click an order to see its details!</p>
+      </div>
+    </div>
+  </div>
+
+</section>

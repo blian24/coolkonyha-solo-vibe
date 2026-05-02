@@ -23,6 +23,7 @@
   </script>
 
   <link rel="stylesheet" href="/ui_design/css/oceanic-plus.css">
+  <script type="module" src="/ui_design/js/router.js"></script>
 </head>
 
 <body class="h-screen flex gap-6 p-6" id="app-body">
@@ -55,7 +56,7 @@
         <a href="#" class="nav-item">
           <i class="fas fa-file-alt w-5 text-center"></i><span>Reports</span>
         </a>
-        <a href="/ui_design/designs/design-03-database-v1.html" class="nav-item">
+        <a href="#" class="nav-item">
           <i class="fas fa-database w-5 text-center"></i><span>Database</span>
         </a>
         <a href="#" class="nav-item">
@@ -71,7 +72,7 @@
         <div class="flex-1"></div>
         <div class="chat-ai"><span class="chat-label">PISTA</span>Üdv CK! Minden rendszerelem stabil. Készen állok
           a műveletekre.</div>
-        <div class="chat-user">Mikor érkeznek a Brema egységek a Hiltonhoz?</div>
+        <div class="chat-user">When will the Brema units arrive at the Hilton?</div>
         <div class="chat-ai"><span class="chat-label">PISTA</span>A Hilton szállítmánya (HILT-00001) holnap reggel
           10:00-ra van ütemezve. Vámkezelés kész.</div>
       </div>
@@ -90,127 +91,7 @@
   <!-- ═══════════════════════════════════════════
        MAIN CONTENT
   ═══════════════════════════════════════════ -->
-  <main class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
-
-    <!-- TOP: MI ÚJSÁG + STAT BOXES -->
-    <div class="shrink-0 flex flex-row gap-6" style="max-height:36%;">
-      <section class="flex-1 ice-card flex flex-col min-w-0">
-        <!-- Header bar -->
-        <div class="section-header">
-          <div class="flex items-center gap-3">
-            <h2 class="section-title">WHAT'S NEW?</h2>
-            <span class="section-badge" id="wn-count">3 NEW UPDATES</span>
-          </div>
-
-
-
-          <!-- Controls -->
-          <div class="flex items-center gap-4">
-            <div class="date-nav">
-              <button class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
-              <span class="date-nav-label">2026. Március 23.</span>
-              <button class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="theme-label" id="theme-label">Dark Mode</span>
-              <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Téma váltása"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Table -->
-        <div class="flex-1 overflow-y-auto cscroll min-h-0">
-          <table class="wn-table">
-            <tbody id="wn-body"></tbody>
-          </table>
-        </div>
-        <div class="tbl-footer">
-          <button class="btn-see-all" onclick="openModal('modal-all')">View All Updates (34)</button>
-        </div>
-      </section>
-
-      <!-- Stat boxes column -->
-      <!-- Width = each box height: parent max-height 36vh → two boxes + 1 gap = (36vh - 1rem) / 2 ≈ 18vh - 0.5rem -->
-      <div class="shrink-0 flex flex-col gap-4 h-full" style="width: calc(18vh - 0.5rem);">
-
-        <!-- Box 1: Active orders — cyan -->
-        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
-                 background: linear-gradient(160deg, rgba(8,145,178,0.25) 0%, rgba(34,211,238,0.08) 100%);
-                 border-color: rgba(34,211,238,0.35);">
-          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
-                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
-                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
-                       color:rgba(34,211,238,0.85); line-height:1.3;">Active Orders</span>
-          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <span style="font-family:'JetBrains Mono',monospace; font-size:36cqi; font-weight:700;
-                         color:#22d3ee; line-height:1;
-                         text-shadow: 0 0 24px rgba(34,211,238,0.55), 0 0 8px rgba(34,211,238,0.3);">124</span>
-          </div>
-        </div>
-
-        <!-- Box 2: Closed orders — emerald -->
-        <div class="ice-card flex-1" style="position:relative; container-type:inline-size; overflow:hidden;
-                 background: linear-gradient(160deg, rgba(5,150,105,0.25) 0%, rgba(74,222,128,0.08) 100%);
-                 border-color: rgba(74,222,128,0.35);">
-          <span style="position:absolute; top:14%; left:8%; right:8%; text-align:center;
-                       font-family:'Montserrat',sans-serif; font-size:max(0.55rem, 6cqi);
-                       font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
-                       color:rgba(74,222,128,0.85); line-height:1.3;">Closed in 30 days</span>
-          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <span style="font-family:'JetBrains Mono',monospace; font-size:42cqi; font-weight:700;
-                         color:#4ade80; line-height:1;
-                         text-shadow: 0 0 24px rgba(74,222,128,0.55), 0 0 8px rgba(74,222,128,0.3);">210</span>
-          </div>
-        </div>
-
-      </div>
-
-
-    </div>
-
-    <!-- BOTTOM: ORDERS + DETAILS -->
-    <section class="flex-1 ice-card flex flex-row min-h-0 overflow-hidden">
-
-      <!-- Orders list -->
-      <div class="flex flex-col min-h-0" style="width:64%; border-right:1px solid var(--border);">
-        <div class="sub-header">
-          <h3 class="sub-title">ACTIVE ORDERS</h3>
-          <div class="search-wrap">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Filter (Customer, Status...)" id="orders-search" oninput="filterOrders()">
-          </div>
-        </div>
-        <div class="flex-1 overflow-y-auto cscroll min-h-0">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th class="col-ico"></th>
-                <th onclick="sortOrders('name')">Customer Name <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                <th onclick="sortOrders('orderCode')">Azonosító <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                <th onclick="sortOrders('status')">Status <i class="fas fa-sort ml-1 opacity-40"></i></th>
-                <th onclick="sortOrders('workflow')">Workflow <i class="fas fa-sort ml-1 opacity-40"></i></th>
-              </tr>
-            </thead>
-            <tbody id="orders-body"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Details panel -->
-      <div class="flex flex-col relative" style="width:36%;">
-        <div class="absolute top-4 right-4 z-10">
-          <div class="status-dot"></div>
-        </div>
-        <div class="flex-1 overflow-y-auto cscroll p-7" id="details-panel">
-          <div class="det-empty">
-            <i class="fas fa-mouse-pointer" style="font-size:2.5rem; opacity:0.25;"></i>
-            <p style="font-size:0.85rem; font-weight:500;">Click an order to see its details!</p>
-          </div>
-        </div>
-      </div>
-
-    </section>
-  </main>
+  <main id="app-content" class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0"></main>
 
   <!-- Frost flash overlay -->
   <div class="frost-flash" id="frost-flash"></div>
@@ -226,11 +107,11 @@
         <button class="btn-close" onclick="closeModal('modal-all')"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body cscroll">
-        <div class="date-div">Ma (2026. Március 23.)</div>
+        <div class="date-div">Today (March 23, 2026)</div>
         <table class="wn-table">
           <tbody id="modal-all-today"></tbody>
         </table>
-        <div class="date-div">Tegnap (2026. Március 22.)</div>
+        <div class="date-div">Yesterday (March 22, 2026)</div>
         <table class="wn-table">
           <tbody id="modal-all-yesterday"></tbody>
         </table>
@@ -356,178 +237,6 @@
   </template>
 
   <script>
-    /* ── RENDERING LOGIC ─────────────────────────── */
-
-    async function renderWN() {
-      const containerMain = document.getElementById('wn-body');
-      const containerToday = document.getElementById('modal-all-today');
-      const containerYest = document.getElementById('modal-all-yesterday');
-      const tpl = document.getElementById('tpl-wn-row');
-
-      const updates = await dataService.getUpdates();
-
-      const createRow = (item, idx) => {
-        const clone = tpl.content.cloneNode(true);
-
-        const icoCont = clone.querySelector('.wn-ico');
-        if (item.logo) {
-          icoCont.innerHTML = `<img src="${item.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${item.icon}\'></i>'">`;
-        } else {
-          icoCont.querySelector('i').className = `fas ${item.icon}`;
-        }
-        clone.querySelector('.wn-title').textContent = item.title;
-        clone.querySelector('.wn-detail').textContent = item.detail;
-        clone.querySelector('.wn-suggestion').textContent = item.suggestion;
-
-        if (item.processed) {
-          clone.querySelector('.done-badge').classList.remove('hidden');
-        } else {
-          const actionRow = clone.querySelector('.wn-action-row');
-          actionRow.classList.remove('hidden');
-          actionRow.querySelector('.btn-edit').onclick = () => openEntryModal(idx);
-        }
-
-        return clone;
-      };
-
-      containerMain.innerHTML = '';
-      containerToday.innerHTML = '';
-      containerYest.innerHTML = '';
-
-      updates.forEach((item, i) => {
-        containerMain.appendChild(createRow(item, i));
-        containerToday.appendChild(createRow(item, i));
-        containerYest.appendChild(createRow(item, i));
-      });
-    }
-
-    let currentSort = { key: 'updated', dir: -1 };
-    let selectedId = null;
-
-    async function renderOrders(data) {
-      const container = document.getElementById('orders-body');
-      const tpl = document.getElementById('tpl-order-row');
-      container.innerHTML = '';
-
-      if (!data) data = await dataService.getOrders();
-
-      data.forEach(async o => {
-        const clone = tpl.content.cloneNode(true);
-        const tr = clone.querySelector('tr');
-
-        tr.id = `order-row-${o.id}`;
-        tr.onclick = () => selectOrder(o.id);
-        if (o.aiInsight) tr.classList.add('ai-row');
-        if (selectedId === o.id) tr.classList.add('selected');
-
-        const icoCont = clone.querySelector('.ico-wrap');
-        if (o.logo) {
-          icoCont.innerHTML = `<img src="${o.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\'fas ${o.icon}\'></i>'">`;
-        } else {
-          icoCont.querySelector('i').className = `fas ${o.icon}`;
-        }
-
-        clone.querySelector('.client-name').textContent = o.name;
-        clone.querySelector('.order-code').textContent = o.orderCode;
-        clone.querySelector('.status-text').textContent = o.status;
-
-        // Pipeline
-        const step = dataService.getWorkflowStep(o.workflow);
-        clone.querySelectorAll('.pip-node').forEach(node => {
-          const n = parseInt(node.dataset.step);
-          if (step > n) node.classList.add('done');
-          else if (step === n) node.classList.add('active');
-        });
-        clone.querySelectorAll('.pip-line').forEach(line => {
-          const l = parseInt(line.dataset.line);
-          if (step > l) line.classList.add('done');
-        });
-
-        // Pill
-        const pill = clone.querySelector('.pill');
-        pill.textContent = dataService.getStatusLabel(o.workflow);
-        pill.classList.add(`p-${o.workflow}`);
-
-        // Clip (awaitable if needed, but currently sync in service)
-        const details = await dataService.getOrderDetails(o.id);
-        if (details.files && details.files.length) {
-          clone.querySelector('.clip-icon').classList.remove('hidden');
-        }
-
-        container.appendChild(clone);
-      });
-    }
-
-    async function sortOrders(key) {
-      if (currentSort.key === key) currentSort.dir *= -1;
-      else { currentSort.key = key; currentSort.dir = -1; }
-      const data = await dataService.getOrders();
-      const sorted = [...data].sort((a, b) => (a[key] || '') < (b[key] || '') ? -currentSort.dir : (a[key] || '') > (b[key] || '') ? currentSort.dir : 0);
-      renderOrders(sorted);
-    }
-
-    async function filterOrders() {
-      const q = document.getElementById('orders-search').value.toLowerCase();
-      const orders = await dataService.getOrders();
-      const filtered = orders.filter(o =>
-        o.name.toLowerCase().includes(q) ||
-        o.orderCode.toLowerCase().includes(q) ||
-        o.workflow.toLowerCase().includes(q)
-      );
-      renderOrders(filtered);
-    }
-
-    /* ── DETAILS PANEL ───────────────────────────── */
-    async function selectOrder(id) {
-      selectedId = id;
-      document.querySelectorAll('.order-row-el').forEach(r => r.classList.remove('selected'));
-      document.getElementById(`order-row-${id}`)?.classList.add('selected');
-
-      const { order, history, items, files } = await dataService.getOrderDetails(id);
-      if (!order) return;
-      const fmt = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 });
-
-      let itemsHtml = '';
-      if (items.length) {
-        let tot = 0;
-        const rows = items.map(it => {
-          const rt = it.qty * it.price;
-          tot += rt;
-          return `<div class="det-row"><span class="det-row-name">${it.name}</span><span class="det-row-qty">${it.qty}x</span><span class="det-row-price">${fmt.format(rt)}</span></div>`;
-        }).join('');
-        itemsHtml = `<div class="det-section">Products</div><div>${rows}<div class="det-row total"><span class="det-row-name">Total:</span><span class="det-row-price">${fmt.format(tot)}</span></div></div>`;
-      }
-
-      let filesHtml = '';
-      if (files && files.length) {
-        filesHtml = `<div class="det-section">Documents</div><div class="flex flex-wrap gap-2">${files.map(f => `<div class="file-chip"><i class="fas ${f.icon}"></i>${f.name}</div>`).join('')}</div>`;
-      }
-
-      const tlHtml = `<div class="det-section">History</div><div style="margin-top:0.5rem;">${[...history].reverse().map(h => `
-        <div class="timeline-item">
-          <p class="tl-date">${h.date}</p>
-          <span class="pill p-${h.status}">${dataService.getStatusLabel(h.status)}</span>
-          <p class="tl-note">${h.note}</p>
-        </div>`).join('')}</div>`;
-
-      document.getElementById('details-panel').innerHTML = `
-        <div class="flex items-center gap-4 mb-5">
-          <div class="det-logo">
-            ${order.logo ? `<img src="${order.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\\\'fas ${order.icon}\\\'></i>'">` : `<i class="fas ${order.icon}"></i>`}
-          </div>
-          <div>
-            <span class="order-code">${order.orderCode}</span>
-            <p class="det-name mt-1">${order.name}</p>
-            <div class="flex flex-col gap-0.5 mt-1">
-              <p class="det-upd">Létrehozva: ${order.orderDate || '–'}</p>
-              <p class="det-upd">Frissítve: ${history[0]?.date ?? '–'}</p>
-            </div>
-          </div>
-        </div>
-        ${filesHtml}${itemsHtml}${tlHtml}
-      `;
-    }
-
     /* ── THEME & MODALS ──────────────────────────── */
     function toggleTheme() {
       const ff = document.getElementById('frost-flash');
@@ -540,22 +249,9 @@
       }, 55);
     }
 
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    function closeBg(e, id) { if (e.target.id === id) closeModal(id); }
-
-    async function openEntryModal(idx) {
-      const updates = await dataService.getUpdates();
-      const it = updates[idx];
-      if (!it) return;
-      document.getElementById('em-logo').innerHTML = `<i class="fas ${it.icon}"></i>`;
-      document.getElementById('em-code').textContent = it.orderCode;
-      document.getElementById('em-name').textContent = it.name;
-      document.getElementById('em-summary').textContent = it.detail;
-      document.getElementById('em-suggestion').textContent = it.suggestion;
-      document.getElementById('em-desc').innerHTML = `<p class="em-txt">A new event was generated during the automatic system check. PISTA's integrated analysis determined that current metrics deviate from expectations.</p>`;
-      openModal('modal-entry');
-    }
+    window.openModal = function(id) { document.getElementById(id).classList.add('open'); }
+    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+    window.closeBg = function(e, id) { if (e.target.id === id) window.closeModal(id); }
 
     /* ── INIT ─────────────────────────────────────── */
     (async () => {
@@ -580,9 +276,9 @@
       });
       document.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
 
-      await renderWN();
-      const orders = await dataService.getOrders();
-      renderOrders([...orders].sort((a, b) => b.updated.localeCompare(a.updated)));
+      
+      
+      
     })();
   </script>
 </body>
