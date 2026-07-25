@@ -1,8 +1,15 @@
 /**
  * @file dataService.js
  * @description Centralized data service for the CoolKonyha UI.
- * This module provides mock data and retrieval functions for orders, 
- * historical updates, and other business entities.
+ *
+ * Provides API consumption and mock-data fallback for:
+ * - Orders (order_status_workflow)
+ * - Maintenance Cases (maintenance_status_workflow) — added v0.6.0
+ * - Unified Dashboard feed combining both domains
+ *
+ * @see server/routes.js   - API endpoints
+ * @see server/agent.js   - DBRobot logic
+ * @version 1.1.0
  */
 
 // RULE: Separation of Concerns - Data vs Presentation
@@ -129,17 +136,24 @@ const ORDER_ITEMS = {
   5: [],
 };
 
-const STATUS_LABELS = { 
-  NEW: 'New', 
-  OFFER_SENT: 'Offer Sent', 
-  ORDER_CONFIRMED: 'Order Confirmed', 
-  PURCHASE: 'Purchase', 
-  READY_FOR_DELIVERY: 'Ready for Delivery', 
-  DELIVERY: 'Delivery', 
-  DELIVERED: 'Delivered', 
-  INVOICED: 'Invoiced', 
-  CLOSED: 'Closed', 
-  CANCELLED: 'Cancelled' 
+const STATUS_LABELS = {
+  // Order statuses
+  NEW: 'New',
+  OFFER_SENT: 'Offer Sent',
+  ORDER_CONFIRMED: 'Order Confirmed',
+  PURCHASE: 'Purchase',
+  READY_FOR_DELIVERY: 'Ready for Delivery',
+  DELIVERY: 'Delivery',
+  DELIVERED: 'Delivered',
+  INVOICED: 'Invoiced',
+  CLOSED: 'Closed',
+  CANCELLED: 'Cancelled',
+  // Maintenance statuses — added v0.6.0
+  DIAGNOSED: 'Diagnosed',
+  PARTS_ORDERED: 'Parts Ordered',
+  IN_REPAIR: 'In Repair',
+  TESTING: 'Testing',
+  READY: 'Ready',
 };
 
 const API_BASE = 'http://localhost:3001/api';
@@ -263,13 +277,132 @@ const dataService = {
   },
   
   getStatusLabel: (wf) => STATUS_LABELS[wf] || wf,
-  
+
   getWorkflowStep: (wf) => {
     if (['NEW', 'OFFER_SENT', 'ORDER_CONFIRMED'].includes(wf)) return 1;
     if (['PURCHASE', 'READY_FOR_DELIVERY'].includes(wf)) return 2;
     if (wf === 'DELIVERY') return 3;
-    return 4; 
-  }
+    return 4;
+  },
+
+  /**
+   * Maps a maintenance status key to a pipeline step number (1–4).
+   * Used for the maintenance pipeline stepper in the UI.
+   *
+   * @param {string} wf - Maintenance status key
+   * @returns {number} Step index 1–4
+   */
+  getMaintenanceWorkflowStep: (wf) => {
+    if (wf === 'NEW') return 1;
+    if (['DIAGNOSED', 'PARTS_ORDERED'].includes(wf)) return 2;
+    if (['IN_REPAIR', 'TESTING'].includes(wf)) return 3;
+    return 4; // READY, INVOICED, CLOSED, CANCELLED
+  },
+
+  // ---------------------------------------------------------
+  // MAINTENANCE DOMAIN — added v0.6.0
+  // ---------------------------------------------------------
+
+  /**
+   * Fetches all maintenance cases from the API.
+   * Returns a normalized array with a `caseType: 'maintenance'` discriminator
+   * so the unified dashboard can render the correct icon.
+   *
+   * @returns {Promise<Array>} Normalized maintenance case objects
+   */
+  async getMaintenanceCases() {
+    try {
+      const resp = await fetch(`${API_BASE}/maintenance`);
+      const cases = await resp.json();
+      return cases.map(mc => ({
+        id: mc.case_id,
+        caseCode: mc.case_code,
+        caseType: 'maintenance',
+        icon: 'fa-wrench',
+        logo: resolveLogoUrl(mc.logo_path),
+        name: mc.cust_name || `Customer #${mc.cust_id}`,
+        status: mc.update_event || mc.current_status,
+        workflow: mc.current_status,
+        updated: (mc.case_date || '').split(' ')[0] || (mc.case_date || ''),
+        description: mc.description || '',
+      }));
+    } catch (e) {
+      console.warn('Maintenance API unavailable, returning empty list');
+      return [];
+    }
+  },
+
+  /**
+   * Fetches full detail of a single maintenance case.
+   *
+   * @param {number} id - Maintenance case ID
+   * @returns {Promise<{case: Object, items: Array, history: Array}>}
+   */
+  async getMaintenanceCaseDetails(id) {
+    try {
+      const resp = await fetch(`${API_BASE}/maintenance/${id}`);
+      const data = await resp.json();
+      return {
+        order: {
+          id: data.case.case_id,
+          orderCode: data.case.case_code,
+          name: data.case.cust_name || `Customer #${data.case.cust_id}`,
+          icon: 'fa-wrench',
+          logo: resolveLogoUrl(data.case.logo_path),
+          orderDate: data.case.case_date,
+          description: data.case.description || '',
+          caseType: 'maintenance',
+        },
+        items: (data.items || []).map(i => ({
+          name: i.prod_name || `Product #${i.prod_id}`,
+          qty: i.quantity,
+          price: 0, // maintenance_items has no unit_price; shown as issue note
+          issueNote: i.issue_note || '',
+        })),
+        history: (data.history || []).map(h => ({
+          date: h.update_date,
+          status: h.status,
+          note: h.update_event,
+        })),
+        files: [],
+      };
+    } catch (e) {
+      console.warn('Maintenance detail API unavailable');
+      return { order: null, items: [], history: [], files: [] };
+    }
+  },
+
+  /**
+   * Returns a unified, chronologically sorted list of both Orders and
+   * Maintenance Cases for the Dashboard "Active Cases" table.
+   *
+   * Each item carries a `caseType` property ('order' | 'maintenance') so
+   * the renderer can show the correct icon and pipeline step.
+   *
+   * @param {string} [filter='all'] - 'all' | 'order' | 'maintenance'
+   * @returns {Promise<Array>} Merged and sorted array
+   */
+  async getAllDashboardCases(filter = 'all') {
+    const [orders, maintenanceCases] = await Promise.all([
+      this.getOrders(),
+      this.getMaintenanceCases(),
+    ]);
+
+    // Tag orders with their domain discriminator
+    const taggedOrders = orders.map(o => ({ ...o, caseType: 'order' }));
+
+    let combined;
+    if (filter === 'order') {
+      combined = taggedOrders;
+    } else if (filter === 'maintenance') {
+      combined = maintenanceCases;
+    } else {
+      combined = [...taggedOrders, ...maintenanceCases];
+    }
+
+    // Sort newest-first by `updated` date string
+    return combined.sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+  },
 };
 
 window.dataService = dataService;

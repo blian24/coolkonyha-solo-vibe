@@ -18,7 +18,7 @@ graph LR
 
 ## Input/Output specifications
 ### Data Service (`dataService.js`)
-- **Inputs:** Internal mock data (transitioning to API calls in the future).
+- **Inputs:** External data fetched via Express REST API endpoints (`/api/customers`, `/api/suppliers`, etc.).
 - **Outputs:** 
     - `getOrders()`: Array of Order objects.
     - `getUpdates()`: Array of Update objects.

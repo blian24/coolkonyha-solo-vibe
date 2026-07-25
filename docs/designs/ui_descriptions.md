@@ -18,6 +18,10 @@ If an order or email becomes processed outside of the dashboard (for example CK 
 - **Entry Details Modal:** Triggered by the Pencil icon on a specific entry row. A large pop-up window divided into two columns:
   - **Left Column (Context & AI Analysis):** Client name and ID at the top. Below that, a "Summary" box, a "Detailed Description" plain text area, and an "AI Suggestion" highlighted box at the bottom.
   - **Right Column (P.I.S.T.A. Assistant):** A dedicated chat interface on the right side to converse with the AI specifically about this update/order, complete with an input field and close button.
+- **Database Viewer Edit Modals:** Applied across the Customers, Suppliers, and Products tables. 
+  - Clicking on any row triggers a read-only details modal.
+  - Features an edit (pencil) icon at the top header that toggles the editable form view. Modals retain standard size irrespective of mode toggle.
+  - Submitting edits automatically refreshes the relevant table row in the UI.
 
 ## Active orders + Details section
 Below the "What's new?" section there should be one single overarching card container that is split into 2 columns vertically, with a visual divider line in between. The one on the left taking up 65% of the width, and the one on the right taking up 35%. 

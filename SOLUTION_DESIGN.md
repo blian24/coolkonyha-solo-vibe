@@ -3,8 +3,8 @@
 ## Project Overview
 Coolkonyha Solo Vibe is a specialized order and product management system designed for efficient kitchen operations. It handles customers, suppliers, products, and orders with a focus on business rule enforcement and verifiable audit trails.
 
-**Last updated:** 2026-05-01
-**Current Version:** [v0.5.2](./docs/.versions/v0.5.2.md)
+**Last updated:** 2026-06-18
+**Current Version:** [v0.8.0](./docs/.versions/v0.8.0.md)
 
 ## Technology Stack
 - **Frontend:** React + Vite
@@ -79,6 +79,7 @@ Gmail Robot              CK's Chat Input
 - [P.I.S.T.A. Agent](./docs/assistant_team/pista-agent.md) - AI Agent definition & logic
 - [Email Robot](./docs/assistant_team/email-robot.md) - Email fetching robot definition
 - [UI Architecture](./docs/architecture/ui-data-flow.md) - Separation of concerns & data binding
+- [Settings View](./docs/architecture/settings-view.md) - Settings view components & controller (v0.7.1)
 
 ### Business Logic Documentation
 
@@ -94,7 +95,10 @@ Gmail Robot              CK's Chat Input
 - [App Description](./docs/app-description.md) - Product vision and wireframes
 - [Notes](./docs/notes.md) - Scratch notes and open questions
 - [Building History](./docs/building-docs/README.md) - Feature implementation history
-- [Release Notes](./docs/.versions/v0.5.0.md) - Versioned release information
+- [Release Notes (v0.6.0)](./docs/.versions/v0.6.0.md) - Release information for v0.6.0
+- [Release Notes (v0.7.0)](./docs/.versions/v0.7.0.md) - Release information for v0.7.0
+- [Release Notes (v0.7.1)](./docs/.versions/v0.7.1.md) - Release information for v0.7.1
+- [Release Notes (v0.8.0)](./docs/.versions/v0.8.0.md) - Release information for v0.8.0
 - [UI Descriptions](./docs/designs/ui_descriptions.md) - Detailed UI component descriptions
 
 ## Component Responsibility Matrix
@@ -108,6 +112,11 @@ Gmail Robot              CK's Chat Input
 | DB Connection | `server/db.js` | SQLite connection | [database-connection.md](./docs/architecture/database-connection.md) |
 | Data Service | `ui_design/js/services/dataService.js` | Centralized UI data provider | [ui-data-flow.md](./docs/architecture/ui-data-flow.md) |
 | Main UI | `index.html` | Dashboard entry point (Oceanic Plus design) | [ui_descriptions.md](./docs/designs/ui_descriptions.md) |
+| Database UI | `ui_design/views/database.html` | Database viewer interface containing data tables and edit modals | [ui_descriptions.md](./docs/designs/ui_descriptions.md) |
+| Database Controller | `ui_design/js/controllers/databaseController.js` | Controller handling Database view state, search, and dynamic modals | [ui_descriptions.md](./docs/designs/ui_descriptions.md) |
+| Maintenance UI | `ui_design/views/maintenance.html` | Isolated maintenance tracking view | [ui_descriptions.md](./docs/designs/ui_descriptions.md) |
+| Settings UI | `ui_design/views/settings.html` | Settings page (General + Admin sections) | [settings-view.md](./docs/architecture/settings-view.md) |
+| Settings Controller | `ui_design/js/controllers/settingsController.js` | Tab logic, theme sync, version display, toast | [settings-view.md](./docs/architecture/settings-view.md) |
 | Server | `server/index.js` | Express app entry | - |
 
 ## Quick Reference

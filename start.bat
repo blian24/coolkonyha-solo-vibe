@@ -1,1 +1,13 @@
-node server/index.js
+@echo off
+
+echo Starting backend server in the background...
+start /min cmd /c "node server/index.js"
+
+echo Starting frontend development server in the background...
+start /min cmd /c "npm run dev"
+
+echo Waiting for servers to start...
+timeout /t 3 /nobreak > nul
+
+echo Opening browser...
+start http://localhost:5173

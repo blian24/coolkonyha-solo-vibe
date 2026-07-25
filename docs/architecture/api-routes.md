@@ -2,6 +2,7 @@
 
 **Component:** `API Routes`
 **Location:** [`server/routes.js`](../../server/routes.js)
+**Version:** `v0.8.0`
 
 ## 1. Purpose
 The API Routes module defines the **RESTful interface** for the Coolkonyha application. It handles HTTP requests, parses parameters, delegates business logic to the `DBRobot`, and formats responses.
@@ -61,7 +62,13 @@ sequenceDiagram
 | **GET** | `/api/orders/:id` | Get order details | - | `{ order, items, history }` | `getOrderDetails()` |
 | **PUT** | `/api/orders/:id/status` | Update status | `{ status, performedBy, eventDescription }` | `{ success, newStatus }` | `updateOrderStatus()` |
 | **POST** | `/api/orders/:id/items` | Add item to order | `{ prodId, quantity }` | `{ id: number }` | `addOrderItem()` |
-| **GET** | `/api/workflow` | Get workflow statuses | - | `Array<Status>` | `getWorkflowStatuses()` |
+| **GET** | `/api/workflow` | Get order workflow statuses | - | `Array<Status>` | `getWorkflowStatuses()` |
+| **GET** | `/api/maintenance` | Get all maintenance cases | - | `Array<MaintenanceCase>` | `getMaintenanceCases()` |
+| **POST** | `/api/maintenance` | Create maintenance case | `{ custId, description }` | `{ caseId: number }` | `createMaintenanceCase()` |
+| **GET** | `/api/maintenance/:id` | Get maintenance case details | - | `{ case, items, history }` | `getMaintenanceDetails()` |
+| **PUT** | `/api/maintenance/:id/status` | Update status of case | `{ status, performedBy, eventDescription }` | `{ success, newStatus }` | `updateMaintenanceStatus()` |
+| **POST** | `/api/maintenance/:id/items` | Add item to case | `{ prodId, quantity, issueNote }` | `{ id: number }` | `addMaintenanceItem()` |
+| **GET** | `/api/maintenance/workflow` | Get maintenance workflow statuses | - | `Array<Status>` | `getMaintenanceWorkflowStatuses()` |
 
 ### Example Request (Update Status)
 

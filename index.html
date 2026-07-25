@@ -53,6 +53,9 @@
         <a href="#" class="nav-item active" id="nav-dashboard">
           <i class="fas fa-columns w-5 text-center"></i><span>Dashboard</span>
         </a>
+        <a href="#" class="nav-item" id="nav-maintenance">
+          <i class="fas fa-wrench w-5 text-center"></i><span>Maintenance</span>
+        </a>
         <a href="#" class="nav-item">
           <i class="fas fa-file-alt w-5 text-center"></i><span>Reports</span>
         </a>
@@ -229,9 +232,13 @@
         </div>
       </td>
       <td>
-        <div class="flex items-center"><span class="pill"></span><i
-            class="fas fa-paperclip clip-icon hidden ml-2 opacity-50"
-            style="color:var(--accent); font-size:0.75rem;"></i></div>
+        <!-- Case type badge -->
+        <div class="flex items-center gap-2">
+          <span class="case-type-badge"></span>
+          <span class="flex items-center"><span class="pill"></span><i
+              class="fas fa-paperclip clip-icon hidden ml-2 opacity-50"
+              style="color:var(--accent); font-size:0.75rem;"></i></span>
+        </div>
       </td>
     </tr>
   </template>

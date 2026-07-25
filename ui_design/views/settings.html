@@ -1,0 +1,188 @@
+<!-- SETTINGS VIEW -->
+<div class="flex-1 ice-card flex flex-col min-h-0 overflow-hidden">
+
+  <!-- Header -->
+  <div class="section-header">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-cog" style="color:rgba(255,255,255,0.8);"></i>
+      <h2 class="section-title">Settings</h2>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="section-badge" id="settings-version-badge">v—</span>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="settings-tab-bar">
+    <button class="settings-tab-btn active" id="settings-tab-general" onclick="switchSettingsTab('general')">
+      <i class="fas fa-sliders-h mr-1"></i> General
+    </button>
+    <button class="settings-tab-btn" id="settings-tab-admin" onclick="switchSettingsTab('admin')">
+      <i class="fas fa-shield-alt mr-1"></i> Admin
+    </button>
+  </div>
+
+  <!-- ── GENERAL SECTION ─────────────────────── -->
+  <div class="settings-section cscroll active" id="settings-panel-general">
+
+    <p class="settings-divider">Appearance</p>
+
+    <!-- Theme toggle -->
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-label">Theme Mode</div>
+        <div class="settings-desc">Switch between Dark and Light interface themes.</div>
+      </div>
+      <label class="toggle-switch" id="settings-theme-toggle" title="Toggle theme">
+        <input type="checkbox" id="settings-theme-checkbox">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </div>
+
+    <p class="settings-divider">Language & Region</p>
+
+    <!-- Language selector -->
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-label">UI Language</div>
+        <div class="settings-desc">Interface display language. Affects labels and static text only.</div>
+      </div>
+      <select class="settings-select" id="settings-language" disabled title="Language selection coming soon">
+        <option value="en">English</option>
+        <option value="hu">Magyar</option>
+      </select>
+    </div>
+
+    <p class="settings-divider">Layout</p>
+
+    <!-- Sidebar reset -->
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-label">Reset Sidebar Width</div>
+        <div class="settings-desc">Restore the sidebar to its default width of 18vw.</div>
+      </div>
+      <button class="settings-btn" id="settings-reset-sidebar" onclick="resetSidebarWidth()">
+        <i class="fas fa-undo-alt mr-1"></i> Reset
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── ADMIN SECTION ───────────────────────── -->
+  <div class="settings-section cscroll" id="settings-panel-admin">
+
+    <p class="settings-divider">System Information</p>
+
+    <div class="settings-info-card">
+      <div class="settings-info-row">
+        <span class="settings-info-key">App Version</span>
+        <span class="settings-info-val" id="settings-app-version">—</span>
+      </div>
+      <div class="settings-info-row">
+        <span class="settings-info-key">Environment</span>
+        <span class="settings-info-val">Development</span>
+      </div>
+      <div class="settings-info-row">
+        <span class="settings-info-key">Frontend</span>
+        <span class="settings-info-val">HTML / Tailwind / Vanilla JS</span>
+      </div>
+      <div class="settings-info-row">
+        <span class="settings-info-key">Backend</span>
+        <span class="settings-info-val">Express.js + SQLite</span>
+      </div>
+    </div>
+
+    <p class="settings-divider">Maintenance Actions</p>
+
+    <!-- Clear logs -->
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-label">Clear Application Logs</div>
+        <div class="settings-desc">Removes cached UI logs from the current session. Server logs are not affected.</div>
+      </div>
+      <button class="settings-btn danger" id="settings-clear-logs" onclick="clearAppLogs()">
+        <i class="fas fa-trash-alt mr-1"></i> Clear Logs
+      </button>
+    </div>
+
+    <p class="settings-divider">Database View</p>
+
+    <!-- Extend database view toggle -->
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-label">Extend Database View</div>
+        <div class="settings-desc">
+          When off, the Database page only shows core tables: Customers, Suppliers, Products,
+          Orders, Items, Maintenance Cases and Maintenance Items.
+          Turn on to also reveal History, Workflow, Emails and Sender Rules.
+        </div>
+      </div>
+      <label class="toggle-switch" id="settings-db-extended-toggle" title="Extend database view">
+        <input type="checkbox" id="settings-db-extended-checkbox">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </div>
+
+    <p class="settings-divider">Feature Flags</p>
+
+    <table class="feature-flag-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Description</th>
+          <th style="width:5rem; text-align:center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="feature-flag-name">P.I.S.T.A. AI Chat</div>
+            <div class="feature-flag-desc">Sidebar AI assistant integration</div>
+          </td>
+          <td><span class="settings-desc">Planned — under development</span></td>
+          <td style="text-align:center;">
+            <label class="toggle-switch">
+              <input type="checkbox" disabled>
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="feature-flag-name">Email Robot</div>
+            <div class="feature-flag-desc">Gmail fetch & deduplication</div>
+          </td>
+          <td><span class="settings-desc">Planned — under development</span></td>
+          <td style="text-align:center;">
+            <label class="toggle-switch">
+              <input type="checkbox" disabled>
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="feature-flag-name">Dark Mode</div>
+            <div class="feature-flag-desc">Oceanic Plus theme engine</div>
+          </td>
+          <td><span class="settings-desc">Active — toggle in General settings</span></td>
+          <td style="text-align:center;">
+            <label class="toggle-switch">
+              <input type="checkbox" checked disabled>
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+
+<!-- Toast notification (shared, appended once by controller) -->

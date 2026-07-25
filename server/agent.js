@@ -4,14 +4,19 @@
  * This is a deterministic Robot (no AI). It enforces business rules mechanically:
  * - **Pricing Continuity:** Order items freeze product prices at order time
  * - **Dual-Write Status:** Order status updates write to both orders table and history
+ * - **Dual-Write Status (Maintenance):** Maintenance status updates mirror the same pattern
  * - **Transaction Safety:** Critical operations use SQLite transactions
+ *
+ * Domains:
+ * - Orders: uses order_status_workflow (renamed from business_status_workflow in v0.6.0)
+ * - Maintenance: uses maintenance_status_workflow (fully independent state machine)
  *
  * All database operations are promisified for async/await usage.
  *
  * @see docs/assistant_team/db_robot_logic_tools.md - Business rules documentation
  * @see docs/architecture/database-schema.md - Database schema
  * @author Coolkonyha Development Team
- * @version 1.1.0
+ * @version 1.2.0
  */
 import db from './db.js';
 
@@ -75,7 +80,7 @@ class DBRobot {
      * (current state) and order_status_history table (audit log) within a transaction.
      * 
      * @param {number} orderId - Order ID to update
-     * @param {string} newStatus - Status key from business_status_workflow table
+     * @param {string} newStatus - Status key from order_status_workflow table
      * @param {string} performedBy - Username or system identifier (e.g., 'SYSTEM', 'admin')
      * @param {string} eventDescription - Human-readable event description
      * @returns {Promise<{success: boolean, newStatus: string}>}
@@ -92,7 +97,7 @@ class DBRobot {
 
         // 1. Validate Status (Section 3 rule)
         const statusDef = await this.get(
-            'SELECT * FROM business_status_workflow WHERE status_key = ?',
+            'SELECT * FROM order_status_workflow WHERE status_key = ?',
             [newStatus]
         );
         if (!statusDef) {
@@ -365,7 +370,7 @@ class DBRobot {
     }
 
     async getWorkflowStatuses() {
-        return await this.all('SELECT * FROM business_status_workflow ORDER BY status_id');
+        return await this.all('SELECT * FROM order_status_workflow ORDER BY status_id');
     }
 
     /**
@@ -605,6 +610,317 @@ class DBRobot {
             [orderId, limit]
         );
     }
+
+    // ---------------------------------------------------------
+    // MAINTENANCE DOMAIN
+    // Fully isolated from Orders. Shares products catalog only.
+    // Implements identical Dual-Write and Transaction Safety rules.
+    // @see docs/architecture/database-schema.md — maintenance tables
+    // ---------------------------------------------------------
+
+    /**
+     * Retrieves all maintenance workflow statuses.
+     *
+     * @returns {Promise<Array>} Array of maintenance_status_workflow rows
+     */
+    async getMaintenanceWorkflowStatuses() {
+        return await this.all('SELECT * FROM maintenance_status_workflow ORDER BY status_id');
+    }
+
+    /**
+     * Retrieves all maintenance cases with customer name for list views.
+     *
+     * @returns {Promise<Array>} Array of maintenance case rows joined with customer name
+     */
+    async getMaintenanceCases() {
+        return await this.all(`
+            SELECT mc.*, c.cust_name, c.logo_path
+            FROM maintenance_cases mc
+            JOIN customers c ON mc.cust_id = c.cust_id
+            ORDER BY mc.case_date DESC
+        `);
+    }
+
+    /**
+     * Retrieves full details of a single maintenance case including items and history.
+     *
+     * @param {number} caseId - Maintenance case ID
+     * @returns {Promise<{case: Object, items: Array, history: Array}>}
+     */
+    async getMaintenanceDetails(caseId) {
+        const maintenanceCase = await this.get(`
+            SELECT mc.*, c.cust_name, c.logo_path
+            FROM maintenance_cases mc
+            JOIN customers c ON mc.cust_id = c.cust_id
+            WHERE mc.case_id = ?
+        `, [caseId]);
+
+        const items = await this.all(`
+            SELECT mi.*, p.prod_name, p.prod_type
+            FROM maintenance_items mi
+            JOIN products p ON mi.prod_id = p.prod_id
+            WHERE mi.case_id = ?
+        `, [caseId]);
+
+        const history = await this.all(
+            'SELECT * FROM maintenance_status_history WHERE case_id = ? ORDER BY update_date DESC',
+            [caseId]
+        );
+
+        return { case: maintenanceCase, items, history };
+    }
+
+    /**
+     * Creates a new maintenance case with initial NEW status.
+     *
+     * Implements the Dual-Write pattern: inserts a row into maintenance_cases
+     * and immediately logs the initial status to maintenance_status_history.
+     *
+     * @param {number} custId - Customer ID (from customers table)
+     * @param {string} [description] - Freetext description of the reported issue
+     * @returns {Promise<{caseId: number, caseCode: string}>}
+     * @throws {Error} When customer not found or transaction fails
+     *
+     * @see docs/assistant_team/db_robot_logic_tools.md — Dual-Write rule
+     */
+    async createMaintenanceCase(custId, description = null) {
+        try {
+            await this.run('BEGIN TRANSACTION');
+
+            const result = await this.run(`
+                INSERT INTO maintenance_cases (cust_id, current_status, description, update_event)
+                VALUES (?, 'NEW', ?, 'Maintenance case created via API')
+            `, [custId, description]);
+
+            // Generate case_code (MAINT + 5-digit ID)
+            const caseCode = `MAINT-${String(result.lastID).padStart(5, '0')}`;
+            await this.run(
+                'UPDATE maintenance_cases SET case_code = ? WHERE case_id = ?',
+                [caseCode, result.lastID]
+            );
+
+            // Initial status history — Dual-Write rule
+            await this.run(`
+                INSERT INTO maintenance_status_history (case_id, status, update_event, performed_by)
+                VALUES (?, 'NEW', 'Case Initialized', 'SYSTEM')
+            `, [result.lastID]);
+
+            await this.run('COMMIT');
+            return { caseId: result.lastID, caseCode };
+        } catch (error) {
+            await this.run('ROLLBACK');
+            throw error;
+        }
+    }
+
+    /**
+     * Adds a product item to a maintenance case.
+     *
+     * Records the product reference and quantity. Note: the maintenance_items
+     * table uses issue_note for freetext annotations (not unit_price, which
+     * is a labour-cost concern tracked at the case level).
+     *
+     * @param {number} caseId - Maintenance case ID
+     * @param {number} prodId - Product ID (from products table)
+     * @param {number} quantity - Number of units
+     * @param {string} [issueNote] - Optional freetext note describing the issue with this item
+     * @returns {Promise<{id: number}>} Created item ID
+     * @throws {Error} When product not found or transaction fails
+     */
+    async addMaintenanceItem(caseId, prodId, quantity, issueNote = null) {
+        const product = await this.get(
+            'SELECT prod_id FROM products WHERE prod_id = ?',
+            [prodId]
+        );
+        if (!product) throw new Error('Product not found');
+
+        try {
+            await this.run('BEGIN TRANSACTION');
+
+            const result = await this.run(`
+                INSERT INTO maintenance_items (case_id, prod_id, quantity, issue_note)
+                VALUES (?, ?, ?, ?)
+            `, [caseId, prodId, quantity, issueNote]);
+
+            await this.run('COMMIT');
+            return { id: result.lastID };
+        } catch (error) {
+            await this.run('ROLLBACK');
+            throw error;
+        }
+    }
+
+    /**
+     * Updates the status of a maintenance case with Dual-Write pattern.
+     *
+     * Validates the new status against maintenance_status_workflow, then atomically
+     * updates maintenance_cases.current_status and appends to maintenance_status_history.
+     *
+     * @param {number} caseId - Maintenance case ID
+     * @param {string} newStatus - Status key from maintenance_status_workflow table
+     * @param {string} performedBy - Actor identifier (e.g., 'admin', 'SYSTEM')
+     * @param {string} eventDescription - Human-readable event description
+     * @returns {Promise<{success: boolean, newStatus: string}>}
+     * @throws {Error} When status is invalid or transaction fails
+     *
+     * @see docs/assistant_team/db_robot_logic_tools.md — Dual-Write rule
+     */
+    async updateMaintenanceStatus(caseId, newStatus, performedBy, eventDescription) {
+        // Validate status against the maintenance-specific workflow table
+        const statusDef = await this.get(
+            'SELECT * FROM maintenance_status_workflow WHERE status_key = ?',
+            [newStatus]
+        );
+        if (!statusDef) {
+            throw new Error(`Invalid maintenance status: ${newStatus}`);
+        }
+
+        try {
+            await this.run('BEGIN TRANSACTION');
+
+            // Update current state on the case row
+            await this.run(`
+                UPDATE maintenance_cases
+                SET current_status = ?,
+                    current_status_update = CURRENT_TIMESTAMP,
+                    update_event = ?
+                WHERE case_id = ?
+            `, [newStatus, eventDescription, caseId]);
+
+            // Append to audit history — Dual-Write rule
+            await this.run(`
+                INSERT INTO maintenance_status_history (case_id, status, update_event, performed_by)
+                VALUES (?, ?, ?, ?)
+            `, [caseId, newStatus, eventDescription, performedBy]);
+
+            await this.run('COMMIT');
+            return { success: true, newStatus };
+        } catch (error) {
+            await this.run('ROLLBACK');
+            throw error;
+        }
+    }
+    // ---------------------------------------------------------
+    // DATABASE VIEWER GETTERS — added v0.7.0
+    // Full-list read methods for tables that previously had no
+    // standalone list endpoint. Used exclusively by the DB viewer.
+    // @see ui_design/js/controllers/databaseController.js
+    // ---------------------------------------------------------
+
+    /**
+     * Returns all order items joined with product name and order code.
+     * Enables the Order Items tab in the database viewer.
+     *
+     * @returns {Promise<Array>} All order_items rows enriched with prod_name and order_code
+     */
+    async getAllOrderItems() {
+        return await this.all(`
+            SELECT oi.*,
+                   p.prod_name,
+                   o.order_code
+            FROM order_items oi
+            JOIN products p ON oi.prod_id = p.prod_id
+            JOIN orders o ON oi.order_id = o.order_id
+            ORDER BY o.order_code, oi.order_item_id
+        `);
+    }
+
+    /**
+     * Returns the full order status history joined with order codes.
+     * Enables the Order History tab in the database viewer.
+     *
+     * @returns {Promise<Array>} All order_status_history rows enriched with order_code
+     */
+    async getOrderStatusHistory() {
+        return await this.all(`
+            SELECT osh.*,
+                   o.order_code
+            FROM order_status_history osh
+            JOIN orders o ON osh.order_id = o.order_id
+            ORDER BY osh.update_date DESC
+        `);
+    }
+
+    /**
+     * Returns all maintenance items joined with product name and case code.
+     * Enables the Maintenance Items tab in the database viewer.
+     *
+     * @returns {Promise<Array>} All maintenance_items rows enriched with prod_name and case_code
+     */
+    async getAllMaintenanceItems() {
+        return await this.all(`
+            SELECT mi.*,
+                   p.prod_name,
+                   mc.case_code
+            FROM maintenance_items mi
+            JOIN products p ON mi.prod_id = p.prod_id
+            JOIN maintenance_cases mc ON mi.case_id = mc.case_id
+            ORDER BY mc.case_code, mi.item_id
+        `);
+    }
+
+    /**
+     * Returns the full maintenance status history joined with case codes.
+     * Enables the Maintenance History tab in the database viewer.
+     *
+     * @returns {Promise<Array>} All maintenance_status_history rows enriched with case_code
+     */
+    async getAllMaintenanceHistory() {
+        return await this.all(`
+            SELECT msh.*,
+                   mc.case_code
+            FROM maintenance_status_history msh
+            JOIN maintenance_cases mc ON msh.case_id = mc.case_id
+            ORDER BY msh.update_date DESC
+        `);
+    }
+
+    /**
+     * Returns all processed email records.
+     * Enables the Processed Emails tab in the database viewer.
+     * Note: linked_order_id may be null for unmatched or spam emails.
+     * Returns empty array if the table does not exist yet (pre-Gmail Robot migration).
+     *
+     * @returns {Promise<Array>} All processed_emails rows, or [] if table is absent
+     */
+    async getProcessedEmails() {
+        try {
+            return await this.all(`
+                SELECT pe.*,
+                       o.order_code AS linked_order_code
+                FROM processed_emails pe
+                LEFT JOIN orders o ON pe.linked_order_id = o.order_id
+                ORDER BY pe.email_date DESC
+            `);
+        } catch (err) {
+            // RULE: Graceful degradation — processed_emails is created by Gmail Robot migration.
+            if (err.message && err.message.includes('no such table')) return [];
+            throw err;
+        }
+    }
+
+    /**
+     * Returns all sender rules.
+     * Enables the Sender Rules tab in the database viewer.
+     * Returns empty array if the table does not exist yet (pre-Gmail Robot migration).
+     *
+     * @returns {Promise<Array>} All sender_rules rows, or [] if table is absent
+     */
+    async getSenderRules() {
+        try {
+            return await this.all(`
+                SELECT * FROM sender_rules ORDER BY created_at DESC
+            `);
+        } catch (err) {
+            // RULE: Graceful degradation — sender_rules is created by Gmail Robot migration.
+            // Return empty array so the DB viewer tab renders cleanly before that migration runs.
+            if (err.message && err.message.includes('no such table')) return [];
+            throw err;
+        }
+    }
+
 }
 
 export default new DBRobot();
+
+
