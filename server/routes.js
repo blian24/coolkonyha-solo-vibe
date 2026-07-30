@@ -1,6 +1,6 @@
 /**
  * @fileoverview API Routes - Express REST API endpoints for Coolkonyha.
- * 
+ *
  * Provides RESTful endpoints for:
  * - Customer management (GET, PUT)
  * - Supplier management (GET, PUT)
@@ -8,21 +8,29 @@
  * - Order management (GET, POST, PUT)
  * - Workflow status definitions (GET)
  * - Maintenance case management (GET, POST, PUT) — added v0.6.0
- * 
- * All routes delegate business logic to the DBRobot layer.
- * 
- * @see server/agent.js - Business logic implementation
+ *
+ * All routes delegate business logic to the domain agent layer.
+ *
+ * @see server/agents/agent-crm.js        — Customer operations
+ * @see server/agents/agent-catalog.js    — Supplier & product operations
+ * @see server/agents/agent-orders.js     — Order operations
+ * @see server/agents/agent-maintenance.js — Maintenance operations
+ * @see server/agents/agent-pista-db.js   — Email & sender rule operations
  * @author Coolkonyha Development Team
- * @version 1.1.0
+ * @version 1.2.0
  */
 import express from 'express';
-import dbRobot from './agent.js';
+import { getCustomers, createCustomer, updateCustomer } from './agents/agent-crm.js';
+import { getSuppliers, createSupplier, updateSupplier, getProducts, createProduct, updateProduct } from './agents/agent-catalog.js';
+import { getWorkflowStatuses, getOrders, getOrderDetails, createOrder, addOrderItem, updateOrderStatus, getAllOrderItems, getOrderStatusHistory } from './agents/agent-orders.js';
+import { getMaintenanceWorkflowStatuses, getMaintenanceCases, createMaintenanceCase, getMaintenanceDetails, updateMaintenanceStatus, addMaintenanceItem, getAllMaintenanceItems, getAllMaintenanceHistory } from './agents/agent-maintenance.js';
+import { getProcessedEmails, getSenderRules } from './agents/agent-pista-db.js';
 
 const router = express.Router();
 
 router.get('/customers', async (req, res) => {
     try {
-        const customers = await dbRobot.getCustomers();
+        const customers = await getCustomers();
         res.json(customers);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -31,7 +39,7 @@ router.get('/customers', async (req, res) => {
 
 router.post('/customers', async (req, res) => {
     try {
-        const result = await dbRobot.createCustomer(req.body);
+        const result = await createCustomer(req.body);
         res.status(201).json(result);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -40,7 +48,7 @@ router.post('/customers', async (req, res) => {
 
 router.get('/suppliers', async (req, res) => {
     try {
-        const suppliers = await dbRobot.getSuppliers();
+        const suppliers = await getSuppliers();
         res.json(suppliers);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,7 +57,7 @@ router.get('/suppliers', async (req, res) => {
 
 router.post('/suppliers', async (req, res) => {
     try {
-        const result = await dbRobot.createSupplier(req.body);
+        const result = await createSupplier(req.body);
         res.status(201).json(result);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -58,7 +66,7 @@ router.post('/suppliers', async (req, res) => {
 
 router.get('/products', async (req, res) => {
     try {
-        const products = await dbRobot.getProducts();
+        const products = await getProducts();
         res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -67,7 +75,7 @@ router.get('/products', async (req, res) => {
 
 router.post('/products', async (req, res) => {
     try {
-        const result = await dbRobot.createProduct(req.body);
+        const result = await createProduct(req.body);
         res.status(201).json(result);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -76,7 +84,7 @@ router.post('/products', async (req, res) => {
 
 router.get('/workflow', async (req, res) => {
     try {
-        const statuses = await dbRobot.getWorkflowStatuses();
+        const statuses = await getWorkflowStatuses();
         res.json(statuses);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -85,7 +93,7 @@ router.get('/workflow', async (req, res) => {
 
 router.get('/orders', async (req, res) => {
     try {
-        const orders = await dbRobot.getOrders();
+        const orders = await getOrders();
         res.json(orders);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -95,7 +103,7 @@ router.get('/orders', async (req, res) => {
 router.post('/orders', async (req, res) => {
     try {
         const { custId, currency } = req.body;
-        const result = await dbRobot.createOrder(custId, currency);
+        const result = await createOrder(custId, currency);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -104,7 +112,7 @@ router.post('/orders', async (req, res) => {
 
 router.get('/orders/:id', async (req, res) => {
     try {
-        const result = await dbRobot.getOrderDetails(req.params.id);
+        const result = await getOrderDetails(req.params.id);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -116,7 +124,7 @@ router.get('/orders/:id', async (req, res) => {
 router.put('/orders/:id/status', async (req, res) => {
     try {
         const { status, performedBy, eventDescription } = req.body;
-        const result = await dbRobot.updateOrderStatus(
+        const result = await updateOrderStatus(
             req.params.id,
             status,
             performedBy,
@@ -133,7 +141,7 @@ router.put('/orders/:id/status', async (req, res) => {
 router.post('/orders/:id/items', async (req, res) => {
     try {
         const { prodId, quantity } = req.body;
-        const result = await dbRobot.addOrderItem(req.params.id, prodId, quantity);
+        const result = await addOrderItem(req.params.id, prodId, quantity);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -142,7 +150,7 @@ router.post('/orders/:id/items', async (req, res) => {
 
 router.put('/customers/:id', async (req, res) => {
     try {
-        const result = await dbRobot.updateCustomer(req.params.id, req.body);
+        const result = await updateCustomer(req.params.id, req.body);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -151,7 +159,7 @@ router.put('/customers/:id', async (req, res) => {
 
 router.put('/suppliers/:id', async (req, res) => {
     try {
-        const result = await dbRobot.updateSupplier(req.params.id, req.body);
+        const result = await updateSupplier(req.params.id, req.body);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -160,7 +168,7 @@ router.put('/suppliers/:id', async (req, res) => {
 
 router.put('/products/:id', async (req, res) => {
     try {
-        const result = await dbRobot.updateProduct(req.params.id, req.body);
+        const result = await updateProduct(req.params.id, req.body);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -178,7 +186,7 @@ router.put('/products/:id', async (req, res) => {
  */
 router.get('/maintenance/workflow', async (req, res) => {
     try {
-        const statuses = await dbRobot.getMaintenanceWorkflowStatuses();
+        const statuses = await getMaintenanceWorkflowStatuses();
         res.json(statuses);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -191,7 +199,7 @@ router.get('/maintenance/workflow', async (req, res) => {
  */
 router.get('/maintenance', async (req, res) => {
     try {
-        const cases = await dbRobot.getMaintenanceCases();
+        const cases = await getMaintenanceCases();
         res.json(cases);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -205,7 +213,7 @@ router.get('/maintenance', async (req, res) => {
 router.post('/maintenance', async (req, res) => {
     try {
         const { custId, description } = req.body;
-        const result = await dbRobot.createMaintenanceCase(custId, description);
+        const result = await createMaintenanceCase(custId, description);
         res.status(201).json(result);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -218,7 +226,7 @@ router.post('/maintenance', async (req, res) => {
  */
 router.get('/maintenance/:id', async (req, res) => {
     try {
-        const result = await dbRobot.getMaintenanceDetails(req.params.id);
+        const result = await getMaintenanceDetails(req.params.id);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -235,7 +243,7 @@ router.get('/maintenance/:id', async (req, res) => {
 router.put('/maintenance/:id/status', async (req, res) => {
     try {
         const { status, performedBy, eventDescription } = req.body;
-        const result = await dbRobot.updateMaintenanceStatus(
+        const result = await updateMaintenanceStatus(
             req.params.id,
             status,
             performedBy,
@@ -257,7 +265,7 @@ router.put('/maintenance/:id/status', async (req, res) => {
 router.post('/maintenance/:id/items', async (req, res) => {
     try {
         const { prodId, quantity, issueNote } = req.body;
-        const result = await dbRobot.addMaintenanceItem(
+        const result = await addMaintenanceItem(
             req.params.id,
             prodId,
             quantity,
@@ -282,7 +290,7 @@ router.post('/maintenance/:id/items', async (req, res) => {
  */
 router.get('/order-items', async (req, res) => {
     try {
-        const items = await dbRobot.getAllOrderItems();
+        const items = await getAllOrderItems();
         res.json(items);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -295,7 +303,7 @@ router.get('/order-items', async (req, res) => {
  */
 router.get('/order-history', async (req, res) => {
     try {
-        const history = await dbRobot.getOrderStatusHistory();
+        const history = await getOrderStatusHistory();
         res.json(history);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -308,7 +316,7 @@ router.get('/order-history', async (req, res) => {
  */
 router.get('/maintenance-items', async (req, res) => {
     try {
-        const items = await dbRobot.getAllMaintenanceItems();
+        const items = await getAllMaintenanceItems();
         res.json(items);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -321,7 +329,7 @@ router.get('/maintenance-items', async (req, res) => {
  */
 router.get('/maintenance-history', async (req, res) => {
     try {
-        const history = await dbRobot.getAllMaintenanceHistory();
+        const history = await getAllMaintenanceHistory();
         res.json(history);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -334,7 +342,7 @@ router.get('/maintenance-history', async (req, res) => {
  */
 router.get('/processed-emails', async (req, res) => {
     try {
-        const emails = await dbRobot.getProcessedEmails();
+        const emails = await getProcessedEmails();
         res.json(emails);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -347,7 +355,7 @@ router.get('/processed-emails', async (req, res) => {
  */
 router.get('/sender-rules', async (req, res) => {
     try {
-        const rules = await dbRobot.getSenderRules();
+        const rules = await getSenderRules();
         res.json(rules);
     } catch (err) {
         res.status(500).json({ error: err.message });

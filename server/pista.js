@@ -7,19 +7,24 @@
  * actions to CK for explicit approval BEFORE writing anything to the database.
  *
  * Constraints:
- *  - NEVER writes to the database directly. All mutations go through DBRobot.
- *  - NEVER executes an action without CK's approval (Human-in-the-Loop).
+ *  - NEVER writes to the database directly. All mutations go through the DB agents.
+ *  - NEVER executes an action without CK’s approval (Human-in-the-Loop).
  *  - Only external dependency: Google Gemini API (via @google/generative-ai).
  *
- * @see docs/assistant_team/pista-agent.md   — Architecture & persona definition
- * @see docs/assistant_team/database-robot.md — DBRobot API contract (inter-agent)
- * @see SOLUTION_DESIGN.md                   — Full system overview
+ * @see docs/assistant_team/pista-agent.md        — Architecture & persona definition
+ * @see server/agents/agent-pista-db.js            — DB layer for chat & email persistence
+ * @see server/agents/agent-crm.js                — Customer lookups
+ * @see server/agents/agent-orders.js             — Order queries
+ * @see SOLUTION_DESIGN.md                        — Full system overview
  *
  * @author Coolkonyha Development Team
- * @version 0.2.0 (Chat history persistence via DBRobot)
+ * @version 0.3.0 (Direct imports replacing constructor injection)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getCustomerByEmail } from './agents/agent-crm.js';
+import { getOrdersByCustomer, getActiveOrders } from './agents/agent-orders.js';
+import { saveChatMessage, getChatHistory, getRecentEmailsByAddress } from './agents/agent-pista-db.js';
 
 // ---------------------------------------------------------------------------
 // PERSONA: Senior Business Project Manager
@@ -72,17 +77,14 @@ If no action is needed (e.g. purely informational), return an empty proposed_act
 
 class PistaAgent {
   /**
-   * @param {object} dbRobot - An instance of DBRobot (from server/agent.js)
    * @param {string} geminiApiKey - Gemini API key (from process.env.GEMINI_API_KEY)
    * @param {object} [options]
    * @param {number} [options.stuckOrderDays=3] - Days of inactivity before an order is flagged
    * @param {number} [options.maxTokensPerRequest=20000] - Hard limit on input tokens to prevent cost spikes
    */
-  constructor(dbRobot, geminiApiKey, options = {}) {
-    if (!dbRobot) throw new Error('PistaAgent requires a DBRobot instance.');
+  constructor(geminiApiKey, options = {}) {
     if (!geminiApiKey) throw new Error('PistaAgent requires a GEMINI_API_KEY.');
 
-    this.dbRobot = dbRobot;
     this.stuckOrderDays = options.stuckOrderDays ?? 3;
     this.maxTokensPerRequest = options.maxTokensPerRequest ?? 20000;
 
@@ -122,7 +124,7 @@ class PistaAgent {
     // Auto-save the P.I.S.T.A. proposal to the persistent chat log.
     // Links to the order if one is identifiable, otherwise goes to the Dashboard thread.
     const resolvedOrderId = orderId ?? context.orders?.[0]?.order_id ?? null;
-    await this.dbRobot.saveChatMessage({
+    await saveChatMessage({
       orderId: resolvedOrderId,
       role: 'pista',
       message: analysis.summary,
@@ -176,10 +178,10 @@ class PistaAgent {
     console.log(`\n[P.I.S.T.A.] 💬 Chat message received from CK.`);
 
     // 1. Persist CK's message immediately (so history is complete even on failure)
-    await this.dbRobot.saveChatMessage({ orderId, role: 'ck', message });
+    await saveChatMessage({ orderId, role: 'ck', message });
 
     // 2. Load prior conversation history for context continuity
-    const history = await this.dbRobot.getChatHistory(orderId, 20);
+    const history = await getChatHistory(orderId, 20);
     const historyText = history.length > 0
       ? history
           .map(h => `[${h.role.toUpperCase()} @ ${h.created_at}]: ${h.message}`)
@@ -187,12 +189,7 @@ class PistaAgent {
       : 'No prior conversation in this context.';
 
     // 3. Load active orders as broad business context
-    const activeOrders = await this.dbRobot.all(
-      `SELECT o.*, c.cust_name FROM orders o
-       JOIN customers c ON o.cust_id = c.cust_id
-       WHERE o.current_status NOT IN ('CLOSED', 'CANCELLED')
-       ORDER BY o.current_status_update ASC`
-    );
+    const activeOrders = await getActiveOrders();
 
     const prompt = `
 Conversation history in this context (oldest first):
@@ -211,7 +208,7 @@ If it is purely informational, set proposed_actions to [] and requires_approval 
     const analysis = await this._callGemini(prompt);
 
     // 4. Persist P.I.S.T.A.'s response
-    await this.dbRobot.saveChatMessage({
+    await saveChatMessage({
       orderId,
       role: 'pista',
       message: analysis.summary,
@@ -234,38 +231,17 @@ If it is purely informational, set proposed_actions to [] and requires_approval 
    */
   async _gatherEmailContext(fromEmail) {
     // Step 1: Find customer by email
-    const customer = await this.dbRobot.get(
-      `SELECT * FROM customers WHERE cust_email = ? OR cust_email2 = ?`,
-      [fromEmail, fromEmail]
-    );
+    const customer = await getCustomerByEmail(fromEmail);
 
     if (!customer) {
       return { customer: null, orders: [], recentEmails: [] };
     }
 
     // Step 2: Get active orders for this customer
-    const orders = await this.dbRobot.all(
-      `SELECT o.*,
-        (SELECT json_group_array(json_object('prod_name', p.prod_name, 'quantity', oi.quantity, 'unit_price', oi.unit_price))
-         FROM order_items oi JOIN products p ON oi.prod_id = p.prod_id
-         WHERE oi.order_id = o.order_id) AS items,
-        (SELECT json_group_array(json_object('status', h.status, 'update_event', h.update_event, 'update_date', h.update_date))
-         FROM order_status_history h
-         WHERE h.order_id = o.order_id ORDER BY h.update_date DESC LIMIT 5) AS recent_history
-       FROM orders o
-       WHERE o.cust_id = ?
-       ORDER BY o.current_status_update DESC`,
-      [customer.cust_id]
-    );
+    const orders = await getOrdersByCustomer(customer.cust_id);
 
     // Step 3: Get recent processed emails from/to this sender
-    const recentEmails = await this.dbRobot.all(
-      `SELECT gmail_message_id, direction, email_date, subject, ai_summary, status
-       FROM processed_emails
-       WHERE sender_email = ? OR receiver_email = ?
-       ORDER BY email_date DESC LIMIT 5`,
-      [fromEmail, fromEmail]
-    );
+    const recentEmails = await getRecentEmailsByAddress(fromEmail);
 
     return { customer, orders, recentEmails };
   }
@@ -277,15 +253,13 @@ If it is purely informational, set proposed_actions to [] and requires_approval 
    * @returns {Promise<Array>}
    */
   async _findStuckOrders() {
-    return await this.dbRobot.all(
-      `SELECT o.*, c.cust_name, c.cust_email,
-        CAST((julianday('now') - julianday(o.current_status_update)) AS INTEGER) AS days_stuck
-       FROM orders o
-       JOIN customers c ON o.cust_id = c.cust_id
-       WHERE o.current_status NOT IN ('CLOSED', 'CANCELLED')
-         AND julianday('now') - julianday(o.current_status_update) >= ?
-       ORDER BY days_stuck DESC`,
-      [this.stuckOrderDays]
+    return await getActiveOrders().then(orders =>
+      orders.filter(o =>
+        (new Date() - new Date(o.current_status_update)) / 86400000 >= this.stuckOrderDays
+      ).map(o => ({
+        ...o,
+        days_stuck: Math.floor((new Date() - new Date(o.current_status_update)) / 86400000),
+      }))
     );
   }
 

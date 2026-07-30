@@ -12,13 +12,20 @@
  *
  * @see docs/assistant_team/email-robot.md    — Architecture & flow diagram
  * @see server/pista.js                       — AI agent that receives the payload
+ * @see server/agents/agent-pista-db.js       — DB layer for email persistence & sender rules
  * @see docs/architecture/database-schema.md  — processed_emails, sender_rules tables
  *
  * @author Coolkonyha Development Team
- * @version 1.0.0
+ * @version 1.1.0 (Direct imports replacing constructor injection)
  */
 
 import { google } from 'googleapis';
+import {
+  filterUnprocessedEmailIds,
+  insertPendingEmail,
+  updateEmailStatus,
+  getSenderRule,
+} from './agents/agent-pista-db.js';
 
 // ---------------------------------------------------------------------------
 // CONSTANTS
@@ -33,16 +40,13 @@ const PISTA_LABEL_NAME = 'pista';
 
 class EmailRobot {
   /**
-   * @param {object} dbRobot   - DBRobot instance (from server/agent.js)
    * @param {object} pistaAgent - PistaAgent instance (from server/pista.js)
    * @param {object} oAuth2Client - google.auth.OAuth2 instance (pre-authorized)
    */
-  constructor(dbRobot, pistaAgent, oAuth2Client) {
-    if (!dbRobot)     throw new Error('EmailRobot requires a DBRobot instance.');
+  constructor(pistaAgent, oAuth2Client) {
     if (!pistaAgent)  throw new Error('EmailRobot requires a PistaAgent instance.');
     if (!oAuth2Client) throw new Error('EmailRobot requires an authorized OAuth2 client.');
 
-    this.dbRobot    = dbRobot;
     this.pista      = pistaAgent;
     this.gmail      = google.gmail({ version: 'v1', auth: oAuth2Client });
 
@@ -114,13 +118,7 @@ class EmailRobot {
     }
 
     // Deduplication: filter out IDs already in processed_emails
-    const knownIds = await this.dbRobot.all(
-      `SELECT gmail_message_id FROM processed_emails WHERE gmail_message_id IN (${[...ids].map(() => '?').join(',')})`,
-      [...ids]
-    );
-    const knownSet = new Set(knownIds.map(r => r.gmail_message_id));
-
-    return [...ids].filter(id => !knownSet.has(id));
+    return filterUnprocessedEmailIds([...ids]);
   }
 
   /**
@@ -151,33 +149,28 @@ class EmailRobot {
     const direction    = labelNames.includes('SENT') ? 'OUTBOUND' : 'INBOUND';
 
     // Step 2: Insert a 'pending' row into processed_emails (idempotent guard)
-    await this.dbRobot.run(
-      `INSERT OR IGNORE INTO processed_emails (gmail_message_id, direction, sender_email, receiver_email, subject, email_date, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-      [messageId, direction, fromAddress, toAddress, subject, emailDate]
-    );
+    await insertPendingEmail({
+      messageId,
+      direction,
+      fromAddress,
+      toAddress,
+      subject,
+      emailDate,
+    });
 
     // Step 3: Check sender rules
     const senderEmail = this._extractEmail(fromAddress);
-    const rule = await this.dbRobot.get(
-      'SELECT action FROM sender_rules WHERE sender_email = ? OR sender_domain = ?',
-      [senderEmail, this._extractDomain(senderEmail)]
-    );
+    const rule = await getSenderRule(senderEmail, this._extractDomain(senderEmail));
 
     if (rule?.action === 'skip') {
-      await this.dbRobot.run(
-        `UPDATE processed_emails SET status = 'skipped' WHERE gmail_message_id = ?`,
-        [messageId]
-      );
+      await updateEmailStatus(messageId, 'skipped', null);
       console.log(`[EmailRobot] ⏭️  Skipping message from ${senderEmail} (rule: skip).`);
       return 'skipped';
     }
 
     // Step 4: Check customer record
-    const customer = await this.dbRobot.get(
-      'SELECT * FROM customers WHERE cust_email = ? OR cust_email2 = ?',
-      [senderEmail, senderEmail]
-    );
+    const { getCustomerByEmail } = await import('./agents/agent-crm.js');
+    const customer = await getCustomerByEmail(senderEmail);
 
     // Step 5: Strip quoted history from body
     const rawBody   = this._extractBody(rawMsg.payload);
@@ -200,10 +193,7 @@ class EmailRobot {
     await this.pista.receiveEmail(payload);
 
     // Step 7: Mark as processed in DB
-    await this.dbRobot.run(
-      `UPDATE processed_emails SET status = 'processed', ai_summary = 'Forwarded to P.I.S.T.A.' WHERE gmail_message_id = ?`,
-      [messageId]
-    );
+    await updateEmailStatus(messageId, 'processed', 'Forwarded to P.I.S.T.A.');
 
     // Step 8: Apply the Gmail "pista" label so CK can see it in their inbox
     // @see docs/assistant_team/email-robot.md — Section 2 (Labeling rule)
