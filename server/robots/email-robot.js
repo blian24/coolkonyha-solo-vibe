@@ -12,11 +12,12 @@
  *
  * @see docs/assistant_team/email-robot.md    — Architecture & flow diagram
  * @see server/pista.js                       — AI agent that receives the payload
- * @see server/agents/agent-pista-db.js       — DB layer for email persistence & sender rules
+ * @see server/robots/robot-pista-db.js       — DB layer for email persistence & sender rules
+ * @see server/robots/robot-crm.js            — Customer lookup used at Step 4
  * @see docs/architecture/database-schema.md  — processed_emails, sender_rules tables
  *
  * @author Coolkonyha Development Team
- * @version 1.1.0 (Direct imports replacing constructor injection)
+ * @version 1.2.0 (Moved to server/robots/)
  */
 
 import { google } from 'googleapis';
@@ -25,7 +26,8 @@ import {
   insertPendingEmail,
   updateEmailStatus,
   getSenderRule,
-} from './agents/agent-pista-db.js';
+} from './robot-pista-db.js';
+import { getCustomerByEmail } from './robot-crm.js';
 
 // ---------------------------------------------------------------------------
 // CONSTANTS
@@ -44,11 +46,11 @@ class EmailRobot {
    * @param {object} oAuth2Client - google.auth.OAuth2 instance (pre-authorized)
    */
   constructor(pistaAgent, oAuth2Client) {
-    if (!pistaAgent)  throw new Error('EmailRobot requires a PistaAgent instance.');
+    if (!pistaAgent)   throw new Error('EmailRobot requires a PistaAgent instance.');
     if (!oAuth2Client) throw new Error('EmailRobot requires an authorized OAuth2 client.');
 
-    this.pista      = pistaAgent;
-    this.gmail      = google.gmail({ version: 'v1', auth: oAuth2Client });
+    this.pista = pistaAgent;
+    this.gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
     // Cache the resolved label ID so we only call the Gmail labels API once per session.
     this._pistaLabelId = null;
@@ -69,7 +71,6 @@ class EmailRobot {
     const summary = { processed: 0, skipped: 0, errors: 0 };
 
     try {
-      // Fetch recent messages from both INBOX and SENT
       const messageIds = await this._fetchNewMessageIds();
 
       for (const messageId of messageIds) {
@@ -97,7 +98,6 @@ class EmailRobot {
 
   /**
    * Lists message IDs from INBOX and SENT that haven't been processed yet.
-   * Uses Gmail's history API when available for incremental fetching.
    *
    * @returns {Promise<string[]>} Array of gmail_message_id strings
    */
@@ -141,12 +141,12 @@ class EmailRobot {
 
     const getHeader = name => headers.find(h => h.name.toLowerCase() === name)?.value ?? '';
 
-    const fromAddress  = getHeader('from');
-    const toAddress    = getHeader('to');
-    const subject      = getHeader('subject');
-    const emailDate    = getHeader('date');
-    const labelNames   = rawMsg.labelIds ?? [];
-    const direction    = labelNames.includes('SENT') ? 'OUTBOUND' : 'INBOUND';
+    const fromAddress = getHeader('from');
+    const toAddress   = getHeader('to');
+    const subject     = getHeader('subject');
+    const emailDate   = getHeader('date');
+    const labelNames  = rawMsg.labelIds ?? [];
+    const direction   = labelNames.includes('SENT') ? 'OUTBOUND' : 'INBOUND';
 
     // Step 2: Insert a 'pending' row into processed_emails (idempotent guard)
     await insertPendingEmail({
@@ -169,7 +169,6 @@ class EmailRobot {
     }
 
     // Step 4: Check customer record
-    const { getCustomerByEmail } = await import('./agents/agent-crm.js');
     const customer = await getCustomerByEmail(senderEmail);
 
     // Step 5: Strip quoted history from body
@@ -178,16 +177,16 @@ class EmailRobot {
 
     // Step 6: Build payload and hand off to P.I.S.T.A.
     const payload = {
-      gmail_message_id: messageId,
-      thread_id:        rawMsg.threadId,
-      email_date:       emailDate,
+      gmail_message_id:  messageId,
+      thread_id:         rawMsg.threadId,
+      email_date:        emailDate,
       direction,
-      from:             fromAddress,
-      to:               toAddress,
+      from:              fromAddress,
+      to:                toAddress,
       subject,
       newest_body_block: cleanBody,
-      known_sender:     !!customer,
-      rule:             rule?.action ?? null,
+      known_sender:      !!customer,
+      rule:              rule?.action ?? null,
     };
 
     await this.pista.receiveEmail(payload);
@@ -220,9 +219,7 @@ class EmailRobot {
       await this.gmail.users.messages.modify({
         userId: 'me',
         id: messageId,
-        requestBody: {
-          addLabelIds: [labelId],
-        },
+        requestBody: { addLabelIds: [labelId] },
       });
 
       console.log(`[EmailRobot] 🏷️  Applied label "${PISTA_LABEL_NAME}" to message ${messageId}.`);
@@ -239,11 +236,8 @@ class EmailRobot {
    * @returns {Promise<string>} Gmail label ID (e.g. "Label_123456789")
    */
   async _resolveOrCreatePistaLabel() {
-    if (this._pistaLabelId) {
-      return this._pistaLabelId;
-    }
+    if (this._pistaLabelId) return this._pistaLabelId;
 
-    // List all existing labels
     const listRes = await this.gmail.users.labels.list({ userId: 'me' });
     const existing = listRes.data.labels ?? [];
     const found = existing.find(l => l.name.toLowerCase() === PISTA_LABEL_NAME);

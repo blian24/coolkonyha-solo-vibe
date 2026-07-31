@@ -1,8 +1,9 @@
 /**
- * @fileoverview Orders Agent — Order lifecycle data access layer for Coolkonyha.
+ * @fileoverview Orders Robot — Order lifecycle data access layer for Coolkonyha.
  *
  * Single responsibility: all read and write operations on the orders domain:
  * `orders`, `order_items`, `order_status_history`, and `order_status_workflow`.
+ * Deterministic robot — no AI logic.
  *
  * Business rules enforced:
  * - **Pricing Continuity:** Order items freeze the product price at order creation time.
@@ -15,7 +16,7 @@
  * @see docs/assistant_team/db_robot_logic_tools.md — Business rules (Sections 1 & 2)
  * @see docs/architecture/database-schema.md — orders domain schema
  * @author Coolkonyha Development Team
- * @version 0.8.0
+ * @version 0.9.0
  */
 
 import db from '../db.js';
@@ -116,7 +117,7 @@ export const getActiveOrders = () =>
   );
 
 /**
- * Returns orders belonging to a specific customer.
+ * Returns orders belonging to a specific customer, with items and recent history.
  * Used by pista.js to build email context for a known sender.
  *
  * @param {number} custId - Customer ID
@@ -208,20 +209,18 @@ export const createOrder = async (custId, currency = 'HUF') => {
  * @see docs/assistant_team/db_robot_logic_tools.md Section 1
  */
 export const addOrderItem = async (orderId, prodId, quantity) => {
-  // 1. Fetch current product price (outside transaction — read-only)
   const product = await get('SELECT unit_price FROM products WHERE prod_id = ?', [prodId]);
   if (!product) throw new Error('Product not found');
 
   try {
     await run('BEGIN TRANSACTION');
 
-    // 2. Insert with FROZEN price
     const result = await run(
       `INSERT INTO order_items (order_id, prod_id, quantity, unit_price) VALUES (?, ?, ?, ?)`,
       [orderId, prodId, quantity, product.unit_price]
     );
 
-    // 3. Recalculate order total to ensure consistency
+    // Recalculate order total to ensure consistency
     await run(
       `UPDATE orders
        SET total_amount = (SELECT SUM(quantity * unit_price) FROM order_items WHERE order_id = ?)
@@ -244,12 +243,9 @@ export const addOrderItem = async (orderId, prodId, quantity) => {
 /**
  * Updates an order's status with dual-write pattern for data consistency.
  *
- * Atomically updates both the orders table (current state) and
- * order_status_history table (audit log) within a transaction.
- *
  * @param {number} orderId - Order ID to update
  * @param {string} newStatus - Status key from order_status_workflow table
- * @param {string} performedBy - Username or system identifier (e.g., 'SYSTEM', 'admin')
+ * @param {string} performedBy - Username or system identifier
  * @param {string} eventDescription - Human-readable event description
  * @returns {Promise<{success: boolean, newStatus: string}>}
  * @throws {Error} When status is invalid or transaction fails
@@ -257,7 +253,6 @@ export const addOrderItem = async (orderId, prodId, quantity) => {
  * @see docs/assistant_team/db_robot_logic_tools.md Section 2
  */
 export const updateOrderStatus = async (orderId, newStatus, performedBy, eventDescription) => {
-  // 1. Validate Status
   const statusDef = await get(
     'SELECT * FROM order_status_workflow WHERE status_key = ?',
     [newStatus]
@@ -267,7 +262,6 @@ export const updateOrderStatus = async (orderId, newStatus, performedBy, eventDe
   try {
     await run('BEGIN TRANSACTION');
 
-    // 2. Update orders table
     await run(
       `UPDATE orders
        SET current_status = ?,
@@ -277,7 +271,6 @@ export const updateOrderStatus = async (orderId, newStatus, performedBy, eventDe
       [newStatus, eventDescription, orderId]
     );
 
-    // 3. Insert into order_status_history
     await run(
       `INSERT INTO order_status_history (order_id, status, update_event, performed_by)
        VALUES (?, ?, ?, ?)`,
@@ -298,8 +291,6 @@ export const updateOrderStatus = async (orderId, newStatus, performedBy, eventDe
 
 /**
  * Returns all order items joined with product name and order code.
- * Used by the database viewer UI.
- *
  * @returns {Promise<Array>}
  */
 export const getAllOrderItems = () =>
@@ -313,8 +304,6 @@ export const getAllOrderItems = () =>
 
 /**
  * Returns the full order status history joined with order codes.
- * Used by the database viewer UI.
- *
  * @returns {Promise<Array>}
  */
 export const getOrderStatusHistory = () =>

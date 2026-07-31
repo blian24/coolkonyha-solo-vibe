@@ -1,9 +1,10 @@
 /**
- * @fileoverview Maintenance Agent — Maintenance case data access layer for Coolkonyha.
+ * @fileoverview Maintenance Robot — Maintenance case data access layer for Coolkonyha.
  *
  * Single responsibility: all read and write operations on the maintenance domain:
  * `maintenance_cases`, `maintenance_items`, `maintenance_status_history`,
  * and `maintenance_status_workflow`.
+ * Deterministic robot — no AI logic.
  *
  * Business rules enforced (mirror of the Orders domain):
  * - **Dual-Write Status:** Maintenance status updates atomically write to both
@@ -15,7 +16,7 @@
  * @see docs/assistant_team/db_robot_logic_tools.md — Dual-Write rule
  * @see docs/architecture/database-schema.md — maintenance tables schema
  * @author Coolkonyha Development Team
- * @version 0.8.0
+ * @version 0.9.0
  */
 
 import db from '../db.js';
@@ -133,7 +134,6 @@ export const createMaintenanceCase = async (custId, description = null) => {
       [custId, description]
     );
 
-    // Generate case_code (MAINT + 5-digit ID)
     const caseCode = `MAINT-${String(result.lastID).padStart(5, '0')}`;
     await run(
       'UPDATE maintenance_cases SET case_code = ? WHERE case_id = ?',
@@ -192,9 +192,6 @@ export const addMaintenanceItem = async (caseId, prodId, quantity, issueNote = n
 /**
  * Updates the status of a maintenance case with Dual-Write pattern.
  *
- * Validates the new status against maintenance_status_workflow, then atomically
- * updates maintenance_cases.current_status and appends to maintenance_status_history.
- *
  * @param {number} caseId - Maintenance case ID
  * @param {string} newStatus - Status key from maintenance_status_workflow table
  * @param {string} performedBy - Actor identifier (e.g., 'admin', 'SYSTEM')
@@ -205,7 +202,6 @@ export const addMaintenanceItem = async (caseId, prodId, quantity, issueNote = n
  * @see docs/assistant_team/db_robot_logic_tools.md — Dual-Write rule
  */
 export const updateMaintenanceStatus = async (caseId, newStatus, performedBy, eventDescription) => {
-  // Validate status against the maintenance-specific workflow table
   const statusDef = await get(
     'SELECT * FROM maintenance_status_workflow WHERE status_key = ?',
     [newStatus]
@@ -215,7 +211,6 @@ export const updateMaintenanceStatus = async (caseId, newStatus, performedBy, ev
   try {
     await run('BEGIN TRANSACTION');
 
-    // Update current state on the case row
     await run(
       `UPDATE maintenance_cases
        SET current_status = ?,
@@ -225,7 +220,6 @@ export const updateMaintenanceStatus = async (caseId, newStatus, performedBy, ev
       [newStatus, eventDescription, caseId]
     );
 
-    // Append to audit history — Dual-Write rule
     await run(
       `INSERT INTO maintenance_status_history (case_id, status, update_event, performed_by)
        VALUES (?, ?, ?, ?)`,
@@ -246,8 +240,6 @@ export const updateMaintenanceStatus = async (caseId, newStatus, performedBy, ev
 
 /**
  * Returns all maintenance items joined with product name and case code.
- * Used by the database viewer UI.
- *
  * @returns {Promise<Array>}
  */
 export const getAllMaintenanceItems = () =>
@@ -261,8 +253,6 @@ export const getAllMaintenanceItems = () =>
 
 /**
  * Returns the full maintenance status history joined with case codes.
- * Used by the database viewer UI.
- *
  * @returns {Promise<Array>}
  */
 export const getAllMaintenanceHistory = () =>

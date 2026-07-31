@@ -1,16 +1,16 @@
 /**
- * @fileoverview Catalog Agent — Supplier and product data access layer for Coolkonyha.
+ * @fileoverview Catalog Robot — Supplier and product data access layer for Coolkonyha.
  *
  * Single responsibility: all read and write operations on the `product_suppliers`
  * and `products` tables.
- * No AI logic, no business domain other than the product catalogue.
+ * Deterministic robot — no AI logic.
  *
  * Depends on: server/db.js (shared SQLite connection singleton)
  * Consumed by: server/routes.js
  *
  * @see docs/antigravity_db_schema.md — product_suppliers and products table schemas
  * @author Coolkonyha Development Team
- * @version 0.8.0
+ * @version 0.9.0
  */
 
 import db from '../db.js';
@@ -89,13 +89,6 @@ export const createSupplier = async (data) => {
  *
  * @param {number} suppId - Supplier ID (prod_supp_id in database)
  * @param {Object} data - Fields to update
- * @param {string} [data.prod_supp_co]
- * @param {string} [data.prod_supp_name]
- * @param {string} [data.prod_supp_email]
- * @param {string} [data.prod_supp_phone]
- * @param {string} [data.prod_supp_web]
- * @param {string} [data.notes]
- * @param {string} [data.logo_path]
  * @returns {Promise<{success: boolean}>}
  * @throws {Error} When no fields are provided
  *
@@ -178,13 +171,6 @@ export const createProduct = async (data) => {
  *
  * @param {number} prodId - Product ID (prod_id in database)
  * @param {Object} data - Fields to update
- * @param {string} [data.prod_name]
- * @param {string} [data.prod_type]
- * @param {string} [data.prod_size]
- * @param {number} [data.unit_price]
- * @param {number} [data.prod_supp_id]
- * @param {string} [data.notes]
- * @param {string} [data.image_path]
  * @returns {Promise<{success: boolean}>}
  * @throws {Error} When no fields are provided
  *

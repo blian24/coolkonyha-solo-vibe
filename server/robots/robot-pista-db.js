@@ -1,22 +1,20 @@
 /**
- * @fileoverview PISTA DB Agent — Data persistence layer for P.I.S.T.A. and the Email Robot.
+ * @fileoverview PISTA DB Robot — Data persistence layer for P.I.S.T.A. and the Email Robot.
  *
  * Single responsibility: all database operations required by the AI agent (pista.js)
- * and the deterministic email processor (email-robot.js). This covers:
+ * and the deterministic email processor (robots/email-robot.js). This covers:
  * - Chat history persistence (pista_chat_logs table)
  * - Processed email records (processed_emails table)
  * - Sender rules (sender_rules table)
- *
- * This file is the DB layer only. The AI logic lives in server/pista.js.
- * The naming suffix -db distinguishes it from the AI agent itself.
+ * Deterministic robot — no AI logic.
  *
  * Depends on: server/db.js (shared SQLite connection singleton)
- * Consumed by: server/routes.js, server/pista.js, server/email-robot.js
+ * Consumed by: server/routes.js, server/pista.js, server/robots/email-robot.js
  *
  * @see docs/assistant_team/pista-agent.md — Chat history architecture
  * @see docs/architecture/database-schema.md — pista_chat_logs, processed_emails, sender_rules
  * @author Coolkonyha Development Team
- * @version 0.8.0
+ * @version 0.9.0
  */
 
 import db from '../db.js';
@@ -63,8 +61,6 @@ const run = (sql, params = []) =>
  * @param {string} entry.message - Plain text message content
  * @param {string|null} [entry.proposal] - JSON-stringified P.I.S.T.A. proposal (pista role only)
  * @returns {Promise<{logId: number}>} ID of the created log entry
- *
- * @see docs/assistant_team/pista-agent.md — Chat history architecture
  */
 export const saveChatMessage = async ({ orderId = null, role, message, proposal = null }) => {
   const result = await run(
@@ -78,14 +74,9 @@ export const saveChatMessage = async ({ orderId = null, role, message, proposal 
 /**
  * Retrieves the conversation history for a given context.
  *
- * Pass orderId to get the thread for a specific order.
- * Pass null to get the global Dashboard thread.
- *
  * @param {number|null} orderId - Order context, or null for dashboard
- * @param {number} [limit=50] - Maximum messages to return (newest first)
- * @returns {Promise<Array>} Chat log entries ordered oldest-first for display
- *
- * @see docs/assistant_team/pista-agent.md — Chat history architecture
+ * @param {number} [limit=50] - Maximum messages to return
+ * @returns {Promise<Array>} Chat log entries ordered oldest-first
  */
 export const getChatHistory = (orderId = null, limit = 50) =>
   // Subquery reverses the newest-first fetch to return oldest-first for rendering
@@ -102,13 +93,10 @@ export const getChatHistory = (orderId = null, limit = 50) =>
 
 // ---------------------------------------------------------------------------
 // Processed Emails
-// Used by email-robot.js for deduplication and status tracking,
-// and by routes.js for the database viewer UI.
 // ---------------------------------------------------------------------------
 
 /**
  * Returns all processed email records joined with linked order code.
- * Used by the database viewer UI.
  * Returns empty array gracefully if the table does not yet exist.
  *
  * @returns {Promise<Array>}
@@ -132,7 +120,7 @@ export const getProcessedEmails = async () => {
  * Returns recent processed emails from or to a specific email address.
  * Used by pista.js._gatherEmailContext to provide email history to the AI.
  *
- * @param {string} email - Email address to search for (as sender or receiver)
+ * @param {string} email - Email address to search for (sender or receiver)
  * @returns {Promise<Array>}
  */
 export const getRecentEmailsByAddress = (email) =>
@@ -146,7 +134,6 @@ export const getRecentEmailsByAddress = (email) =>
 
 /**
  * Inserts a 'pending' record for a Gmail message (idempotent — INSERT OR IGNORE).
- * Called at the start of email-robot.js._processMessage to claim the message.
  *
  * @param {object} data
  * @param {string} data.messageId
@@ -167,7 +154,6 @@ export const insertPendingEmail = ({ messageId, direction, fromAddress, toAddres
 
 /**
  * Updates the status and AI summary of a processed email record.
- * Called at the end of email-robot.js._processMessage.
  *
  * @param {string} messageId - Gmail message ID
  * @param {string} status - New status ('processed' | 'skipped' | 'error')
@@ -182,7 +168,7 @@ export const updateEmailStatus = (messageId, status, aiSummary = null) =>
 
 /**
  * Filters a list of Gmail message IDs down to only those not yet in processed_emails.
- * Used by email-robot.js._fetchNewMessageIds for deduplication.
+ * Used by email-robot.js for deduplication.
  *
  * @param {string[]} ids - Array of Gmail message IDs to check
  * @returns {Promise<string[]>} IDs not yet present in the table
@@ -204,7 +190,6 @@ export const filterUnprocessedEmailIds = async (ids) => {
 
 /**
  * Returns all sender rules.
- * Used by the database viewer UI.
  * Returns empty array gracefully if the table does not yet exist.
  *
  * @returns {Promise<Array>}
@@ -221,7 +206,6 @@ export const getSenderRules = async () => {
 
 /**
  * Finds a sender rule matching an email address or domain.
- * Used by email-robot.js._processMessage to decide whether to skip a message.
  *
  * @param {string} email - Exact sender email address
  * @param {string} domain - Sender domain (e.g., 'example.com')

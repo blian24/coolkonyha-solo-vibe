@@ -1,16 +1,16 @@
 /**
- * @fileoverview CRM Agent — Customer data access layer for Coolkonyha.
+ * @fileoverview CRM Robot — Customer data access layer for Coolkonyha.
  *
  * Single responsibility: all read and write operations on the `customers` table.
- * No AI logic, no business domain other than customer records.
+ * Deterministic robot — no AI logic.
  *
  * Depends on: server/db.js (shared SQLite connection singleton)
- * Consumed by: server/routes.js, server/agents/agent-pista-db.js (via email-robot.js context)
+ * Consumed by: server/routes.js, server/robots/robot-pista-db.js (via email-robot context)
  *
  * @see docs/assistant_team/db_robot_logic_tools.md — Business rules documentation
  * @see docs/architecture/database-schema.md — customers table schema
  * @author Coolkonyha Development Team
- * @version 0.8.0
+ * @version 0.9.0
  */
 
 import db from '../db.js';

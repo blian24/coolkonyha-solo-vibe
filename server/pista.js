@@ -12,9 +12,9 @@
  *  - Only external dependency: Google Gemini API (via @google/generative-ai).
  *
  * @see docs/assistant_team/pista-agent.md        — Architecture & persona definition
- * @see server/agents/agent-pista-db.js            — DB layer for chat & email persistence
- * @see server/agents/agent-crm.js                — Customer lookups
- * @see server/agents/agent-orders.js             — Order queries
+ * @see server/robots/robot-pista-db.js            — DB layer for chat & email persistence
+ * @see server/robots/robot-crm.js                — Customer lookups
+ * @see server/robots/robot-orders.js             — Order queries
  * @see SOLUTION_DESIGN.md                        — Full system overview
  *
  * @author Coolkonyha Development Team
@@ -22,9 +22,9 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getCustomerByEmail } from './agents/agent-crm.js';
-import { getOrdersByCustomer, getActiveOrders } from './agents/agent-orders.js';
-import { saveChatMessage, getChatHistory, getRecentEmailsByAddress } from './agents/agent-pista-db.js';
+import { getCustomerByEmail } from './robots/robot-crm.js';
+import { getOrdersByCustomer, getActiveOrders } from './robots/robot-orders.js';
+import { saveChatMessage, getChatHistory, getRecentEmailsByAddress } from './robots/robot-pista-db.js';
 
 // ---------------------------------------------------------------------------
 // PERSONA: Senior Business Project Manager

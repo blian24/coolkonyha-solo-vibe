@@ -11,20 +11,20 @@
  *
  * All routes delegate business logic to the domain agent layer.
  *
- * @see server/agents/agent-crm.js        — Customer operations
- * @see server/agents/agent-catalog.js    — Supplier & product operations
- * @see server/agents/agent-orders.js     — Order operations
- * @see server/agents/agent-maintenance.js — Maintenance operations
- * @see server/agents/agent-pista-db.js   — Email & sender rule operations
+ * @see server/robots/robot-crm.js        — Customer operations
+ * @see server/robots/robot-catalog.js    — Supplier & product operations
+ * @see server/robots/robot-orders.js     — Order operations
+ * @see server/robots/robot-maintenance.js — Maintenance operations
+ * @see server/robots/robot-pista-db.js   — Email & sender rule operations
  * @author Coolkonyha Development Team
  * @version 1.2.0
  */
 import express from 'express';
-import { getCustomers, createCustomer, updateCustomer } from './agents/agent-crm.js';
-import { getSuppliers, createSupplier, updateSupplier, getProducts, createProduct, updateProduct } from './agents/agent-catalog.js';
-import { getWorkflowStatuses, getOrders, getOrderDetails, createOrder, addOrderItem, updateOrderStatus, getAllOrderItems, getOrderStatusHistory } from './agents/agent-orders.js';
-import { getMaintenanceWorkflowStatuses, getMaintenanceCases, createMaintenanceCase, getMaintenanceDetails, updateMaintenanceStatus, addMaintenanceItem, getAllMaintenanceItems, getAllMaintenanceHistory } from './agents/agent-maintenance.js';
-import { getProcessedEmails, getSenderRules } from './agents/agent-pista-db.js';
+import { getCustomers, createCustomer, updateCustomer } from './robots/robot-crm.js';
+import { getSuppliers, createSupplier, updateSupplier, getProducts, createProduct, updateProduct } from './robots/robot-catalog.js';
+import { getWorkflowStatuses, getOrders, getOrderDetails, createOrder, addOrderItem, updateOrderStatus, getAllOrderItems, getOrderStatusHistory } from './robots/robot-orders.js';
+import { getMaintenanceWorkflowStatuses, getMaintenanceCases, createMaintenanceCase, getMaintenanceDetails, updateMaintenanceStatus, addMaintenanceItem, getAllMaintenanceItems, getAllMaintenanceHistory } from './robots/robot-maintenance.js';
+import { getProcessedEmails, getSenderRules } from './robots/robot-pista-db.js';
 
 const router = express.Router();
 
