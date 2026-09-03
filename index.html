@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -20,6 +20,15 @@
       darkMode: 'class',
       theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], head: ['Montserrat', 'sans-serif'] } } }
     }
+  </script>
+
+  <!-- Apply stored theme before first paint to avoid flash -->
+  <script>
+    (function () {
+      const stored = localStorage.getItem('ck-theme');
+      const prefersDark = stored ? stored === 'dark' : true;
+      document.documentElement.classList.toggle('dark', prefersDark);
+    })();
   </script>
 
   <link rel="stylesheet" href="/ui_design/css/oceanic-plus.css">
@@ -81,13 +90,21 @@
       </div>
     </div>
 
-    <!-- Input -->
+    <!-- PISTA Input -->
     <div class="p-5 shrink-0">
       <div class="carved">
         <button class="carved-btn"><i class="fas fa-paperclip"></i></button>
         <input type="text" placeholder="Ask PISTA...">
         <button class="carved-btn"><i class="fas fa-paper-plane" style="color:var(--accent);"></i></button>
       </div>
+    </div>
+
+    <!-- Theme toggle -->
+    <div class="px-5 pb-5 shrink-0 flex items-center justify-between"
+      style="border-top:1px solid var(--border); padding-top:0.85rem;">
+      <span id="theme-label"
+        style="font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);"></span>
+      <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"></div>
     </div>
   </aside>
 
@@ -244,30 +261,52 @@
   </template>
 
   <script>
-    /* ── THEME & MODALS ──────────────────────────── */
+    /* ── THEME ─────────────────────────────────────────────────────── */
+
+    /**
+     * Toggles dark/light mode on <html>, persists preference to localStorage,
+     * and syncs the sidebar label + settings checkbox (if visible).
+     * Self-contained: no dependency on dynamically loaded view elements.
+     * @see docs/architecture/ui-data-flow.md
+     */
     function toggleTheme() {
       const ff = document.getElementById('frost-flash');
       ff.classList.add('on');
       setTimeout(() => {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        document.getElementById('theme-label').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('ck-theme', isDark ? 'dark' : 'light');
+
+        // Update the permanent sidebar label
+        const label = document.getElementById('theme-label');
+        if (label) label.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+
+        // Sync settings checkbox if that view is currently loaded
+        const checkbox = document.getElementById('settings-theme-checkbox');
+        if (checkbox) checkbox.checked = isDark;
+
         requestAnimationFrame(() => ff.classList.remove('on'));
       }, 55);
     }
 
-    window.openModal = function(id) { document.getElementById(id).classList.add('open'); }
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
-    window.closeBg = function(e, id) { if (e.target.id === id) window.closeModal(id); }
+    // Set sidebar label once DOM is ready (theme class already applied in <head>)
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      const label = document.getElementById('theme-label');
+      if (label) label.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    });
 
-    /* ── INIT ─────────────────────────────────────── */
+    /* ── MODALS ────────────────────────────────────────────────────── */
+    window.openModal = function (id) { document.getElementById(id).classList.add('open'); }
+    window.closeModal = function (id) { document.getElementById(id).classList.remove('open'); }
+    window.closeBg = function (e, id) { if (e.target.id === id) window.closeModal(id); }
+
+    /* ── SIDEBAR RESIZER ───────────────────────────────────────────── */
     (async () => {
       const resizer = document.getElementById('sidebar-resizer');
       const sidebar = document.getElementById('main-sidebar');
-      let dragging = false, startX = 0, startW = 0, hasMoved = false;
+      let dragging = false, startX = 0, startW = 0;
       resizer.addEventListener('mousedown', e => {
         dragging = true;
-        hasMoved = false;
         startX = e.clientX;
         startW = sidebar.offsetWidth;
         resizer.classList.add('active');
@@ -275,17 +314,12 @@
       });
       document.addEventListener('mousemove', e => {
         if (!dragging) return;
-        hasMoved = true;
-        // Allow ±5vw around the default 18vw  →  clamp to 13vw – 23vw
+        // Clamp to 13vw – 23vw
         const minW = Math.round(window.innerWidth * 0.13);
         const maxW = Math.round(window.innerWidth * 0.23);
         sidebar.style.width = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX))) + 'px';
       });
       document.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
-
-      
-      
-      
     })();
   </script>
 </body>

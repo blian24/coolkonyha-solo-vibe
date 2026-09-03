@@ -15,6 +15,12 @@ Welcome to the Coolkonyha Solo Vibe module map. This directory contains lightwei
 - [robot-pista-db.js](robot-pista-db.js.md) — Persistence robot for P.I.S.T.A. chat history, processed email logs, and sender rules.
 - [email-robot.js](email-robot.js.md) — Deterministic Gmail polling worker for deduplicating, stripping, and forwarding emails.
 
+### Frontend
+
+- [index.html](index.html.md) — SPA shell: sidebar, modals, theme toggle logic, and `#app-content` container for dynamic view injection.
+
+> **Note:** The `ui_design/` layer (router, controllers, views, CSS) is not yet fully mapped. Module map entries for this layer will be created during the v0.9.0 React migration phase.
+
 ## Dependency Graph
 
 ```mermaid
@@ -66,3 +72,5 @@ graph TD
   Read [email-robot.js](email-robot.js.md) to follow the 8-step pipeline, [robot-pista-db.js](robot-pista-db.js.md) for deduplication queries and sender rules, and [pista.js](pista.js.md) for AI handoff.
 - **If you are working on Database connections, transactions, or schema:**
   Read [db.js](db.js.md) for connection and foreign key setup, followed by the relevant domain robot in `server/robots/`.
+- **If you are working on the SPA shell, sidebar, theme, or modals:**
+  Read [index.html](index.html.md) first. For view content see `ui_design/views/`. For routing see `ui_design/js/router.js`.

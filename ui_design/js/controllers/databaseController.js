@@ -56,13 +56,6 @@ window.setFallbackIcon = (imgEl) => {
   imgEl.parentElement.innerHTML = '<i class="fas fa-building"></i>';
 };
 
-/* ── Theme ─────────────────────────────────────── */
-window.toggleTheme = () => {
-  const html = document.documentElement;
-  const isNowDark = html.classList.toggle('dark');
-  document.getElementById('theme-label').textContent = isNowDark ? 'Dark Mode' : 'Light Mode';
-};
-
 /* ── Refresh current tab (manual) ──────────────── */
 window.refreshCurrentTab = async () => {
   if (!currentTab) return;

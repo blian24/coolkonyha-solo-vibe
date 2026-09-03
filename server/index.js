@@ -33,15 +33,16 @@ app.use(express.static(join(__dirname, '..', 'public')));
 // Serve ui_design directory for previewing designs
 app.use('/ui_design', express.static(join(__dirname, '..', 'ui_design')));
 
-// Option A: Redirect / and /index.html to /index-db.html to serve the app without file renaming
+// Serve the main SPA (index.html) at the root
 app.get('/', (req, res) => {
-  res.redirect('/index-db.html');
+  res.sendFile(join(__dirname, '..', 'index.html'));
 });
 
 app.get('/index.html', (req, res) => {
-  res.redirect('/index-db.html');
+  res.sendFile(join(__dirname, '..', 'index.html'));
 });
 
+// Database viewer remains accessible at its own URL
 app.get('/index-db.html', (req, res) => {
   res.sendFile(join(__dirname, '..', 'index-db.html'));
 });
