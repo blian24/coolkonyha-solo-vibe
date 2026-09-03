@@ -1,7 +1,7 @@
 # DB Robot Operations & Logic Rules
 
 **Component:** `DBRobot`
-**Location:** [`server/agent.js`](../../server/agent.js)
+**Location:** Split across [`server/robots/robot-orders.js`](../../server/robots/robot-orders.js), [`robot-maintenance.js`](../../server/robots/robot-maintenance.js), [`robot-crm.js`](../../server/robots/robot-crm.js), [`robot-catalog.js`](../../server/robots/robot-catalog.js) — see [database-robot.md](./database-robot.md) for the current-vs-legacy file note.
 
 ## 1. Purpose
 This document defines the mandatory **business logic and operational rules** that the Database Robot must enforce. These rules ensure data integrity, auditability, and consistent workflow execution across the Coolkonyha application.
@@ -68,5 +68,5 @@ Whenever an order status changes, the Agent MUST perform a dual-write operation:
 -   **Price Freezing**: The Pricing Continuity rule is a financial security measure to prevent accidental modification of historical revenue data.
 
 ## Cross References
-- **Implementation:** See [`server/agent.js`](../../server/agent.js)
+- **Implementation:** See [`server/robots/robot-orders.js`](../../server/robots/robot-orders.js) (order rules) and [`robot-maintenance.js`](../../server/robots/robot-maintenance.js) (maintenance rules)
 - **Schema:** See [`docs/architecture/database-schema.md`](../architecture/database-schema.md)

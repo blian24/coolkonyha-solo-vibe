@@ -2,7 +2,9 @@
 
 **Component:** `API Routes`
 **Location:** [`server/routes.js`](../../server/routes.js)
-**Version:** `v0.8.0`
+**Version:** `v0.9.0` (in progress)
+
+> **Note:** "Agent"/"DBRobot" below refers to the deterministic data-access layer, currently implemented as the domain robots under [`server/robots/`](../../server/robots/) — see [database-robot.md](../assistant_team/database-robot.md).
 
 ## 1. Purpose
 The API Routes module defines the **RESTful interface** for the Coolkonyha application. It handles HTTP requests, parses parameters, delegates business logic to the `DBRobot`, and formats responses.

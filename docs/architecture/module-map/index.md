@@ -2,6 +2,17 @@
 
 Welcome to the Coolkonyha Solo Vibe module map. This directory contains lightweight summaries of all core backend and automation modules in the project.
 
+## Single Source of Truth: `status.json`
+
+[`status.json`](./status.json) declares, for every file under `server/`, whether it is:
+- **`live`** — reachable by import from `server/index.js`, i.e. actually running in the app.
+- **`not-wired`** — implemented, but nothing currently imports it (e.g. `pista.js`, `email-robot.js` today).
+- **`legacy-unused`** — superseded by other code, not imported by anything live, and moved out of `server/` into `.trash/` (e.g. the pre-split DBRobot monolith, retired to `.trash/server/agent.js` on 2026-09-03).
+
+Any narrative doc (`docs/assistant_team/*.md`, `docs/architecture/*.md`, `SOLUTION_DESIGN.md`) that states a file's location or wiring status should agree with `status.json`. This is not just a convention — `npm run check-docs` (which also runs automatically before `npm test`) statically re-derives reachability from the real import graph and fails the build if any manifest entry disagrees with reality, or if any doc references a `server/`/`tests/` path that doesn't exist. See `scripts/check-docs.js` for what it checks.
+
+**When you add, move, or delete a file under `server/`:** update `status.json` in the same change. The checker will fail if you don't (undeclared files and stale statuses are both hard errors).
+
 ## Module Index
 
 - [index.js](index.js.md) — Express application entry point that initializes middleware, static routes, and starts the HTTP server.

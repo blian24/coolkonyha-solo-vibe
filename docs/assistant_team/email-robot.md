@@ -2,7 +2,7 @@
 
 **Component:** `Email Robot`
 **Type:** 🤖 Robot (deterministic, no AI)
-**Status:** Implemented — `server/email-robot.js`
+**Status:** Implemented — [`server/robots/email-robot.js`](../../server/robots/email-robot.js) (moved into `server/robots/` during the v0.8.0 split; previously sat directly under `server/`). **Not yet wired into the live server**: nothing currently instantiates or schedules it, so the Gmail polling pipeline described below does not run in production yet.
 
 ## 1. Purpose
 

@@ -66,10 +66,12 @@ tests/
 
 | Scope | Files Read Before Test |
 |---|---|
-| `unit` | `server/agent.js`, `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
-| `integration` | `server/routes.js`, `server/agent.js`, `docs/architecture/api-routes.md`, `docs/assistant_team/db_robot_logic_tools.md` |
+| `unit` | `tests/helpers/agent-factory.js` mirror source (`.trash/server/agent.js`, retired — see note below), `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
+| `integration` | `server/routes.js`, all files under `server/robots/`, `docs/architecture/api-routes.md`, `docs/assistant_team/db_robot_logic_tools.md` |
 | `e2e` | All of the above + `server/index.js`, `docs/architecture/database-schema.md` |
 | `all` | Union of all scopes |
+
+> **Known gap:** the `unit` scope's tests run against `tests/helpers/agent-factory.js`, which mirrors the retired `.trash/server/agent.js` (moved out of `server/` 2026-09-03, was never imported by the live server) rather than the current `server/robots/robot-orders.js` / `robot-maintenance.js`. Integration and E2E tests do exercise the real robot files via the HTTP layer. See `docs/assistant_team/db_robot_code_structure.md` for detail.
 
 ## 6. Test Reports
 

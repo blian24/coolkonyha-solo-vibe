@@ -4,7 +4,7 @@
  * Tests each DBRobot method in isolation using an in-memory sandbox SQLite DB.
  * The production coolkonyha.db is never opened.
  *
- * RE-LEARN: Before tests run, the learner reads server/agent.js and the
+ * RE-LEARN: Before tests run, the learner reads the retired .trash/server/agent.js and the
  * associated business-rule documentation to ensure test assertions match
  * the current implementation.
  *

@@ -3,10 +3,16 @@
 This document explains how the DBRobot rules defined in [`db_robot_logic_tools.md`](./db_robot_logic_tools.md) are implemented in the codebase.
 
 ## 1. Code Location
-The DBRobot logic is encapsulated entirely within:
-- **`server/agent.js`**: Main logic class (`DBRobot`).
+The DBRobot logic is split by domain across `server/robots/`:
+- **`server/robots/robot-crm.js`**: Customer read/write operations.
+- **`server/robots/robot-catalog.js`**: Supplier and product read/write operations.
+- **`server/robots/robot-orders.js`**: Order lifecycle, order items, dual-write and pricing-continuity enforcement.
+- **`server/robots/robot-maintenance.js`**: Maintenance case lifecycle and dual-write enforcement.
+- **`server/robots/robot-pista-db.js`**: Chat history, processed emails, sender rules.
 - **`server/db.js`**: Database connection management.
-- **`server/routes.js`**: API layer exposing the Robot's capabilities.
+- **`server/routes.js`**: API layer exposing the robots' capabilities.
+
+The pre-split monolith this logic used to live in (formerly at the top level of `server/`) is confirmed dead (nothing in `server/index.js` or `server/routes.js` imported it) and was retired to [`.trash/server/agent.js`](../../.trash/server/agent.js) on 2026-09-03. See [database-robot.md](./database-robot.md) for details.
 
 ## 2. Rule Implementation Mapping
 
@@ -59,7 +65,7 @@ async exampleMultiWriteMethod(params) {
 
 **Single-write methods** (e.g., `updateCustomer`, `updatePlayer`) issue one SQL statement — SQLite guarantees their atomicity natively, no explicit transaction is needed.
 
-**The test factory (`tests/helpers/agent-factory.js`) MUST mirror any changes to `server/agent.js` exactly.**
+**The test factory (`tests/helpers/agent-factory.js`) currently mirrors the retired pre-split monolith's logic (`.trash/server/agent.js`), not the live `server/robots/robot-orders.js` / `robot-maintenance.js` implementations.** This is a known gap — unit tests validate the mirrored copy, not the code path `routes.js` actually calls in production. Integration and E2E tests do exercise the real `server/robots/` files via the HTTP layer. Retargeting the unit-test factory to the split files is a test-architecture decision, not made as part of this documentation fix.
 
 ## 3. Usage
 - **Start Server**: `node server/index.js`
@@ -68,5 +74,5 @@ async exampleMultiWriteMethod(params) {
 
 ## Cross References
 - **Business Rules:** [`db_robot_logic_tools.md`](./db_robot_logic_tools.md)
-- **Implementation:** [`server/agent.js`](../../server/agent.js)
+- **Implementation:** [`server/robots/`](../../server/robots/)
 - **Tests:** [`docs/tests/README.md`](../tests/README.md)

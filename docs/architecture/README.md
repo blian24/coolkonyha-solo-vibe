@@ -4,7 +4,8 @@ This folder contains comprehensive architecture documentation for Coolkonyha Sol
 
 ## Contents
 
-- [Database Agent](./database-agent.md) - Data access layer and business rules
+- [Module Map](./module-map/index.md) - Living module map & dependency graph (primary navigation entry point for current code structure)
+- [Database Robot](../assistant_team/database-robot.md) - Data access layer and business rules
 - [API Routes](./api-routes.md) - REST API endpoints
 - [Database Schema](./database-schema.md) - Database design and relationships
 - [Database Connection](./database-connection.md) - Connection management

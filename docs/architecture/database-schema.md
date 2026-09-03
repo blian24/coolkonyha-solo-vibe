@@ -271,6 +271,6 @@ Stores CK's learned preferences for non-customer email senders. Rules are propos
 
 ## Cross References
 - **Business Rules:** See [`docs/assistant_team/db_robot_logic_tools.md`](../assistant_team/db_robot_logic_tools.md)
-- **Data Access:** See [`server/agent.js`](../../server/agent.js)
+- **Data Access:** See [`server/robots/`](../../server/robots/) (see [database-robot.md](../assistant_team/database-robot.md) for the current file layout)
 - **P.I.S.T.A. (sender_rules consumer):** See [`docs/assistant_team/pista-agent.md`](./pista-agent.md)
 - **Email Robot (sender_rules consumer):** See [`docs/assistant_team/email-robot.md`](./email-robot.md)

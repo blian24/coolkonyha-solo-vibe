@@ -1,10 +1,12 @@
 # Database Robot Architecture
 
 **Component:** `DBRobot`
-**Location:** [`server/agent.js`](../../server/agent.js)
+**Location:** Split across five domain modules under [`server/robots/`](../../server/robots/) — [`robot-crm.js`](../../server/robots/robot-crm.js), [`robot-catalog.js`](../../server/robots/robot-catalog.js), [`robot-orders.js`](../../server/robots/robot-orders.js), [`robot-maintenance.js`](../../server/robots/robot-maintenance.js), [`robot-pista-db.js`](../../server/robots/robot-pista-db.js) — consumed by [`server/routes.js`](../../server/routes.js).
+
+> **Note:** The original monolithic implementation of this layer (formerly at the top level of `server/`, before the `server/robots/` split — see [module map](../architecture/module-map/index.md)) carried no live logic and was retired to [`.trash/server/agent.js`](../../.trash/server/agent.js) on 2026-09-03. Treat any other reference to the old path elsewhere as historical unless it's inside a dated `docs/.impl_plans/` or `docs/.versions/` record.
 
 ## 1. Purpose
-The **Database Robot** is a deterministic (non-AI) data access layer for the Coolkonyha application. It abstracts all raw SQL operations and enforces critical business rules mechanically before data reaches the persistence layer.
+The **Database Robot** is a deterministic (non-AI) data access layer for the Coolkonyha application. It abstracts all raw SQL operations and enforces critical business rules mechanically before data reaches the persistence layer. The rules and flows described below are conceptually unchanged from the original monolith — only the file layout changed.
 
 Key responsibilities:
 - **Centralized Data Access:** All database interactions flow through this class.

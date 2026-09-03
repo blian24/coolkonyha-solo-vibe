@@ -3,7 +3,7 @@
 **Full name:** **P**roactive **I**ntelligent **S**ystem for **T**ask **A**utomation
 **Component:** `P.I.S.T.A.`
 **Type:** 🧠 Agent (AI)
-**Status:** Planned — not yet implemented
+**Status:** Implemented (`server/pista.js`) — the `PistaAgent` class and its three methods (`receiveEmail`, `checkWorkflowHealth`, `receiveChat`) exist and match this document. **Not yet wired into the live server**: no route in `server/routes.js` and no scheduler instantiates it, so it currently only runs from test/CLI scripts. See [module-map/pista.js.md](../architecture/module-map/pista.js.md) for the implementation-level summary.
 
 ## 1. Purpose
 
@@ -144,7 +144,7 @@ P.I.S.T.A.'s output is always a **proposal** — CK approves or rejects.
 **Rule:** P.I.S.T.A. may prepare, draft, and suggest — but never execute outbound or destructive actions without explicit CK confirmation.
 
 ## Cross References
-- **DBRobot:** [`server/agent.js`](../../server/agent.js)
+- **DBRobot:** [`server/robots/`](../../server/robots/) — see [database-robot.md](./database-robot.md)
 - **Email Robot:** [`docs/assistant_team/email-robot.md`](./email-robot.md)
 - **DB Schema:** [`docs/architecture/database-schema.md`](./database-schema.md)
 - **Solution Design:** [`SOLUTION_DESIGN.md`](../../SOLUTION_DESIGN.md)

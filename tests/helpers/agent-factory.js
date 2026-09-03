@@ -1,15 +1,17 @@
 /**
  * @fileoverview DBRobot Factory — Test-injectable version of the database robot.
  *
- * The production `server/agent.js` imports a hardcoded singleton DB connection.
- * This factory re-implements the same DBRobot class but accepts any db-compatible
- * object (e.g., SandboxDb) via constructor injection, enabling full sandbox isolation
- * in tests without modifying production code.
+ * The retired `.trash/server/agent.js` (moved out of server/ 2026-09-03, no longer
+ * live — see docs/assistant_team/db_robot_code_structure.md) imported a hardcoded
+ * singleton DB connection. This factory re-implements the same DBRobot class but
+ * accepts any db-compatible object (e.g., SandboxDb) via constructor injection,
+ * enabling full sandbox isolation in tests without modifying production code.
  *
- * Keep this file in sync with server/agent.js — if agent.js logic changes,
- * update this file to match.
+ * This still mirrors the retired agent.js implementation, not the live
+ * server/robots/robot-orders.js / robot-maintenance.js — see
+ * docs/.notes/future-ideas.md i-2 for the open decision to retarget it.
  *
- * @see server/agent.js — Production implementation (source of truth)
+ * @see .trash/server/agent.js — retired reference implementation
  * @see docs/assistant_team/db_robot_logic_tools.md — Business rules
  * @see docs/tests/unit-tests.md — Unit test documentation
  */

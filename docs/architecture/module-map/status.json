@@ -1,0 +1,13 @@
+{
+  "_comment": "Single source of truth for server/ file wiring status. Verified automatically by scripts/check-docs.js against static import analysis from server/index.js — do not hand-edit the 'status' of an entry without also making the corresponding wiring change (or vice versa), the check will fail on mismatch. Status values: 'live' (reachable from server/index.js), 'not-wired' (implemented but nothing currently imports it), 'legacy-unused' (superseded, kept in the repo, not imported by anything live).",
+  "server/index.js": { "status": "live" },
+  "server/routes.js": { "status": "live" },
+  "server/db.js": { "status": "live" },
+  "server/robots/robot-crm.js": { "status": "live" },
+  "server/robots/robot-catalog.js": { "status": "live" },
+  "server/robots/robot-orders.js": { "status": "live" },
+  "server/robots/robot-maintenance.js": { "status": "live" },
+  "server/robots/robot-pista-db.js": { "status": "live" },
+  "server/pista.js": { "status": "not-wired" },
+  "server/robots/email-robot.js": { "status": "not-wired" }
+}

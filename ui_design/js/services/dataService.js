@@ -8,7 +8,7 @@
  * - Unified Dashboard feed combining both domains
  *
  * @see server/routes.js   - API endpoints
- * @see server/agent.js   - DBRobot logic
+ * @see server/robots/    - DBRobot logic (split by domain)
  * @version 1.1.0
  */
 
