@@ -72,6 +72,7 @@ Gmail Robot              CK's Chat Input
 
 ### Architecture Documentation
 
+- [Module Map](./docs/architecture/module-map/index.md) - Living module map & dependency graph (primary navigation entry point)
 - [Database Robot](./docs/assistant_team/database-robot.md) - Data access robot & business rules
 - [API Routes](./docs/architecture/api-routes.md) - REST endpoints overview
 - [Database Schema](./docs/architecture/database-schema.md) - Schema definitions & ER diagram
