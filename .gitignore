@@ -34,7 +34,6 @@ dist-ssr
 # Backups and Agent internal files
 .backup/
 .agent/
-.trash/
 
 # Runtime logs
 server_log.txt
