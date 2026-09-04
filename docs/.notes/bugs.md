@@ -6,6 +6,4 @@ Informal, running backlog of suspected/confirmed defects — not authoritative, 
 
 **Priority levels** (lowest → highest): Maintenance, Relevant, Critical, Nuclear — full definitions in `~/.claude/CLAUDE.md` §8.6.
 
-## From the 2026-09-04 ESLint pass
-
-- **b-4-maintenance — Minor cosmetic lint findings.** A handful of unused `catch (e)` variables in `dataService.js`/`maintenanceController.js`, a few lines over the 100-char limit, one unnecessary regex escape character in `dashboardController.js`. No functional impact.
+_No open entries. `npm run lint` is at 0 problems as of 2026-09-04._
