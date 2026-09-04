@@ -84,11 +84,14 @@ window.renderOrders = async function(data) {
     data = await window.dataService.getAllDashboardCases(filter);
   }
 
-  data.forEach(async o => {
+  data.forEach(o => {
     const clone = tpl.content.cloneNode(true);
     const tr = clone.querySelector('tr');
 
-    tr.id = `order-row-${o.id}`;
+    // Namespaced by caseType: order_id and maintenance case_id are separate
+    // auto-increment sequences that overlap (both start at 1), so the raw
+    // numeric id alone is not a unique DOM id across the unified table.
+    tr.id = `order-row-${o.caseType}-${o.id}`;
     tr.onclick = () => selectOrder(o.id, o.caseType);
     if (o.aiInsight) tr.classList.add('ai-row');
     if (selectedId === o.id && selectedCaseType === o.caseType) tr.classList.add('selected');
@@ -135,15 +138,18 @@ window.renderOrders = async function(data) {
       badge.classList.add('badge-order');
     }
 
-    // ── Attachment indicator (orders only) ──
-    if (o.caseType === 'order') {
-      const details = await window.dataService.getOrderDetails(o.id);
-      if (details.files && details.files.length) {
-        clone.querySelector('.clip-icon').classList.remove('hidden');
-      }
-    }
-
     container.appendChild(clone);
+
+    // ── Attachment indicator (orders only) ──
+    // Fetched and applied after the row is in the DOM so row order always
+    // matches `data` order instead of drifting with per-row fetch timing.
+    if (o.caseType === 'order') {
+      window.dataService.getOrderDetails(o.id).then(details => {
+        if (details.files && details.files.length) {
+          tr.querySelector('.clip-icon')?.classList.remove('hidden');
+        }
+      });
+    }
   });
 };
 
@@ -201,7 +207,7 @@ window.selectOrder = async function(id, caseType = 'order') {
   selectedId = id;
   selectedCaseType = caseType;
   document.querySelectorAll('.order-row-el').forEach(r => r.classList.remove('selected'));
-  document.getElementById(`order-row-${id}`)?.classList.add('selected');
+  document.getElementById(`order-row-${caseType}-${id}`)?.classList.add('selected');
 
   const fetchFn = caseType === 'maintenance'
     ? () => window.dataService.getMaintenanceCaseDetails(id)
