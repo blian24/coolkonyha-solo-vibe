@@ -296,9 +296,9 @@
     });
 
     /* ── MODALS ────────────────────────────────────────────────────── */
-    window.openModal = function (id) { document.getElementById(id).classList.add('open'); }
-    window.closeModal = function (id) { document.getElementById(id).classList.remove('open'); }
-    window.closeBg = function (e, id) { if (e.target.id === id) window.closeModal(id); }
+    window.openModal = function (id) { document.getElementById(id).classList.add('open'); };
+    window.closeModal = function (id) { document.getElementById(id).classList.remove('open'); };
+    window.closeBg = function (e, id) { if (e.target.id === id) window.closeModal(id); };
 
     /* ── SIDEBAR RESIZER ───────────────────────────────────────────── */
     (async () => {
