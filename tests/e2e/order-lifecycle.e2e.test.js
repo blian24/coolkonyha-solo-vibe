@@ -28,7 +28,6 @@ import { fileURLToPath } from 'node:url';
 import { learn, formatLearnReport } from '../helpers/learner.js';
 import { createSandboxDb } from '../helpers/sandbox-db.js';
 import { seedBaseData } from '../helpers/fixtures.js';
-import { createTestAgent } from '../helpers/agent-factory.js';
 import { createTestServer } from '../helpers/test-app-factory.js';
 
 const PROJECT_ROOT = resolve(fileURLToPath(import.meta.url), '../../../..');
@@ -61,16 +60,15 @@ describe('E2E: Full Order Lifecycle', () => {
 
     before(async () => {
         db = await createSandboxDb();
+        await db.reset();
         seeded = await seedBaseData(db);
-        const agent = createTestAgent(db);
-        const server = await createTestServer(agent);
+        const server = await createTestServer();
         baseUrl = server.baseUrl;
         serverTeardown = server.teardown;
     });
 
     after(async () => {
         await serverTeardown();
-        await db.close();
     });
 
     // Step 1: Create order

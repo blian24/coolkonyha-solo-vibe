@@ -1,18 +1,20 @@
-# Unit Tests — DBRobot Business Logic
+# Unit Tests — Orders/CRM/Catalog Robot Business Logic
 
 **File:** [`tests/unit/agent.unit.test.js`](../../tests/unit/agent.unit.test.js)  
 **Re-Learn Scope:** `unit`
 
 ## 1. Purpose
 
-Verifies the core business rules of the `DBRobot` class in isolation, using an in-memory sandbox DB with no server running.
+Verifies the core business rules of the real `server/robots/robot-orders.js`, `robot-crm.js`, and `robot-catalog.js` functions directly, in isolation, using an in-memory sandbox DB with no server running.
 
 ## 2. Architecture / Flow
 
 ```mermaid
 flowchart LR
-    Test[unit test] --> AgentFactory[createTestAgent\nagent-factory.js]
-    AgentFactory --> SandboxDb[SandboxDb :memory:]
+    Test[unit test] --> Robots[real server/robots/*.js\nfunctions, called directly]
+    Robots --> SharedDb[server/db.js :memory:]
+    Test --> SandboxDb[SandboxDb wrapper\nsandbox-db.js]
+    SandboxDb --> SharedDb
     Test --> Fixtures[seedBaseData\nfixtures.js]
     Fixtures --> SandboxDb
 ```
@@ -57,7 +59,7 @@ All tests receive seeded data from `seedBaseData()`:
 
 ## 5. Security Considerations
 
-- No production DB access; all writes go to `:memory:` only
-- Each `describe` block creates its own isolated `SandboxDb` instance
+- No production DB access; all writes go to `:memory:` only (`server/db.js` itself, switched via `DB_PATH`)
+- The connection is a shared singleton for the whole test-file process (matching production's singleton pattern) — each `describe` block calls `db.reset()` in its `before()` hook to clear mutable tables instead of getting a brand-new connection
 
 *See also:* [docs/assistant_team/db_robot_logic_tools.md](../assistant_team/db_robot_logic_tools.md)

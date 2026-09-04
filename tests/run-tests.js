@@ -43,6 +43,11 @@ const filesToRun = scope === 'all'
 
 const absoluteFiles = filesToRun.map((f) => resolve(PROJECT_ROOT, f));
 
+// All test files run against an in-memory DB, never coolkonyha.db - see
+// server/db.js and docs/.notes/future-ideas.md i-2. node:test spawns each
+// file as its own child process, which inherits this env var.
+process.env.DB_PATH = ':memory:';
+
 // ---------------------------------------------------------------
 // RE-LEARN PHASE
 // ---------------------------------------------------------------

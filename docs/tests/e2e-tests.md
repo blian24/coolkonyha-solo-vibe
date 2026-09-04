@@ -5,7 +5,7 @@
 
 ## 1. Purpose
 
-Validates the complete order lifecycle from creation to closure, exercising the HTTP API, DBRobot business rules, and the SQLite persistence layer together.
+Validates the complete order lifecycle from creation to closure, exercising the HTTP API, the real `server/robots/robot-orders.js` business rules, and the SQLite persistence layer together.
 
 ## 2. Architecture / Flow
 
@@ -44,7 +44,7 @@ flowchart TD
 ## 5. Security Considerations
 
 - Full-scope re-learn reads all server source files and docs before running
-- Sandbox DB: in-memory only; closed after suite teardown
+- Sandbox DB: in-memory only (`server/db.js` switched via `DB_PATH`), reclaimed when the test-file process exits
 - Production DB safety explicitly verified in Step 6
 
 *See also:* [docs/assistant_team/db_robot_logic_tools.md](../assistant_team/db_robot_logic_tools.md)

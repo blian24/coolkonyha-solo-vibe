@@ -22,12 +22,10 @@ import { resolve } from 'node:path';
  * @type {Record<string, string[]>}
  */
 export const LEARN_SCOPES = {
-    // NOTE: 'unit' intentionally still reads the retired .trash/server/agent.js — the
-    // unit suite (tests/unit/agent.unit.test.js) runs against tests/helpers/agent-factory.js,
-    // which mirrors agent.js, not the live server/robots/*.js split. See
-    // docs/assistant_team/db_robot_code_structure.md for the known gap this reflects.
     unit: [
-        '.trash/server/agent.js',
+        'server/robots/robot-orders.js',
+        'server/robots/robot-crm.js',
+        'server/robots/robot-catalog.js',
         'docs/assistant_team/db_robot_logic_tools.md',
         'docs/assistant_team/db_robot_code_structure.md',
     ],

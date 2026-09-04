@@ -1,13 +1,15 @@
 /**
  * @fileoverview Integration Tests — Express REST API Routes
  *
- * Spins up a real Express server on a random port backed by a sandbox in-memory
- * SQLite database. All tests use fetch() to verify HTTP contract behaviour.
- * The production server and coolkonyha.db are never touched.
+ * Spins up a real Express server on a random port, mounting the real
+ * server/routes.js against server/db.js switched to an in-memory sandbox
+ * (see tests/run-tests.js). All tests use fetch() to verify HTTP contract
+ * behaviour against the actual production code path. The production server
+ * and coolkonyha.db are never touched.
  *
- * RE-LEARN: Before tests run, the learner reads server/routes.js, server/agent.js,
- * and docs/architecture/api-routes.md to validate the HTTP contract against the
- * current implementation.
+ * RE-LEARN: Before tests run, the learner reads server/routes.js, the real
+ * server/robots/*.js modules, and docs/architecture/api-routes.md to
+ * validate the HTTP contract against the current implementation.
  *
  * @see docs/architecture/api-routes.md — API contract
  * @see docs/tests/integration-tests.md — Test documentation
@@ -20,7 +22,6 @@ import { fileURLToPath } from 'node:url';
 import { learn, formatLearnReport } from '../helpers/learner.js';
 import { createSandboxDb } from '../helpers/sandbox-db.js';
 import { seedBaseData } from '../helpers/fixtures.js';
-import { createTestAgent } from '../helpers/agent-factory.js';
 import { createTestServer } from '../helpers/test-app-factory.js';
 
 const PROJECT_ROOT = resolve(fileURLToPath(import.meta.url), '../../../..');
@@ -45,16 +46,15 @@ let seeded;
 
 before(async () => {
     db = await createSandboxDb();
+    await db.reset();
     seeded = await seedBaseData(db);
-    const agent = createTestAgent(db);
-    const server = await createTestServer(agent);
+    const server = await createTestServer();
     baseUrl = server.baseUrl;
     serverTeardown = server.teardown;
 });
 
 after(async () => {
     await serverTeardown();
-    await db.close();
 });
 
 // ---------------------------------------------------------------

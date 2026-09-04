@@ -14,14 +14,17 @@ Before each test run, the agent performs a **Re-Learn Phase**: it reads the curr
 ```mermaid
 flowchart TD
     CLI([npm test / npm run test:unit]) --> Runner[tests/run-tests.js]
+    Runner --> EnvVar[Sets DB_PATH=':memory:']
     Runner --> Learn[Re-Learn Phase\nlearner.js]
-    Learn --> SrcFiles[Reads: server/*.js\ndocs/assistant_team/*.md\ndocs/architecture/*.md]
-    Runner --> Suites{Test Scope}
+    Learn --> SrcFiles[Reads: server/robots/*.js\ndocs/assistant_team/*.md\ndocs/architecture/*.md]
+    Runner --> Suites{Test Scope\none child process per file}
     Suites --> Unit[Unit Tests\ntests/unit/]
     Suites --> Integration[Integration Tests\ntests/integration/]
     Suites --> E2E[E2E Tests\ntests/e2e/]
-    Unit & Integration & E2E --> SandboxDb[In-Memory SQLite\ntests/helpers/sandbox-db.js]
-    SandboxDb -.->|Never touches| ProdDb[(coolkonyha.db)]
+    Unit & Integration & E2E --> RealRobots[Real server/robots/*.js\n+ server/routes.js]
+    RealRobots --> SharedDb[server/db.js\nin-memory, seeded from\ndocs/setup_complete_db.sql]
+    SandboxDb[tests/helpers/sandbox-db.js\npromise wrapper + reset] --> SharedDb
+    SharedDb -.->|Never touches| ProdDb[(coolkonyha.db)]
     Runner --> Report[docs/tests/reports/run-*.md]
 ```
 
@@ -49,29 +52,30 @@ Each run prints a summary table to stdout and saves a timestamped report to `doc
 tests/
 ├── helpers/
 │   ├── learner.js          # Re-Learn Phase — reads scoped source + docs
-│   ├── sandbox-db.js       # In-memory SQLite with full schema
+│   ├── sandbox-db.js       # Promise wrapper + reset around the real,
+│   │                       # in-memory server/db.js connection
 │   ├── fixtures.js         # Deterministic seed data factories
-│   ├── agent-factory.js    # Injectable DBRobot for unit tests
-│   └── test-app-factory.js # Injectable Express app for HTTP tests
+│   └── test-app-factory.js # Mounts the real server/routes.js for HTTP tests
 ├── unit/
-│   └── agent.unit.test.js  # DBRobot business logic tests
+│   └── agent.unit.test.js  # server/robots/*.js business logic tests
 ├── integration/
 │   └── routes.integration.test.js  # REST API HTTP contract tests
 ├── e2e/
 │   └── order-lifecycle.e2e.test.js # Full order lifecycle test
-└── run-tests.js            # Test Agent orchestrator / reporter
+└── run-tests.js            # Test Agent orchestrator / reporter — sets
+                             # DB_PATH=':memory:' before spawning test files
 ```
 
 ## 5. Re-Learn Scopes
 
 | Scope | Files Read Before Test |
 |---|---|
-| `unit` | `tests/helpers/agent-factory.js` mirror source (`.trash/server/agent.js`, retired — see note below), `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
+| `unit` | `server/robots/robot-orders.js`, `robot-crm.js`, `robot-catalog.js`, `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
 | `integration` | `server/routes.js`, all files under `server/robots/`, `docs/architecture/api-routes.md`, `docs/assistant_team/db_robot_logic_tools.md` |
 | `e2e` | All of the above + `server/index.js`, `docs/architecture/database-schema.md` |
 | `all` | Union of all scopes |
 
-> **Known gap:** the `unit` scope's tests run against `tests/helpers/agent-factory.js`, which mirrors the retired `.trash/server/agent.js` (moved out of `server/` 2026-09-03, was never imported by the live server) rather than the current `server/robots/robot-orders.js` / `robot-maintenance.js`. Integration and E2E tests do exercise the real robot files via the HTTP layer. See `docs/assistant_team/db_robot_code_structure.md` for detail.
+All three scopes now exercise the real functions in `server/robots/` (and, for integration/E2E, the real `server/routes.js`) directly — there is no hand-maintained mirror anymore. See `docs/assistant_team/db_robot_code_structure.md` for how this was resolved (previously `docs/.notes/future-ideas.md` i-2).
 
 ## 6. Test Reports
 
@@ -82,7 +86,7 @@ Every run generates `docs/tests/reports/run-<ISO-timestamp>.md` containing:
 
 ## 7. Security Considerations
 
-- **Sandbox isolation:** All tests use `:memory:` SQLite. The production DB path (`coolkonyha.db`) is not referenced anywhere in the test code.
+- **Sandbox isolation:** `tests/run-tests.js` sets `DB_PATH=':memory:'` before spawning any test file (each runs as its own child process, inheriting that env var), and `tests/helpers/sandbox-db.js` sets it defensively too, so `server/db.js` — the same connection production code uses — is switched to an in-memory database seeded from `docs/setup_complete_db.sql`. The production `coolkonyha.db` file is never opened during a test run.
 - **Random ports:** Integration and E2E tests bind Express to port `0` (OS-assigned random port) so they never conflict with the production server on port 3001.
 - **Read-only re-learn:** The learner only reads files; it never writes outside of `docs/tests/reports/`.
 

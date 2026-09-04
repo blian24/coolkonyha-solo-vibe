@@ -1,10 +1,17 @@
 /**
- * @fileoverview Unit Tests — DBRobot Business Logic
+ * @fileoverview Unit Tests — Orders/CRM/Catalog Robot Business Logic
  *
- * Tests each DBRobot method in isolation using an in-memory sandbox SQLite DB.
- * The production coolkonyha.db is never opened.
+ * Tests real server/robots/*.js functions directly against an in-memory
+ * sandbox SQLite DB (server/db.js switched to ':memory:' — see
+ * tests/run-tests.js). The production coolkonyha.db is never opened.
  *
- * RE-LEARN: Before tests run, the learner reads the retired .trash/server/agent.js and the
+ * Previously these tests ran against tests/helpers/agent-factory.js, a
+ * hand-maintained mirror of the retired .trash/server/agent.js that had
+ * drifted from production (wrong workflow table name, missing the whole
+ * Maintenance domain). See docs/.notes/future-ideas.md i-2 (now resolved)
+ * for the full history.
+ *
+ * RE-LEARN: Before tests run, the learner reads the real robot files and the
  * associated business-rule documentation to ensure test assertions match
  * the current implementation.
  *
@@ -18,14 +25,16 @@
  * @see docs/tests/unit-tests.md — Test documentation
  */
 
-import { describe, it, before, after } from 'node:test';
+import { describe, it, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { learn, formatLearnReport } from '../helpers/learner.js';
 import { createSandboxDb } from '../helpers/sandbox-db.js';
 import { seedBaseData } from '../helpers/fixtures.js';
-import { createTestAgent } from '../helpers/agent-factory.js';
+import * as ordersRobot from '../../server/robots/robot-orders.js';
+import { updateCustomer } from '../../server/robots/robot-crm.js';
+import { updateProduct } from '../../server/robots/robot-catalog.js';
 
 const PROJECT_ROOT = resolve(fileURLToPath(import.meta.url), '../../../..');
 
@@ -42,21 +51,18 @@ before(async () => {
 // ---------------------------------------------------------------
 // SUITE: createOrder
 // ---------------------------------------------------------------
-describe('DBRobot.createOrder()', () => {
+describe('robot-orders.createOrder()', () => {
     let db;
-    let agent;
     let seeded;
 
     before(async () => {
         db = await createSandboxDb();
-        agent = createTestAgent(db);
+        await db.reset();
         seeded = await seedBaseData(db);
     });
 
-    after(() => db.close());
-
     it('inserts a row in the orders table with NEW status', async () => {
-        const { orderId } = await agent.createOrder(seeded.customerId);
+        const { orderId } = await ordersRobot.createOrder(seeded.customerId);
         assert.ok(orderId > 0, 'orderId should be a positive integer');
 
         const order = await db.get('SELECT * FROM orders WHERE order_id = ?', [orderId]);
@@ -65,7 +71,7 @@ describe('DBRobot.createOrder()', () => {
     });
 
     it('creates an initial NEW entry in order_status_history', async () => {
-        const { orderId } = await agent.createOrder(seeded.customerId);
+        const { orderId } = await ordersRobot.createOrder(seeded.customerId);
 
         const historyRow = await db.get(
             "SELECT * FROM order_status_history WHERE order_id = ? AND status = 'NEW'",
@@ -76,13 +82,13 @@ describe('DBRobot.createOrder()', () => {
     });
 
     it('defaults currency to HUF when not provided', async () => {
-        const { orderId } = await agent.createOrder(seeded.customerId);
+        const { orderId } = await ordersRobot.createOrder(seeded.customerId);
         const order = await db.get('SELECT currency FROM orders WHERE order_id = ?', [orderId]);
         assert.equal(order.currency, 'HUF');
     });
 
     it('respects a custom currency when provided', async () => {
-        const { orderId } = await agent.createOrder(seeded.customerId, 'EUR');
+        const { orderId } = await ordersRobot.createOrder(seeded.customerId, 'EUR');
         const order = await db.get('SELECT currency FROM orders WHERE order_id = ?', [orderId]);
         assert.equal(order.currency, 'EUR');
     });
@@ -91,29 +97,26 @@ describe('DBRobot.createOrder()', () => {
 // ---------------------------------------------------------------
 // SUITE: updateOrderStatus — Dual-Write Rule
 // ---------------------------------------------------------------
-describe('DBRobot.updateOrderStatus() — Dual-Write Rule', () => {
+describe('robot-orders.updateOrderStatus() — Dual-Write Rule', () => {
     let db;
-    let agent;
     let orderId;
 
     before(async () => {
         db = await createSandboxDb();
-        agent = createTestAgent(db);
+        await db.reset();
         const seeded = await seedBaseData(db);
-        const result = await agent.createOrder(seeded.customerId);
+        const result = await ordersRobot.createOrder(seeded.customerId);
         orderId = result.orderId;
     });
 
-    after(() => db.close());
-
     it('updates orders.current_status to the new status', async () => {
-        await agent.updateOrderStatus(orderId, 'OFFER_SENT', 'test', 'Offer sent to client');
+        await ordersRobot.updateOrderStatus(orderId, 'OFFER_SENT', 'test', 'Offer sent to client');
         const order = await db.get('SELECT current_status FROM orders WHERE order_id = ?', [orderId]);
         assert.equal(order.current_status, 'OFFER_SENT');
     });
 
     it('inserts a matching row in order_status_history (dual-write)', async () => {
-        await agent.updateOrderStatus(orderId, 'ORDER_CONFIRMED', 'test', 'Client confirmed');
+        await ordersRobot.updateOrderStatus(orderId, 'ORDER_CONFIRMED', 'test', 'Client confirmed');
         const histRow = await db.get(
             "SELECT * FROM order_status_history WHERE order_id = ? AND status = 'ORDER_CONFIRMED'",
             [orderId]
@@ -124,7 +127,7 @@ describe('DBRobot.updateOrderStatus() — Dual-Write Rule', () => {
 
     it('throws an error for an invalid status key (before any DB write)', async () => {
         await assert.rejects(
-            () => agent.updateOrderStatus(orderId, 'INVALID_XYZ', 'test', 'Bad status'),
+            () => ordersRobot.updateOrderStatus(orderId, 'INVALID_XYZ', 'test', 'Bad status'),
             /Invalid Status/
         );
     });
@@ -135,7 +138,7 @@ describe('DBRobot.updateOrderStatus() — Dual-Write Rule', () => {
             [orderId]
         );
         try {
-            await agent.updateOrderStatus(orderId, 'BOGUS', 'test', 'Should fail');
+            await ordersRobot.updateOrderStatus(orderId, 'BOGUS', 'test', 'Should fail');
         } catch { /* expected */ }
         const after = await db.get(
             'SELECT current_status FROM orders WHERE order_id = ?',
@@ -148,21 +151,18 @@ describe('DBRobot.updateOrderStatus() — Dual-Write Rule', () => {
 // ---------------------------------------------------------------
 // SUITE: addOrderItem — Pricing Continuity Rule
 // ---------------------------------------------------------------
-describe('DBRobot.addOrderItem() — Pricing Continuity Rule', () => {
+describe('robot-orders.addOrderItem() — Pricing Continuity Rule', () => {
     let db;
-    let agent;
     let seeded;
     let orderId;
 
     before(async () => {
         db = await createSandboxDb();
-        agent = createTestAgent(db);
+        await db.reset();
         seeded = await seedBaseData(db);
-        const result = await agent.createOrder(seeded.customerId);
+        const result = await ordersRobot.createOrder(seeded.customerId);
         orderId = result.orderId;
     });
-
-    after(() => db.close());
 
     it('freezes the product price at the time of order (Pricing Continuity)', async () => {
         // Confirm base product price is 2500
@@ -172,7 +172,7 @@ describe('DBRobot.addOrderItem() — Pricing Continuity Rule', () => {
         );
         assert.equal(product.unit_price, seeded.productPrice);
 
-        await agent.addOrderItem(orderId, seeded.productId, 3);
+        await ordersRobot.addOrderItem(orderId, seeded.productId, 3);
 
         const item = await db.get(
             'SELECT unit_price FROM order_items WHERE order_id = ?',
@@ -186,7 +186,7 @@ describe('DBRobot.addOrderItem() — Pricing Continuity Rule', () => {
         const quantity = 3;
         const expected = quantity * seeded.productPrice;
 
-        const details = await agent.getOrderDetails(orderId);
+        const details = await ordersRobot.getOrderDetails(orderId);
         assert.equal(
             Number(details.order.total_amount),
             expected,
@@ -210,30 +210,27 @@ describe('DBRobot.addOrderItem() — Pricing Continuity Rule', () => {
 
     it('throws an error when the product does not exist', async () => {
         await assert.rejects(
-            () => agent.addOrderItem(orderId, 99999, 1),
+            () => ordersRobot.addOrderItem(orderId, 99999, 1),
             /Product not found/
         );
     });
 });
 
 // ---------------------------------------------------------------
-// SUITE: updateCustomer / updateSupplier / updateProduct
+// SUITE: updateCustomer / updateProduct
 // ---------------------------------------------------------------
-describe('DBRobot.updateCustomer()', () => {
+describe('robot-crm.updateCustomer()', () => {
     let db;
-    let agent;
     let seeded;
 
     before(async () => {
         db = await createSandboxDb();
-        agent = createTestAgent(db);
+        await db.reset();
         seeded = await seedBaseData(db);
     });
 
-    after(() => db.close());
-
     it('updates allowed fields correctly', async () => {
-        await agent.updateCustomer(seeded.customerId, { cust_name: 'Updated Kft.' });
+        await updateCustomer(seeded.customerId, { cust_name: 'Updated Kft.' });
         const row = await db.get(
             'SELECT cust_name FROM customers WHERE cust_id = ?',
             [seeded.customerId]
@@ -242,25 +239,22 @@ describe('DBRobot.updateCustomer()', () => {
     });
 
     it('throws when no fields are provided', async () => {
-        await assert.rejects(() => agent.updateCustomer(seeded.customerId, {}), /No fields/);
+        await assert.rejects(() => updateCustomer(seeded.customerId, {}), /No fields/);
     });
 });
 
-describe('DBRobot.updateProduct()', () => {
+describe('robot-catalog.updateProduct()', () => {
     let db;
-    let agent;
     let seeded;
 
     before(async () => {
         db = await createSandboxDb();
-        agent = createTestAgent(db);
+        await db.reset();
         seeded = await seedBaseData(db);
     });
 
-    after(() => db.close());
-
     it('updates product unit_price', async () => {
-        await agent.updateProduct(seeded.productId, { unit_price: 500 });
+        await updateProduct(seeded.productId, { unit_price: 500 });
         const row = await db.get(
             'SELECT unit_price FROM products WHERE prod_id = ?',
             [seeded.productId]
@@ -269,6 +263,6 @@ describe('DBRobot.updateProduct()', () => {
     });
 
     it('throws when no fields are provided', async () => {
-        await assert.rejects(() => agent.updateProduct(seeded.productId, {}), /No fields/);
+        await assert.rejects(() => updateProduct(seeded.productId, {}), /No fields/);
     });
 });

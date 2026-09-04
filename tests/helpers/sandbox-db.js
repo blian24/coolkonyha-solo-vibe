@@ -1,148 +1,56 @@
 /**
- * @fileoverview Sandbox DB — Isolated in-memory SQLite database for testing.
+ * @fileoverview Sandbox DB — promise wrapper + reset helper around the real
+ * server/db.js connection running in in-memory test mode.
  *
- * Creates a fresh SQLite database in memory for each test run.
- * The full schema and workflow seed data are applied automatically,
- * so tests always have a realistic but completely clean environment.
+ * Previously this file created its own independent :memory: SQLite database
+ * with a hand-copied schema, separate from server/db.js. That copy drifted
+ * from production (wrong workflow table name, missing the whole Maintenance
+ * domain) - see docs/.notes/future-ideas.md i-2. Tests now import the real
+ * server/robots/*.js modules directly, so they must share the *same*
+ * connection those modules use: server/db.js itself, switched to ':memory:'
+ * and seeded from docs/setup_complete_db.sql (the accurate, production-
+ * introspected schema).
  *
- * IMPORTANT: This helper never touches coolkonyha.db (the production database).
+ * IMPORTANT — production safety: this module defensively sets
+ * `process.env.DB_PATH = ':memory:'` before importing server/db.js, so a
+ * test file is never able to accidentally open coolkonyha.db even if run
+ * directly instead of via tests/run-tests.js (which also sets this env var,
+ * as the primary mechanism — this is a belt-and-suspenders backup).
+ *
+ * Because the connection is now a shared singleton (one per test-file
+ * process, not one per describe block), full isolation between suites is
+ * achieved via `reset()` (clears all mutable tables) instead of creating a
+ * brand-new connection each time.
  *
  * @see docs/tests/README.md — Test Agent overview
  * @see docs/setup_complete_db.sql — Schema source of truth
  */
 
-import sqlite3 from 'sqlite3';
+process.env.DB_PATH = ':memory:';
 
-// ---------------------------------------------------------------
-// RULE: Full schema, copied from docs/setup_complete_db.sql
-// Kept inline so the sandbox has zero dependency on the FS path.
-// If the schema changes, update this block AND the SQL file.
-// ---------------------------------------------------------------
-const SCHEMA_SQL = `
-PRAGMA foreign_keys = ON;
+// Dynamic import (not a static one) so the env var above is guaranteed to be
+// set before server/db.js evaluates its module body and opens the connection.
+const dbPromise = import('../../server/db.js').then((m) => m.default);
 
-CREATE TABLE customers (
-  cust_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  cust_name TEXT NOT NULL,
-  cust_contact TEXT,
-  cust_email TEXT NOT NULL,
-  cust_email2 TEXT,
-  cust_phone TEXT,
-  cust_web TEXT,
-  cust_note TEXT,
-  notes TEXT,
-  logo_path TEXT,
-  cust_reg_date DATE DEFAULT CURRENT_DATE
-);
-
-CREATE TABLE product_suppliers (
-  prod_supp_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  prod_supp_co TEXT NOT NULL,
-  prod_supp_name TEXT,
-  prod_supp_email TEXT,
-  prod_supp_phone TEXT,
-  prod_supp_web TEXT,
-  prod_supp_note TEXT,
-  notes TEXT,
-  logo_path TEXT,
-  prod_supp_reg_date DATE DEFAULT CURRENT_DATE
-);
-
-CREATE TABLE products (
-  prod_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  prod_name TEXT NOT NULL,
-  prod_type TEXT,
-  prod_size TEXT,
-  prod_note TEXT,
-  notes TEXT,
-  image_path TEXT,
-  prod_reg_date DATE DEFAULT CURRENT_DATE,
-  prod_supp_id INTEGER,
-  unit_price NUMERIC(10,2),
-  FOREIGN KEY (prod_supp_id) REFERENCES product_suppliers(prod_supp_id)
-);
-
-CREATE TABLE orders (
-  order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  cust_id INTEGER NOT NULL,
-  order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  total_amount NUMERIC(12,2),
-  current_status TEXT,
-  current_status_update DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_event TEXT,
-  currency TEXT DEFAULT 'HUF',
-  FOREIGN KEY (cust_id) REFERENCES customers(cust_id)
-);
-
-CREATE TABLE order_items (
-  order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  order_id INTEGER NOT NULL,
-  prod_id INTEGER NOT NULL,
-  quantity INTEGER NOT NULL,
-  unit_price NUMERIC(10,2) NOT NULL,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id),
-  FOREIGN KEY (prod_id) REFERENCES products(prod_id)
-);
-
-CREATE TABLE order_status_history (
-  history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  order_id INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_event TEXT,
-  performed_by TEXT,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
-
-CREATE TABLE business_status_workflow (
-  status_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  status_key TEXT UNIQUE NOT NULL,
-  display_name TEXT NOT NULL,
-  description TEXT,
-  is_skippable BOOLEAN DEFAULT FALSE
-);
-
-INSERT INTO business_status_workflow (status_key, display_name, description, is_skippable) VALUES
-('NEW', 'New', 'Inquiry received, no human action yet.', 0),
-('OFFER_SENT', 'Offer Sent', 'Quote sent, waiting for customer.', 0),
-('ORDER_CONFIRMED', 'Order Confirmed', 'Binding order accepted.', 0),
-('PURCHASE', 'Purchase', 'Ordering from supplier.', 1),
-('READY_FOR_DELIVERY', 'Ready for Delivery', 'Packed and waiting.', 0),
-('DELIVERY', 'Delivery', 'Handed over to courier.', 0),
-('DELIVERED', 'Delivered', 'Left warehouse / In transit.', 0),
-('INVOICED', 'Invoiced', 'Invoice sent, awaiting payment.', 0),
-('CLOSED', 'Closed', 'Transaction successful.', 0),
-('CANCELLED', 'Cancelled', 'Deal failed.', 0);
-
-CREATE TABLE IF NOT EXISTS processed_emails (
-  email_id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  gmail_message_id  TEXT UNIQUE NOT NULL,
-  thread_id         TEXT,
-  email_date        DATETIME,
-  direction         TEXT NOT NULL CHECK(direction IN ('received', 'sent')),
-  from_address      TEXT,
-  to_address        TEXT,
-  subject           TEXT,
-  ai_summary        TEXT,
-  linked_order_id   INTEGER,
-  status            TEXT NOT NULL DEFAULT 'pending'
-                        CHECK(status IN ('pending', 'processed', 'failed', 'skipped')),
-  processed_at      DATETIME,
-  FOREIGN KEY (linked_order_id) REFERENCES orders(order_id)
-);
-`;
+// Mutable tables cleared between describe blocks. The two workflow tables
+// are seed/reference data the app never writes to, so they're left alone.
+const MUTABLE_TABLES = [
+    'order_items', 'order_status_history', 'orders',
+    'maintenance_items', 'maintenance_status_history', 'maintenance_cases',
+    'processed_emails', 'products', 'product_suppliers', 'customers',
+];
 
 /**
- * Wraps a raw sqlite3.Database with promise-based helpers matching the
- * DBRobot interface so tests can use the same patterns.
+ * Wraps the raw sqlite3.Database connection with promise-based helpers
+ * matching the shape robot modules and test bodies both rely on.
  */
 export class SandboxDb {
-    /** @param {sqlite3.Database} rawDb */
+    /** @param {import('sqlite3').Database} rawDb */
     constructor(rawDb) {
         this._db = rawDb;
     }
 
-    /** @returns {sqlite3.Database} The raw sqlite3 connection */
+    /** @returns {import('sqlite3').Database} The raw sqlite3 connection */
     get raw() {
         return this._db;
     }
@@ -183,38 +91,41 @@ export class SandboxDb {
         });
     }
 
-    close() {
-        return new Promise((resolve, reject) => {
-            this._db.close((err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+    /**
+     * Clears every mutable table and resets autoincrement counters, giving
+     * the next describe block a clean slate without needing a new
+     * connection (the connection is shared across the whole test-file
+     * process). Reference/workflow tables are left untouched.
+     */
+    async reset() {
+        await this.run('PRAGMA foreign_keys = OFF;');
+        for (const table of MUTABLE_TABLES) {
+            await this.run(`DELETE FROM ${table};`);
+        }
+        await this.run(
+            `DELETE FROM sqlite_sequence WHERE name IN (${MUTABLE_TABLES.map((t) => `'${t}'`).join(',')});`
+        );
+        await this.run('PRAGMA foreign_keys = ON;');
     }
+
+    /**
+     * No-op by design: the connection is a shared singleton for the whole
+     * test-file process (matching server/db.js's real singleton pattern).
+     * Closing it here would break every describe block that runs after.
+     * The connection is reclaimed naturally when the test-file's child
+     * process exits.
+     */
+    async close() { /* intentionally empty — see docstring */ }
 }
 
 /**
- * Creates a fresh, isolated in-memory SQLite database with the full schema
- * and seed workflow data applied. Safe to use in parallel test suites because
- * each call returns a completely independent database instance.
+ * Returns a SandboxDb wrapping the shared in-memory server/db.js
+ * connection. Safe to call multiple times per test file — always resolves
+ * to the same underlying connection.
  *
- * The production `coolkonyha.db` file is never opened or modified.
- *
- * @returns {Promise<SandboxDb>} A ready-to-use sandbox database instance
+ * @returns {Promise<SandboxDb>}
  */
-export const createSandboxDb = () => new Promise((resolve, reject) => {
-    const rawDb = new sqlite3.Database(':memory:', (connectErr) => {
-        if (connectErr) {
-            reject(new Error(`Sandbox DB connect failed: ${connectErr.message}`));
-            return;
-        }
-
-        rawDb.exec(SCHEMA_SQL, (schemaErr) => {
-            if (schemaErr) {
-                reject(new Error(`Sandbox schema init failed: ${schemaErr.message}`));
-                return;
-            }
-            resolve(new SandboxDb(rawDb));
-        });
-    });
-});
+export const createSandboxDb = async () => {
+    const rawDb = await dbPromise;
+    return new SandboxDb(rawDb);
+};

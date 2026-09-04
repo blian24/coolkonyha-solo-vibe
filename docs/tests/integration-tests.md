@@ -12,8 +12,8 @@ Verifies the HTTP contract of every REST endpoint by running a real Express serv
 ```mermaid
 flowchart LR
     Test[integration test] -->|fetch| TestServer[Express:randomPort\ntest-app-factory.js]
-    TestServer --> AgentFactory[createTestAgent]
-    AgentFactory --> SandboxDb[SandboxDb :memory:]
+    TestServer --> Routes[real server/routes.js\n+ server/robots/*.js]
+    Routes --> SharedDb[server/db.js :memory:]
 ```
 
 ## 3. Test Cases

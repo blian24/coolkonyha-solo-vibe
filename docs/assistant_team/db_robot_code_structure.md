@@ -65,7 +65,7 @@ async exampleMultiWriteMethod(params) {
 
 **Single-write methods** (e.g., `updateCustomer`, `updatePlayer`) issue one SQL statement — SQLite guarantees their atomicity natively, no explicit transaction is needed.
 
-**The test factory (`tests/helpers/agent-factory.js`) currently mirrors the retired pre-split monolith's logic (`.trash/server/agent.js`), not the live `server/robots/robot-orders.js` / `robot-maintenance.js` implementations.** This is a known gap — unit tests validate the mirrored copy, not the code path `routes.js` actually calls in production. Integration and E2E tests do exercise the real `server/robots/` files via the HTTP layer. Retargeting the unit-test factory to the split files is a test-architecture decision, not made as part of this documentation fix.
+**Resolved 2026-09-04:** unit, integration, and E2E tests all now call the real functions in `server/robots/` directly against `server/db.js` switched to `:memory:` (see `tests/helpers/sandbox-db.js` and `tests/run-tests.js`), instead of a hand-maintained mirror. See `docs/tests/README.md` for the current test architecture.
 
 ## 3. Usage
 - **Start Server**: `node server/index.js`
