@@ -49,11 +49,6 @@ app.get('/index.html', (req, res) => {
   res.sendFile(join(__dirname, '..', 'index.html'));
 });
 
-// Database viewer remains accessible at its own URL
-app.get('/index-db.html', (req, res) => {
-  res.sendFile(join(__dirname, '..', 'index-db.html'));
-});
-
 app.use('/api', routes);
 
 app.listen(PORT, () => {

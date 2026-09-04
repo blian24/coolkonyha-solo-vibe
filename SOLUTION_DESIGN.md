@@ -105,10 +105,8 @@ Gmail Robot              CK's Chat Input
 
 - [Tests Overview](./docs/tests/README.md) - Test agent, structure, and scopes
 
-### Frontend Migration (pending decision)
+### UI Design Documentation
 
-- [Frontend Scope - Owner Summary](./docs/.impl_plans/0.9.0_20260903-082033_frontend-scope-owner.md) - Plain-language summary of the proposed React migration
-- [Frontend Scope - Technical](./docs/.impl_plans/0.9.0_20260903-082033_frontend-scope-technical.md) - Technical scoping for migrating `index-db.html` to React
 - [Design Spec (Oceanic)](./docs/designs/design-01-oceanic-spec.md) - Original design spec
 - [Design Plan (Oceanic Plus)](./docs/designs/design-02-oceanic_plus-initplan.md) - Current UI design's init plan
 - [UI Descriptions](./docs/designs/ui_descriptions.md) - Detailed UI component descriptions
