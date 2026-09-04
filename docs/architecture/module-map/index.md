@@ -1,6 +1,6 @@
 # Living Module Map
 
-Welcome to the Coolkonyha Solo Vibe module map. This directory contains lightweight summaries of all core backend and automation modules in the project.
+Welcome to the Coolkonyha Solo Vibe module map. This directory contains lightweight summaries of core backend, automation, and (incrementally, as touched) frontend modules in the project.
 
 ## Single Source of Truth: `status.json`
 
@@ -29,8 +29,18 @@ Any narrative doc (`docs/assistant_team/*.md`, `docs/architecture/*.md`, `SOLUTI
 ### Frontend
 
 - [index.html](index.html.md) — SPA shell: sidebar, modals, theme toggle logic, and `#app-content` container for dynamic view injection.
+- [database/databaseController.js](databaseController.js.md) — Database view entry point: tab switching, render dispatch, search, bootstrap.
+- [database/state.js](state.js.md) — Shared state, constants, and formatters for the Database view (leaf module, no internal dependencies).
+- [database/renderers-master-data.js](renderers-master-data.js.md) — Customers, Suppliers, Products table renderers.
+- [database/renderers-orders.js](renderers-orders.js.md) — Orders, Order Items, Order History, Order Workflow table renderers.
+- [database/renderers-maintenance.js](renderers-maintenance.js.md) — Maintenance Cases, Items, History, Workflow table renderers.
+- [database/renderers-email.js](renderers-email.js.md) — Processed Emails, Sender Rules table renderers.
+- [database/modal-supplier.js](modal-supplier.js.md) — Supplier detail/edit modal.
+- [database/modal-product.js](modal-product.js.md) — Product detail/edit modal.
+- [database/modal-customer.js](modal-customer.js.md) — Customer detail/edit modal.
+- [database/modal-order.js](modal-order.js.md) — Order detail/edit modal, status updates, items, history timeline.
 
-> **Note:** The `ui_design/` layer (router, controllers, views, CSS) is not yet fully mapped. Module map entries for this layer will be created during the v0.9.0 React migration phase.
+> **Note:** The rest of the `ui_design/` layer (router, other view controllers, CSS) is not yet mapped. The Database view controller above was split from a 1,185-line monolith and mapped on 2026-09-04 — see `docs/.notes/future-ideas.md` i-8 (resolved). Further frontend module-map entries will be added incrementally as those files are touched, not gated behind any planned migration.
 
 ## Dependency Graph
 
@@ -65,6 +75,31 @@ graph TD
         RPDB --> DB
         DB --> SQLITE[(SQLite: coolkonyha.db)]
     end
+
+    subgraph DbView[Frontend: Database View]
+        DBC[databaseController.js] --> DBS[state.js]
+        DBC --> RMD[renderers-master-data.js]
+        DBC --> RO[renderers-orders.js]
+        DBC --> RM2[renderers-maintenance.js]
+        DBC --> RE[renderers-email.js]
+        DBC -.->|side-effect import| MS[modal-supplier.js]
+        DBC -.->|side-effect import| MP[modal-product.js]
+        DBC -.->|side-effect import| MC[modal-customer.js]
+        DBC -.->|side-effect import| MO[modal-order.js]
+        RMD --> DBS
+        RO --> DBS
+        RM2 --> DBS
+        RE --> DBS
+        MS --> DBS
+        MP --> DBS
+        MC --> DBS
+        MO --> DBS
+        MS --> RMD
+        MP --> RMD
+        MC --> RMD
+        MO -.->|circular, safe: deferred to event-handler call time| DBC
+        DBC -.->|/api| RT
+    end
 ```
 
 ## Start Here Guide
@@ -85,3 +120,5 @@ graph TD
   Read [db.js](db.js.md) for connection and foreign key setup, followed by the relevant domain robot in `server/robots/`.
 - **If you are working on the SPA shell, sidebar, theme, or modals:**
   Read [index.html](index.html.md) first. For view content see `ui_design/views/`. For routing see `ui_design/js/router.js`.
+- **If you are working on the Database view (any tab or entity modal):**
+  Read [database/databaseController.js](databaseController.js.md) first for tab switching and render dispatch, then [database/state.js](state.js.md) for shared state/formatters. For a specific domain's tables see the matching `database/renderers-*.js`; for a specific entity's modal see the matching `database/modal-*.js`.

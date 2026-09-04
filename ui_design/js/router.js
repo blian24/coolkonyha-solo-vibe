@@ -10,7 +10,7 @@
  * - reports      → static view (no controller)
  */
 
-import { initDatabaseController } from './controllers/databaseController.js';
+import { initDatabaseController } from './controllers/database/databaseController.js';
 import { initDashboardController } from './controllers/dashboardController.js';
 import { initMaintenanceController } from './controllers/maintenanceController.js';
 import { initSettingsController } from './controllers/settingsController.js';

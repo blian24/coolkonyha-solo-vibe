@@ -281,7 +281,7 @@ router.post('/maintenance/:id/items', async (req, res) => {
 // DATABASE VIEWER ENDPOINTS — added v0.7.0
 // Read-only list endpoints for tables that had no standalone route.
 // Used exclusively by the database viewer UI.
-// @see ui_design/js/controllers/databaseController.js
+// @see ui_design/js/controllers/database/databaseController.js
 // ---------------------------------------------------------
 
 /**
