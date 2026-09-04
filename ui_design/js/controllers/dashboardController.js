@@ -256,7 +256,7 @@ window.selectOrder = async function(id, caseType = 'order') {
   document.getElementById('details-panel').innerHTML = `
     <div class="flex items-center gap-4 mb-5">
       <div class="det-logo">
-        ${order.logo ? `<img src="${order.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\\\\'fas ${order.icon}\\\\'\></i>'">` : `<i class="fas ${order.icon}"></i>`}
+        ${order.logo ? `<img src="${order.logo}" class="w-full h-full object-contain p-1" onerror="this.outerHTML='<i class=\\\\'fas ${order.icon}\\\\'></i>'">` : `<i class="fas ${order.icon}"></i>`}
       </div>
       <div>
         <div class="flex items-center flex-wrap gap-1">

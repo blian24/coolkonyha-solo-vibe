@@ -34,7 +34,7 @@ async function renderMaintenanceWorkflowPills() {
     container.innerHTML = statuses.map(s =>
       `<span class="pill p-${s.status_key}" title="${s.description || ''}">${s.display_name}</span>`
     ).join('');
-  } catch (e) {
+  } catch (_) {
     container.innerHTML = `<span style="font-size:0.78rem; color:var(--muted);">Workflow statuses unavailable (server offline?)</span>`;
   }
 }

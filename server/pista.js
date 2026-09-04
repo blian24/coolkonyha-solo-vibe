@@ -80,7 +80,8 @@ class PistaAgent {
    * @param {string} geminiApiKey - Gemini API key (from process.env.GEMINI_API_KEY)
    * @param {object} [options]
    * @param {number} [options.stuckOrderDays=3] - Days of inactivity before an order is flagged
-   * @param {number} [options.maxTokensPerRequest=20000] - Hard limit on input tokens to prevent cost spikes
+   * @param {number} [options.maxTokensPerRequest=20000] - Hard limit on input tokens to
+   *   prevent cost spikes
    */
   constructor(geminiApiKey, options = {}) {
     if (!geminiApiKey) throw new Error('PistaAgent requires a GEMINI_API_KEY.');

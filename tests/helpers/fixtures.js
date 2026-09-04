@@ -75,7 +75,8 @@ export const seedProduct = async (db, supplierId, overrides = {}) => {
  * Returns all IDs for use in tests.
  *
  * @param {import('./sandbox-db.js').SandboxDb} db
- * @returns {Promise<{customerId: number, supplierId: number, productId: number, productPrice: number}>}
+ * @returns {Promise<{customerId: number, supplierId: number, productId: number,
+ *   productPrice: number}>}
  */
 export const seedBaseData = async (db) => {
     const supplierId = await seedSupplier(db);

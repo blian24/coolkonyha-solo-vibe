@@ -194,7 +194,7 @@ const dataService = {
           processed: o.current_status === 'CLOSED'
         };
       });
-    } catch (e) {
+    } catch (_) {
       console.warn('API unavailable, falling back to mock data');
       return [...WHATS_NEW];
     }
@@ -223,7 +223,7 @@ const dataService = {
           updated: o.order_date.split(' ')[0]
         };
       });
-    } catch (e) {
+    } catch (_) {
       console.warn('API unavailable, falling back to mock data');
       return [...ORDERS];
     }
@@ -264,7 +264,7 @@ const dataService = {
         })),
         files: [] 
       };
-    } catch (e) {
+    } catch (_) {
       // RULE: Graceful degradation — always return usable data so the UI doesn't silently fail.
       console.warn('API unavailable for order details, falling back to mock data');
       return {
@@ -326,7 +326,7 @@ const dataService = {
         updated: (mc.case_date || '').split(' ')[0] || (mc.case_date || ''),
         description: mc.description || '',
       }));
-    } catch (e) {
+    } catch (_) {
       console.warn('Maintenance API unavailable, returning empty list');
       return [];
     }
@@ -366,7 +366,7 @@ const dataService = {
         })),
         files: [],
       };
-    } catch (e) {
+    } catch (_) {
       console.warn('Maintenance detail API unavailable');
       return { order: null, items: [], history: [], files: [] };
     }

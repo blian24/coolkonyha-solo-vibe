@@ -144,7 +144,9 @@ export const getRecentEmailsByAddress = (email) =>
  * @param {string} data.emailDate
  * @returns {Promise<void>}
  */
-export const insertPendingEmail = ({ messageId, direction, fromAddress, toAddress, subject, emailDate }) =>
+export const insertPendingEmail = (
+  { messageId, direction, fromAddress, toAddress, subject, emailDate }
+) =>
   run(
     `INSERT OR IGNORE INTO processed_emails
        (gmail_message_id, direction, sender_email, receiver_email, subject, email_date, status)

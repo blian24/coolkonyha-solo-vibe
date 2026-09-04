@@ -100,7 +100,8 @@ for (const f of serverFiles) {
 // ---------------------------------------------------------------------------
 // Check 3: reachability from the entry point vs declared status
 // ---------------------------------------------------------------------------
-const IMPORT_RE = /(?:import\s+(?:[^'";]*?\sfrom\s+)?|export\s+[^'";]*?\sfrom\s+)['"](\.[^'"]+)['"]/g;
+const IMPORT_RE =
+  /(?:import\s+(?:[^'";]*?\sfrom\s+)?|export\s+[^'";]*?\sfrom\s+)['"](\.[^'"]+)['"]/g;
 
 function resolveImportTarget(fromFile, spec) {
     let target = resolve(dirname(fromFile), spec);
