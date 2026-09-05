@@ -118,7 +118,7 @@ CREATE TABLE maintenance_cases (
         current_status           TEXT NOT NULL DEFAULT 'NEW',
         current_status_update    DATETIME DEFAULT CURRENT_TIMESTAMP,
         update_event             TEXT,
-        notes                    TEXT,
+        notes                    TEXT, assigned_to TEXT, pricing_note TEXT,
         FOREIGN KEY (cust_id) REFERENCES customers(cust_id)
       );
 
@@ -153,12 +153,12 @@ CREATE TABLE maintenance_status_workflow (
 
 INSERT INTO maintenance_status_workflow (status_key, display_name, description, is_skippable, status_color) VALUES
 ('NEW', 'New', 'Maintenance request received', 0, '#F1F3F4'),
-('DIAGNOSED', 'Diagnosed', 'Issue has been assessed', 0, '#FFF9C4'),
-('PARTS_ORDERED', 'Parts Ordered', 'Replacement parts have been ordered', 1, '#FFD54F'),
-('IN_REPAIR', 'In Repair', 'Active repair work in progress', 0, '#FB8C00'),
-('TESTING', 'Testing', 'Repaired unit under quality testing', 1, '#E1F5FE'),
+('QUOTE_SENT', 'Quote Sent', 'Price quote sent to customer', 0, '#FFF9C4'),
+('SCHEDULED', 'Scheduled', 'Repair work has been scheduled', 1, '#FFD54F'),
+('WAITING', 'Waiting', 'Waiting on parts, customer, or a third party', 1, '#FB8C00'),
+('IN_REPAIR', 'In Repair', 'Active repair work in progress', 0, '#E64A19'),
+('ON_HOLD', 'On Hold', 'Work paused, may resume later', 0, '#9E9E9E'),
 ('READY', 'Ready', 'Repair complete, awaiting handover', 0, '#90CAF9'),
-('INVOICED', 'Invoiced', 'Service invoice sent to customer', 0, '#A5D6A7'),
 ('CLOSED', 'Closed', 'Maintenance case fully completed', 0, '#2E7D32'),
 ('CANCELLED', 'Cancelled', 'Case was cancelled', 0, '#C62828');
 

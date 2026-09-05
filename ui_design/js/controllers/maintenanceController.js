@@ -202,7 +202,7 @@ window.selectMaintenanceCase = async function(id) {
  * @param {Array} cases - Array of normalized maintenance cases
  */
 function updateMaintenanceStats(cases) {
-  const CLOSED_STATUSES = ['CLOSED', 'CANCELLED', 'INVOICED'];
+  const CLOSED_STATUSES = ['CLOSED', 'CANCELLED'];
   const openCount = cases.filter(c => !CLOSED_STATUSES.includes(c.workflow)).length;
   const closedCount = cases.filter(c => CLOSED_STATUSES.includes(c.workflow)).length;
 

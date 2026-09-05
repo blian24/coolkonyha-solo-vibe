@@ -23,7 +23,7 @@ import express from 'express';
 import { getCustomers, createCustomer, updateCustomer } from './robots/robot-crm.js';
 import { getSuppliers, createSupplier, updateSupplier, getProducts, createProduct, updateProduct } from './robots/robot-catalog.js';
 import { getWorkflowStatuses, getOrders, getOrderDetails, createOrder, addOrderItem, updateOrderStatus, getAllOrderItems, getOrderStatusHistory } from './robots/robot-orders.js';
-import { getMaintenanceWorkflowStatuses, getMaintenanceCases, createMaintenanceCase, getMaintenanceDetails, updateMaintenanceStatus, addMaintenanceItem, getAllMaintenanceItems, getAllMaintenanceHistory } from './robots/robot-maintenance.js';
+import { getMaintenanceWorkflowStatuses, getMaintenanceCases, createMaintenanceCase, getMaintenanceDetails, updateMaintenanceStatus, updateMaintenanceCase, addMaintenanceItem, getAllMaintenanceItems, getAllMaintenanceHistory } from './robots/robot-maintenance.js';
 import { getProcessedEmails, getSenderRules } from './robots/robot-pista-db.js';
 
 const router = express.Router();
@@ -208,12 +208,12 @@ router.get('/maintenance', async (req, res) => {
 
 /**
  * POST /api/maintenance
- * Creates a new maintenance case. Body: { custId, description?, priority? }
+ * Creates a new maintenance case. Body: { custId, description?, assignedTo? }
  */
 router.post('/maintenance', async (req, res) => {
     try {
-        const { custId, description } = req.body;
-        const result = await createMaintenanceCase(custId, description);
+        const { custId, description, assignedTo } = req.body;
+        const result = await createMaintenanceCase(custId, description, assignedTo);
         res.status(201).json(result);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -227,6 +227,20 @@ router.post('/maintenance', async (req, res) => {
 router.get('/maintenance/:id', async (req, res) => {
     try {
         const result = await getMaintenanceDetails(req.params.id);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * PUT /api/maintenance/:id
+ * Updates case fields (description, assigned_to, pricing_note, notes).
+ * For status transitions use PUT /api/maintenance/:id/status instead.
+ */
+router.put('/maintenance/:id', async (req, res) => {
+    try {
+        const result = await updateMaintenanceCase(req.params.id, req.body);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });

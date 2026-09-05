@@ -47,18 +47,38 @@ describe('robot-maintenance.createMaintenanceCase()', () => {
         seeded = await seedBaseData(db);
     });
 
-    it('inserts a row in maintenance_cases with NEW status and a MAINT- code', async () => {
+    it('inserts a row in maintenance_cases with NEW status and an SZ<YY><NN> code', async () => {
         const { caseId, caseCode } = await maintenanceRobot.createMaintenanceCase(
             seeded.customerId,
             'Espresso machine not heating up'
         );
         assert.ok(caseId > 0, 'caseId should be a positive integer');
-        assert.match(caseCode, /^MAINT-\d{5}$/);
+        // CK's own Excel-based numbering format — see docs/.notes/differences-from-excel.md
+        assert.match(caseCode, /^SZ\d{2}\d{2,}$/);
 
         const row = await db.get('SELECT * FROM maintenance_cases WHERE case_id = ?', [caseId]);
         assert.equal(row.current_status, 'NEW');
         assert.equal(row.cust_id, seeded.customerId);
         assert.equal(row.case_code, caseCode);
+    });
+
+    it('resets the case code sequence per calendar year, incrementing within it', async () => {
+        const first = await maintenanceRobot.createMaintenanceCase(seeded.customerId);
+        const second = await maintenanceRobot.createMaintenanceCase(seeded.customerId);
+        const yy = String(new Date().getFullYear()).slice(-2);
+        const firstSeq = parseInt(first.caseCode.slice(4), 10);
+        const secondSeq = parseInt(second.caseCode.slice(4), 10);
+        assert.ok(first.caseCode.startsWith(`SZ${yy}`));
+        assert.ok(second.caseCode.startsWith(`SZ${yy}`));
+        assert.equal(secondSeq, firstSeq + 1, 'sequence must increment by 1 within the same year');
+    });
+
+    it('accepts an assignedTo value', async () => {
+        const { caseId } = await maintenanceRobot.createMaintenanceCase(
+            seeded.customerId, 'Test issue', 'Gábor'
+        );
+        const row = await db.get('SELECT assigned_to FROM maintenance_cases WHERE case_id = ?', [caseId]);
+        assert.equal(row.assigned_to, 'Gábor');
     });
 
     it('creates an initial NEW entry in maintenance_status_history (dual-write on creation)', async () => {
@@ -94,9 +114,9 @@ describe('robot-maintenance.updateMaintenanceStatus() — Dual-Write Rule', () =
     });
 
     it('updates maintenance_cases.current_status to the new status', async () => {
-        await maintenanceRobot.updateMaintenanceStatus(caseId, 'DIAGNOSED', 'tech', 'Issue assessed');
+        await maintenanceRobot.updateMaintenanceStatus(caseId, 'SCHEDULED', 'tech', 'Repair scheduled');
         const row = await db.get('SELECT current_status FROM maintenance_cases WHERE case_id = ?', [caseId]);
-        assert.equal(row.current_status, 'DIAGNOSED');
+        assert.equal(row.current_status, 'SCHEDULED');
     });
 
     it('inserts a matching row in maintenance_status_history (dual-write)', async () => {
@@ -159,6 +179,47 @@ describe('robot-maintenance.addMaintenanceItem()', () => {
         await assert.rejects(
             () => maintenanceRobot.addMaintenanceItem(caseId, 999999, 1, 'test')
         );
+    });
+});
+
+// ---------------------------------------------------------------
+// SUITE: updateMaintenanceCase (field edits, not status transitions)
+// ---------------------------------------------------------------
+describe('robot-maintenance.updateMaintenanceCase()', () => {
+    let db;
+    let caseId;
+
+    before(async () => {
+        db = await createSandboxDb();
+        await db.reset();
+        const seeded = await seedBaseData(db);
+        const result = await maintenanceRobot.createMaintenanceCase(seeded.customerId);
+        caseId = result.caseId;
+    });
+
+    it('updates assigned_to and pricing_note together', async () => {
+        await maintenanceRobot.updateMaintenanceCase(caseId, {
+            assigned_to: 'Judit',
+            pricing_note: '69.44 EUR + VAT, sent via SMS',
+        });
+        const row = await db.get(
+            'SELECT assigned_to, pricing_note FROM maintenance_cases WHERE case_id = ?', [caseId]
+        );
+        assert.equal(row.assigned_to, 'Judit');
+        assert.equal(row.pricing_note, '69.44 EUR + VAT, sent via SMS');
+    });
+
+    it('only updates the field(s) explicitly provided', async () => {
+        await maintenanceRobot.updateMaintenanceCase(caseId, { assigned_to: 'Gábor' });
+        const row = await db.get(
+            'SELECT assigned_to, pricing_note FROM maintenance_cases WHERE case_id = ?', [caseId]
+        );
+        assert.equal(row.assigned_to, 'Gábor');
+        assert.equal(row.pricing_note, '69.44 EUR + VAT, sent via SMS', 'untouched field must be unchanged');
+    });
+
+    it('throws when no fields are provided', async () => {
+        await assert.rejects(() => maintenanceRobot.updateMaintenanceCase(caseId, {}), /No fields/);
     });
 });
 

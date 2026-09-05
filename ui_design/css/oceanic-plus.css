@@ -1340,11 +1340,14 @@ body {
 .p-CANCELLED      { background: rgba(239,68,68,0.2);   color: #f87171; }
 
 /* ── Maintenance-domain status pills ────── */
-/* Uses amber/orange palette to visually distinguish from order pills */
-.p-DIAGNOSED      { background: rgba(251,191,36,0.2);  color: #fbbf24; }
-.p-PARTS_ORDERED  { background: rgba(249,115,22,0.2);  color: #fb923c; }
+/* Uses amber/orange palette to visually distinguish from order pills.
+   Revised 2026-09-05 to match CK's real Excel-based workflow — see
+   docs/.notes/differences-from-excel.md */
+.p-QUOTE_SENT     { background: rgba(251,191,36,0.2);  color: #fbbf24; }
+.p-SCHEDULED      { background: rgba(249,115,22,0.2);  color: #fb923c; }
+.p-WAITING        { background: rgba(251,146,60,0.2);  color: #fdba74; }
 .p-IN_REPAIR      { background: rgba(239,68,68,0.2);   color: #f87171; }
-.p-TESTING        { background: rgba(99,102,241,0.2);  color: #818cf8; }
+.p-ON_HOLD        { background: rgba(148,163,184,0.2); color: var(--muted); }
 .p-READY          { background: rgba(74,222,128,0.2);  color: #4ade80; }
 
 /* ── Case-type domain badge ─────────────── */

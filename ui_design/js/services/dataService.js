@@ -148,11 +148,13 @@ const STATUS_LABELS = {
   INVOICED: 'Invoiced',
   CLOSED: 'Closed',
   CANCELLED: 'Cancelled',
-  // Maintenance statuses — added v0.6.0
-  DIAGNOSED: 'Diagnosed',
-  PARTS_ORDERED: 'Parts Ordered',
+  // Maintenance statuses — added v0.6.0, revised 2026-09-05 to match CK's
+  // real Excel-based workflow (docs/.notes/differences-from-excel.md)
+  QUOTE_SENT: 'Quote Sent',
+  SCHEDULED: 'Scheduled',
+  WAITING: 'Waiting',
   IN_REPAIR: 'In Repair',
-  TESTING: 'Testing',
+  ON_HOLD: 'On Hold',
   READY: 'Ready',
 };
 
@@ -294,9 +296,9 @@ const dataService = {
    */
   getMaintenanceWorkflowStep: (wf) => {
     if (wf === 'NEW') return 1;
-    if (['DIAGNOSED', 'PARTS_ORDERED'].includes(wf)) return 2;
-    if (['IN_REPAIR', 'TESTING'].includes(wf)) return 3;
-    return 4; // READY, INVOICED, CLOSED, CANCELLED
+    if (['QUOTE_SENT', 'SCHEDULED', 'WAITING'].includes(wf)) return 2;
+    if (['IN_REPAIR', 'ON_HOLD'].includes(wf)) return 3;
+    return 4; // READY, CLOSED, CANCELLED
   },
 
   // ---------------------------------------------------------

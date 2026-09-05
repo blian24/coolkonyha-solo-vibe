@@ -87,6 +87,8 @@ erDiagram
         string description
         string update_event
         string notes
+        string assigned_to
+        string pricing_note
     }
 
     maintenance_items {
@@ -188,7 +190,7 @@ Line items for orders.
 #### `maintenance_cases`
 The "Head" of a maintenance case transaction.
 -   `case_id` (PK): Unique identifier.
--   `case_code` (UNIQUE): Human-readable unique case code (e.g., MAINT-00001).
+-   `case_code` (UNIQUE): Human-readable unique case code, in CK's own `SZ<YY><NN>` format (e.g., `SZ2601`) matching their existing Excel-based numbering — sequence resets every calendar year, generated from `maintenance_cases` rows already dated in the current year, not a flat global counter. See `docs/.notes/differences-from-excel.md`.
 -   `cust_id` (FK): Customer reference.
 -   `case_date`: Date the case was opened.
 -   `description`: Description of the reported issue.
@@ -196,6 +198,8 @@ The "Head" of a maintenance case transaction.
 -   `current_status_update`: Timestamp of the last status transition.
 -   `update_event`: Human-friendly summary of the last status update.
 -   `notes`: Internal maintenance notes.
+-   `assigned_to`: Freetext — who internally is handling the case (CK's "Ki intézi?" column). Added 2026-09-05 to match CK's real workflow.
+-   `pricing_note`: Freetext — informal pricing/invoice notes (CK's "mikor_mi_összeg" column). Not a structured price field. Added 2026-09-05.
 
 #### `maintenance_items`
 Line items for maintenance cases, linking to target products.

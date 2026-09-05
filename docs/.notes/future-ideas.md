@@ -2,7 +2,7 @@
 
 Informal, running backlog of things worth doing eventually — not authoritative, not tracked/committed work. Filled in automatically as ideas come up during sessions (not what's decided/done in the moment — see session walkthroughs for that). When one is ready to actually be worked on, promote it to a ClickUp ticket (per the usual workflow) and remove it from here.
 
-**Next ID:** 15
+**Next ID:** 16
 
 ## From the 2026-09-03 documentation consistency pass
 
@@ -17,6 +17,10 @@ CK wants four things confirmed/improved before i-3 (wiring PISTA/Email Robot) ha
 - **i-12 — Standardize modal/pop-up size and design across the entire app, for every entity.** The Database view's 4 entity modals (`ui_design/js/controllers/database/modal-*.js`) already share some CSS foundation (`.modal-overlay`, `.modal-card`, etc., per the v0.8.0 release notes), but the Dashboard's "Entry Detail" / "All Updates" modals and the Maintenance view's modals haven't been audited against that same standard. Needs an inventory of every modal in the app before proposing one consistent spec.
 - **i-13 — Establish P.I.S.T.A. transparency ground rules: approval points and action communication with CK.** Goal: nothing happens that CK didn't explicitly approve. `docs/assistant_team/pista-agent.md` already has a first-draft "Human-in-the-Loop Approval" table (sending emails/changing status/creating customers/sender rules: always approve; reading/summarizing/answering questions: no approval needed) — worth critiquing and expanding rather than starting blank, e.g. how proposals get surfaced in the UI, what an audit trail of PISTA's actions looks like to CK.
 - **i-14 — Documentation handling: what business-facing documents CK needs to have and manage.** Distinct from this project's own dev documentation (`docs/`) — this is about real business paperwork tied to orders/maintenance cases (e.g. invoices, delivery notes, warranty certificates, product spec sheets) that CK needs to generate, store, or attach within the app. Related to the attachment-handling workflow already sketched in `docs/assistant_team/pista-agent.md` (encrypted file storage under `/data/attachments/`) and to i-10's data-handling alignment work — worth scoping once CK's actual document needs are clearer, possibly informed by the same Excel samples.
+
+## From processing the CK maintenance Excel sample (2026-09-05)
+
+- **i-15 — Quick-add for entities referenced from a picker, starting with machines/products.** When CK is creating a maintenance case and the machine isn't in the list yet, the picker should have an "add new…" option that opens a pop-up to create the new machine record without navigating away from the current page/form. This pattern should be generalized to any other entity picker in the app (customers, suppliers, etc.), not just machines — ties into i-12's modal standardization work.
 
 ## From the file-size/modularity rule discussion (2026-09-04)
 

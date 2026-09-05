@@ -112,6 +112,26 @@ export const getMaintenanceDetails = async (caseId) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * Generates the next case code in CK's own SZ<YY><NN> format (e.g. SZ2601),
+ * matching their existing Excel-based numbering exactly. The sequence
+ * resets every calendar year, based on how many cases already exist with
+ * a case_date in the current year — NOT a flat global counter.
+ *
+ * @returns {Promise<string>} e.g. "SZ2601"
+ * @see docs/.notes/differences-from-excel.md
+ */
+const generateCaseCode = async () => {
+  const year = new Date().getFullYear();
+  const yy = String(year).slice(-2);
+  const { count } = await get(
+    `SELECT COUNT(*) AS count FROM maintenance_cases WHERE strftime('%Y', case_date) = ?`,
+    [String(year)]
+  );
+  const seq = String(count + 1).padStart(2, '0');
+  return `SZ${yy}${seq}`;
+};
+
+/**
  * Creates a new maintenance case with initial NEW status.
  *
  * Implements the Dual-Write pattern: inserts a row into maintenance_cases
@@ -119,25 +139,21 @@ export const getMaintenanceDetails = async (caseId) => {
  *
  * @param {number} custId - Customer ID (from customers table)
  * @param {string} [description] - Freetext description of the reported issue
+ * @param {string} [assignedTo] - Who's handling the case internally (freetext)
  * @returns {Promise<{caseId: number, caseCode: string}>}
  * @throws {Error} When transaction fails
  *
  * @see docs/assistant_team/db_robot_logic_tools.md — Dual-Write rule
  */
-export const createMaintenanceCase = async (custId, description = null) => {
+export const createMaintenanceCase = async (custId, description = null, assignedTo = null) => {
   try {
     await run('BEGIN TRANSACTION');
 
+    const caseCode = await generateCaseCode();
     const result = await run(
-      `INSERT INTO maintenance_cases (cust_id, current_status, description, update_event)
-       VALUES (?, 'NEW', ?, 'Maintenance case created via API')`,
-      [custId, description]
-    );
-
-    const caseCode = `MAINT-${String(result.lastID).padStart(5, '0')}`;
-    await run(
-      'UPDATE maintenance_cases SET case_code = ? WHERE case_id = ?',
-      [caseCode, result.lastID]
+      `INSERT INTO maintenance_cases (cust_id, current_status, description, update_event, case_code, assigned_to)
+       VALUES (?, 'NEW', ?, 'Maintenance case created via API', ?, ?)`,
+      [custId, description, caseCode, assignedTo]
     );
 
     // Initial status history — Dual-Write rule
@@ -153,6 +169,37 @@ export const createMaintenanceCase = async (custId, description = null) => {
     await run('ROLLBACK');
     throw error;
   }
+};
+
+/**
+ * Updates a maintenance case record with the provided fields. Only fields
+ * explicitly passed in `data` are updated — undefined fields are skipped.
+ * For status transitions, use updateMaintenanceStatus() instead (that one
+ * implements the Dual-Write rule against maintenance_status_history).
+ *
+ * @param {number} caseId - Maintenance case ID
+ * @param {Object} data - Fields to update
+ * @param {string} [data.description]
+ * @param {string} [data.assigned_to]
+ * @param {string} [data.pricing_note]
+ * @param {string} [data.notes]
+ * @returns {Promise<{success: boolean}>}
+ * @throws {Error} When no fields are provided
+ */
+export const updateMaintenanceCase = async (caseId, data) => {
+  const fields = [];
+  const values = [];
+
+  if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+  if (data.assigned_to !== undefined) { fields.push('assigned_to = ?'); values.push(data.assigned_to); }
+  if (data.pricing_note !== undefined) { fields.push('pricing_note = ?'); values.push(data.pricing_note); }
+  if (data.notes !== undefined) { fields.push('notes = ?'); values.push(data.notes); }
+
+  if (fields.length === 0) throw new Error('No fields to update');
+
+  values.push(caseId);
+  await run(`UPDATE maintenance_cases SET ${fields.join(', ')} WHERE case_id = ?`, values);
+  return { success: true };
 };
 
 /**

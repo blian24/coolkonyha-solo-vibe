@@ -66,8 +66,9 @@ sequenceDiagram
 | **POST** | `/api/orders/:id/items` | Add item to order | `{ prodId, quantity }` | `{ id: number }` | `addOrderItem()` |
 | **GET** | `/api/workflow` | Get order workflow statuses | - | `Array<Status>` | `getWorkflowStatuses()` |
 | **GET** | `/api/maintenance` | Get all maintenance cases | - | `Array<MaintenanceCase>` | `getMaintenanceCases()` |
-| **POST** | `/api/maintenance` | Create maintenance case | `{ custId, description }` | `{ caseId: number }` | `createMaintenanceCase()` |
+| **POST** | `/api/maintenance` | Create maintenance case | `{ custId, description, assignedTo }` | `{ caseId: number, caseCode: string }` | `createMaintenanceCase()` |
 | **GET** | `/api/maintenance/:id` | Get maintenance case details | - | `{ case, items, history }` | `getMaintenanceDetails()` |
+| **PUT** | `/api/maintenance/:id` | Update case fields (not status) | `{ description?, assigned_to?, pricing_note?, notes? }` | `{ success: true }` | `updateMaintenanceCase()` |
 | **PUT** | `/api/maintenance/:id/status` | Update status of case | `{ status, performedBy, eventDescription }` | `{ success, newStatus }` | `updateMaintenanceStatus()` |
 | **POST** | `/api/maintenance/:id/items` | Add item to case | `{ prodId, quantity, issueNote }` | `{ id: number }` | `addMaintenanceItem()` |
 | **GET** | `/api/maintenance/workflow` | Get maintenance workflow statuses | - | `Array<Status>` | `getMaintenanceWorkflowStatuses()` |
