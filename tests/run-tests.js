@@ -32,7 +32,11 @@ const scopeArg = process.argv[2]; // e.g. 'unit', 'integration', 'e2e', or undef
 const scope = (scopeArg && LEARN_SCOPES[scopeArg]) ? scopeArg : 'all';
 
 const TEST_FILES = {
-    unit: ['tests/unit/agent.unit.test.js'],
+    unit: [
+        'tests/unit/agent.unit.test.js',
+        'tests/unit/maintenance.unit.test.js',
+        'tests/unit/pista-db.unit.test.js',
+    ],
     integration: ['tests/integration/routes.integration.test.js'],
     e2e: ['tests/e2e/order-lifecycle.e2e.test.js'],
 };

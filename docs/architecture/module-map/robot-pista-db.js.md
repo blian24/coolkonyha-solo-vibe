@@ -18,9 +18,11 @@
 | getSenderRule() | function | Finds matching sender rule by email or domain |
 
 ## Key Concepts
-- Graceful degradation: returns empty arrays if `processed_emails` or `sender_rules` tables do not exist yet.
+- Graceful degradation: `getProcessedEmails()`, `getSenderRules()`, and `getSenderRule()` all return an empty array/`undefined` instead of throwing if `processed_emails` or `sender_rules` don't exist yet.
 - Idempotent email registration via `INSERT OR IGNORE` on `gmail_message_id`.
 - Chronological ordering: subquery fetches newest entries up to limit, outer query orders oldest-first.
+- **Known gap (`docs/.notes/bugs.md` b-8):** `saveChatMessage()`/`getChatHistory()` reference a `pista_chat_logs` table that does not exist in production, with no graceful-degradation guard — calling either would throw. Zero live impact today since P.I.S.T.A. isn't wired into the server (i-3). Deliberately not fixed as test coverage was added (i-6) — creating the table is a feature decision tied to i-3.
+- 2026-09-05: `getRecentEmailsByAddress()` and `insertPendingEmail()` were fixed to query/insert `from_address`/`to_address` (the real `processed_emails` columns) — they previously referenced nonexistent `sender_email`/`receiver_email` columns, found while writing unit tests for this file.
 
 ## What is NOT here
 - AI prompts and reasoning algorithms — see `server/pista.js`.

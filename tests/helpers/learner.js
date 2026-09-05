@@ -26,6 +26,8 @@ export const LEARN_SCOPES = {
         'server/robots/robot-orders.js',
         'server/robots/robot-crm.js',
         'server/robots/robot-catalog.js',
+        'server/robots/robot-maintenance.js',
+        'server/robots/robot-pista-db.js',
         'docs/assistant_team/db_robot_logic_tools.md',
         'docs/assistant_team/db_robot_code_structure.md',
     ],

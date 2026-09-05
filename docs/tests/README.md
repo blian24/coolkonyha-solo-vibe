@@ -57,7 +57,10 @@ tests/
 │   ├── fixtures.js         # Deterministic seed data factories
 │   └── test-app-factory.js # Mounts the real server/routes.js for HTTP tests
 ├── unit/
-│   └── agent.unit.test.js  # server/robots/*.js business logic tests
+│   ├── agent.unit.test.js       # Orders/CRM/Catalog robot business logic tests
+│   ├── maintenance.unit.test.js # Maintenance robot business logic tests
+│   └── pista-db.unit.test.js    # PISTA DB robot tests (excludes chat-log
+│                                 # functions — see docs/.notes/bugs.md b-8)
 ├── integration/
 │   └── routes.integration.test.js  # REST API HTTP contract tests
 ├── e2e/
@@ -70,7 +73,7 @@ tests/
 
 | Scope | Files Read Before Test |
 |---|---|
-| `unit` | `server/robots/robot-orders.js`, `robot-crm.js`, `robot-catalog.js`, `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
+| `unit` | `server/robots/robot-orders.js`, `robot-crm.js`, `robot-catalog.js`, `robot-maintenance.js`, `robot-pista-db.js`, `docs/assistant_team/db_robot_logic_tools.md`, `docs/assistant_team/db_robot_code_structure.md` |
 | `integration` | `server/routes.js`, all files under `server/robots/`, `docs/architecture/api-routes.md`, `docs/assistant_team/db_robot_logic_tools.md` |
 | `e2e` | All of the above + `server/index.js`, `docs/architecture/database-schema.md` |
 | `all` | Union of all scopes |
@@ -93,6 +96,8 @@ Every run generates `docs/tests/reports/run-<ISO-timestamp>.md` containing:
 ---
 
 *See also:*
-- [unit-tests.md](./unit-tests.md)
+- [unit-tests.md](./unit-tests.md) (Orders/CRM/Catalog)
+- [maintenance-unit-tests.md](./maintenance-unit-tests.md)
+- [pista-db-unit-tests.md](./pista-db-unit-tests.md)
 - [integration-tests.md](./integration-tests.md)
 - [e2e-tests.md](./e2e-tests.md)

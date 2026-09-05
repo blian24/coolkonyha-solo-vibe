@@ -127,7 +127,7 @@ export const getRecentEmailsByAddress = (email) =>
   all(
     `SELECT gmail_message_id, direction, email_date, subject, ai_summary, status
      FROM processed_emails
-     WHERE sender_email = ? OR receiver_email = ?
+     WHERE from_address = ? OR to_address = ?
      ORDER BY email_date DESC LIMIT 5`,
     [email, email]
   );
@@ -149,7 +149,7 @@ export const insertPendingEmail = (
 ) =>
   run(
     `INSERT OR IGNORE INTO processed_emails
-       (gmail_message_id, direction, sender_email, receiver_email, subject, email_date, status)
+       (gmail_message_id, direction, from_address, to_address, subject, email_date, status)
      VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
     [messageId, direction, fromAddress, toAddress, subject, emailDate]
   );
@@ -208,13 +208,21 @@ export const getSenderRules = async () => {
 
 /**
  * Finds a sender rule matching an email address or domain.
+ * Returns undefined gracefully if the table does not yet exist.
  *
  * @param {string} email - Exact sender email address
  * @param {string} domain - Sender domain (e.g., 'example.com')
  * @returns {Promise<Object|undefined>} Matching rule row, or undefined
  */
-export const getSenderRule = (email, domain) =>
-  get(
-    'SELECT action FROM sender_rules WHERE sender_email = ? OR sender_domain = ?',
-    [email, domain]
-  );
+export const getSenderRule = async (email, domain) => {
+  try {
+    return await get(
+      'SELECT action FROM sender_rules WHERE sender_email = ? OR sender_domain = ?',
+      [email, domain]
+    );
+  } catch (err) {
+    // RULE: Graceful degradation — sender_rules is created by Gmail Robot migration.
+    if (err.message && err.message.includes('no such table')) return undefined;
+    throw err;
+  }
+};
