@@ -2,11 +2,20 @@
 
 Informal, running backlog of things worth doing eventually — not authoritative, not tracked/committed work. Filled in automatically as ideas come up during sessions (not what's decided/done in the moment — see session walkthroughs for that). When one is ready to actually be worked on, promote it to a ClickUp ticket (per the usual workflow) and remove it from here.
 
-**Next ID:** 10
+**Next ID:** 14
 
 ## From the 2026-09-03 documentation consistency pass
 
-- **i-3 — Wire P.I.S.T.A. and the Email Robot into the live server.** Both are fully implemented (`server/pista.js`, `server/robots/email-robot.js`) but nothing currently instantiates or schedules either — no route, no cron/poller. This is presumably the next real feature milestone once the architecture housekeeping settles.
+- **i-3 — Wire P.I.S.T.A. and the Email Robot into the live server.** Both are fully implemented (`server/pista.js`, `server/robots/email-robot.js`) but nothing currently instantiates or schedules either — no route, no cron/poller. **Deliberately deferred until i-10, i-11, and i-12 below are done** (2026-09-05) — both cost real money (LLM + Gmail API calls) per CK's explicit call, so everything else should be validated against the existing mocked data first.
+
+## Pre-PISTA validation plan (2026-09-05, before i-3)
+
+CK wants four things confirmed/improved before i-3 (wiring PISTA/Email Robot) happens, since that's the point real API costs start. Agreed sequencing: **i-10 first** (schema changes would otherwise ripple into i-11/i-12's UI work), **i-11 and i-12 after**, **i-13 in parallel throughout** (pure policy/design, no code dependency on the others).
+
+- **i-10 — Align the DB schema with CK's actual Excel-based data handling.** CK has example Excel sheets showing how they currently track data. Analyze them against `docs/architecture/database-schema.md` and propose schema changes so the app resembles CK's existing mental model rather than requiring them to learn a new one — likely surfaces new UX needs too. **Blocked on CK sharing the Excel file(s)** — not yet provided as of this note. Recommended to scope in its own fresh conversation (this one has gotten very long); point that session at `SOLUTION_DESIGN.md` to get oriented.
+- **i-11 — Dashboard UX quality pass.** Every piece of information shown where it belongs, responsive to window-size changes, good-looking buttons, generally usable. Scope TBD on responsiveness target (desktop window resizing vs. genuine small/mobile screens — not yet confirmed with CK).
+- **i-12 — Standardize modal/pop-up size and design across the entire app, for every entity.** The Database view's 4 entity modals (`ui_design/js/controllers/database/modal-*.js`) already share some CSS foundation (`.modal-overlay`, `.modal-card`, etc., per the v0.8.0 release notes), but the Dashboard's "Entry Detail" / "All Updates" modals and the Maintenance view's modals haven't been audited against that same standard. Needs an inventory of every modal in the app before proposing one consistent spec.
+- **i-13 — Establish P.I.S.T.A. transparency ground rules: approval points and action communication with CK.** Goal: nothing happens that CK didn't explicitly approve. `docs/assistant_team/pista-agent.md` already has a first-draft "Human-in-the-Loop Approval" table (sending emails/changing status/creating customers/sender rules: always approve; reading/summarizing/answering questions: no approval needed) — worth critiquing and expanding rather than starting blank, e.g. how proposals get surfaced in the UI, what an audit trail of PISTA's actions looks like to CK.
 
 ## From the file-size/modularity rule discussion (2026-09-04)
 
