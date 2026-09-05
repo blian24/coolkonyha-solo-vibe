@@ -190,7 +190,7 @@ Line items for orders.
 #### `maintenance_cases`
 The "Head" of a maintenance case transaction.
 -   `case_id` (PK): Unique identifier.
--   `case_code` (UNIQUE): Human-readable unique case code, in CK's own `SZ<YY><NN>` format (e.g., `SZ2601`) matching their existing Excel-based numbering — sequence resets every calendar year, generated from `maintenance_cases` rows already dated in the current year, not a flat global counter. See `docs/.notes/differences-from-excel.md`.
+-   `case_code` (UNIQUE): Human-readable unique case code, in CK's own `SZ<YY><NN>` format (e.g., `SZ2601`) matching their existing Excel-based numbering — sequence resets every calendar year, generated from `maintenance_cases` rows already dated in the current year, not a flat global counter. See `docs/.notes/differences-for-CK.md`.
 -   `cust_id` (FK): Customer reference.
 -   `case_date`: Date the case was opened.
 -   `description`: Description of the reported issue.

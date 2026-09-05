@@ -149,7 +149,7 @@ const STATUS_LABELS = {
   CLOSED: 'Closed',
   CANCELLED: 'Cancelled',
   // Maintenance statuses — added v0.6.0, revised 2026-09-05 to match CK's
-  // real Excel-based workflow (docs/.notes/differences-from-excel.md)
+  // real Excel-based workflow (docs/.notes/differences-for-CK.md)
   QUOTE_SENT: 'Quote Sent',
   SCHEDULED: 'Scheduled',
   WAITING: 'Waiting',

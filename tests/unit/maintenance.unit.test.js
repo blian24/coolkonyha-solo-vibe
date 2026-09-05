@@ -53,7 +53,7 @@ describe('robot-maintenance.createMaintenanceCase()', () => {
             'Espresso machine not heating up'
         );
         assert.ok(caseId > 0, 'caseId should be a positive integer');
-        // CK's own Excel-based numbering format — see docs/.notes/differences-from-excel.md
+        // CK's own Excel-based numbering format — see docs/.notes/differences-for-CK.md
         assert.match(caseCode, /^SZ\d{2}\d{2,}$/);
 
         const row = await db.get('SELECT * FROM maintenance_cases WHERE case_id = ?', [caseId]);

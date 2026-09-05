@@ -20,7 +20,7 @@
 ## Key Concepts
 - Isolated domain: completely decoupled from the Orders domain logic.
 - Dual-Write Pattern: atomically updates case status and logs an entry in `maintenance_status_history`.
-- **Case code format (revised 2026-09-05):** `SZ<YY><NN>`, matching CK's own Excel-based numbering exactly — the sequence resets every calendar year (based on how many `maintenance_cases` rows already exist with a `case_date` in the current year), not a flat global counter like the old `MAINT-00001` format. See `docs/.notes/differences-from-excel.md` and `docs/.notes/future-ideas.md` i-10.
+- **Case code format (revised 2026-09-05):** `SZ<YY><NN>`, matching CK's own Excel-based numbering exactly — the sequence resets every calendar year (based on how many `maintenance_cases` rows already exist with a `case_date` in the current year), not a flat global counter like the old `MAINT-00001` format. See `docs/.notes/differences-for-CK.md` and `docs/.notes/future-ideas.md` i-10.
 - `assigned_to` and `pricing_note` (added 2026-09-05) are freetext fields matching CK's real "Ki intézi?" and "mikor_mi_összeg" Excel columns — set at creation via `createMaintenanceCase`, editable via `updateMaintenanceCase`.
 
 ## What is NOT here

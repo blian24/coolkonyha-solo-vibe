@@ -1342,7 +1342,7 @@ body {
 /* ── Maintenance-domain status pills ────── */
 /* Uses amber/orange palette to visually distinguish from order pills.
    Revised 2026-09-05 to match CK's real Excel-based workflow — see
-   docs/.notes/differences-from-excel.md */
+   docs/.notes/differences-for-CK.md */
 .p-QUOTE_SENT     { background: rgba(251,191,36,0.2);  color: #fbbf24; }
 .p-SCHEDULED      { background: rgba(249,115,22,0.2);  color: #fb923c; }
 .p-WAITING        { background: rgba(251,146,60,0.2);  color: #fdba74; }

@@ -24,7 +24,7 @@ flowchart LR
 ### `createMaintenanceCase()`
 | # | Test | Verifies |
 |---|---|---|
-| 1 | Inserts row with NEW status and an `SZ<YY><NN>` code | Case creation + code generation, matching CK's own Excel numbering (see `docs/.notes/differences-from-excel.md`) |
+| 1 | Inserts row with NEW status and an `SZ<YY><NN>` code | Case creation + code generation, matching CK's own Excel numbering (see `docs/.notes/differences-for-CK.md`) |
 | 2 | Case code sequence resets per calendar year, increments within it | Yearly-reset counter, not a flat global one |
 | 3 | Accepts an `assignedTo` value | New field (2026-09-05), maps to `assigned_to` |
 | 4 | Creates initial NEW history entry | Dual-write on creation |

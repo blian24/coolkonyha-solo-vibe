@@ -2,7 +2,11 @@
 
 Informal, running backlog of things worth doing eventually — not authoritative, not tracked/committed work. Filled in automatically as ideas come up during sessions (not what's decided/done in the moment — see session walkthroughs for that). When one is ready to actually be worked on, promote it to a ClickUp ticket (per the usual workflow) and remove it from here.
 
-**Next ID:** 16
+**Next ID:** 17
+
+## From renaming the differences doc (2026-09-05)
+
+- **i-16 — Write a user-facing "how the app works" document for CK's first look at it.** Distinct from `docs/.notes/differences-for-CK.md` (which only logs where the app deliberately diverges from her current Excel-based process) and from this project's own dev documentation (`docs/architecture/`, `SOLUTION_DESIGN.md`, etc., written for developers). This one walks through the app itself — its views, workflows, and day-to-day usage — for CK as the actual end user, before she starts using it for real. Scope (single onboarding doc vs. per-feature guides, format, how much detail) not yet decided.
 
 ## From the 2026-09-03 documentation consistency pass
 

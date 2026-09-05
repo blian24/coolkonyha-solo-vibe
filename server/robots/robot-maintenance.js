@@ -118,7 +118,7 @@ export const getMaintenanceDetails = async (caseId) => {
  * a case_date in the current year — NOT a flat global counter.
  *
  * @returns {Promise<string>} e.g. "SZ2601"
- * @see docs/.notes/differences-from-excel.md
+ * @see docs/.notes/differences-for-CK.md
  */
 const generateCaseCode = async () => {
   const year = new Date().getFullYear();
